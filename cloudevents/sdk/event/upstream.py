@@ -31,3 +31,59 @@ class Event(base.BaseEvent):
 
     def CloudEventVersion(self) -> str:
         return self.ce__specversion.get()
+
+    def EventType(self) -> str:
+        return self.ce__type.get()
+
+    def Source(self) -> str:
+        return self.ce__source.get()
+
+    def EventID(self) -> str:
+        return self.ce__id.get()
+
+    def EventTime(self) -> str:
+        return self.ce__time.get()
+
+    def SchemaURL(self) -> str:
+        return self.ce__schemaurl.get()
+
+    def Data(self) -> object:
+        return self.ce__data.get()
+
+    def Extensions(self) -> dict:
+        return self.ce__extensions.get()
+
+    def ContentType(self) -> str:
+        return self.ce__contenttype.get()
+
+    def WithEventType(self, eventType: str) -> base.BaseEvent:
+        self.Set("type", eventType)
+        return self
+
+    def WithSource(self, source: str) -> base.BaseEvent:
+        self.Set("source", source)
+        return self
+
+    def WithEventID(self, eventID: str) -> base.BaseEvent:
+        self.Set("id", eventID)
+        return self
+
+    def WithEventTime(self, eventTime: str) -> base.BaseEvent:
+        self.Set("time", eventTime)
+        return self
+
+    def WithSchemaURL(self, schemaURL: str) -> base.BaseEvent:
+        self.Set("schemaurl", schemaURL)
+        return self
+
+    def WithData(self, data: object) -> base.BaseEvent:
+        self.Set("data", data)
+        return self
+
+    def WithExtensions(self, extensions: dict) -> base.BaseEvent:
+        self.Set("extension", extensions)
+        return self
+
+    def WithContentType(self, contentType: str) -> base.BaseEvent:
+        self.Set("contenttype", contentType)
+        return self

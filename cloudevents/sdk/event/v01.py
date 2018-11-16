@@ -26,7 +26,7 @@ class Event(base.BaseEvent):
             "eventTypeVersion", None, False)
         self.ce__source = opt.Option("source", None, True)
         self.ce__eventID = opt.Option("eventID", None, True)
-        self.ce__evenTime = opt.Option("eventTime", None, True)
+        self.ce__eventTime = opt.Option("eventTime", None, True)
         self.ce__schemaURL = opt.Option("schemaURL", None, False)
         self.ce__contentType = opt.Option("contentType", None, False)
         self.ce__data = opt.Option("data", None, False)
@@ -34,3 +34,67 @@ class Event(base.BaseEvent):
 
     def CloudEventVersion(self) -> str:
         return self.ce__cloudEventsVersion.get()
+
+    def EventType(self) -> str:
+        return self.ce__eventType.get()
+
+    def Source(self) -> str:
+        return self.ce__source.get()
+
+    def EventID(self) -> str:
+        return self.ce__eventID.get()
+
+    def EventTime(self) -> str:
+        return self.ce__eventTime.get()
+
+    def SchemaURL(self) -> str:
+        return self.ce__schemaURL.get()
+
+    def Data(self) -> object:
+        return self.ce__data.get()
+
+    def Extensions(self) -> dict:
+        return self.ce__extensions.get()
+
+    def ContentType(self) -> str:
+        return self.ce__contentType.get()
+
+    def WithEventType(self, eventType: str) -> base.BaseEvent:
+        self.Set("eventType", eventType)
+        return self
+
+    def WithSource(self, source: str) -> base.BaseEvent:
+        self.Set("source", source)
+        return self
+
+    def WithEventID(self, eventID: str) -> base.BaseEvent:
+        self.Set("eventID", eventID)
+        return self
+
+    def WithEventTime(self, eventTime: str) -> base.BaseEvent:
+        self.Set("eventTime", eventTime)
+        return self
+
+    def WithSchemaURL(self, schemaURL: str) -> base.BaseEvent:
+        self.Set("schemaURL", schemaURL)
+        return self
+
+    def WithData(self, data: object) -> base.BaseEvent:
+        self.Set("data", data)
+        return self
+
+    def WithExtensions(self, extensions: dict) -> base.BaseEvent:
+        self.Set("extension", extensions)
+        return self
+
+    def WithContentType(self, contentType: str) -> base.BaseEvent:
+        self.Set("contentType", contentType)
+        return self
+
+    # additional getter/setter
+    def EventTypeVersion(self) -> str:
+        return self.ce__eventTypeVersion.get()
+
+    def WithEventTypeVersion(self, eventTypeVersion: str) -> base.BaseEvent:
+        self.Set("eventTypeVersion", eventTypeVersion)
+        return self

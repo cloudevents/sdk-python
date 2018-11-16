@@ -17,23 +17,79 @@ import ujson
 import typing
 
 
-class BaseEvent(object):
+class EventGetterSetter(object):
 
-    def Properties(self) -> dict:
+    def CloudEventVersion(self) -> str:
+        raise Exception("not implemented")
+
+    # CloudEvent attribute getters
+    def EventType(self) -> str:
+        raise Exception("not implemented")
+
+    def Source(self) -> str:
+        raise Exception("not implemented")
+
+    def EventID(self) -> str:
+        raise Exception("not implemented")
+
+    def EventTime(self) -> str:
+        raise Exception("not implemented")
+
+    def SchemaURL(self) -> str:
+        raise Exception("not implemented")
+
+    def Data(self) -> object:
+        raise Exception("not implemented")
+
+    def Extensions(self) -> dict:
+        raise Exception("not implemented")
+
+    def ContentType(self) -> str:
+        raise Exception("not implemented")
+
+    # CloudEvent attribute constructors
+    # Each setter return an instance of its class
+    #      in order to build a pipeline of setter
+    def WithEventType(self, eventType: str) -> object:
+        raise Exception("not implemented")
+
+    def WithSource(self, source: str) -> object:
+        raise Exception("not implemented")
+
+    def WithEventID(self, eventID: str) -> object:
+        raise Exception("not implemented")
+
+    def WithEventTime(self, eventTime: str) -> object:
+        raise Exception("not implemented")
+
+    def WithSchemaURL(self, schemaURL: str) -> object:
+        raise Exception("not implemented")
+
+    def WithData(self, data: object) -> object:
+        raise Exception("not implemented")
+
+    def WithExtensions(self, extensions: dict) -> object:
+        raise Exception("not implemented")
+
+    def WithContentType(self, contentType: str) -> object:
+        raise Exception("not implemented")
+
+
+class BaseEvent(EventGetterSetter):
+
+    def Properties(self, with_nullable=False) -> dict:
         props = dict()
         for name, value in self.__dict__.items():
             if str(name).startswith("ce__"):
-                props.update(
-                    {
-                        str(name).replace("ce__", ""): value.get()
-                    }
-                )
+                v = value.get()
+                if v is not None or with_nullable:
+                    props.update(
+                        {
+                            str(name).replace("ce__", ""): value.get()
+                        }
+                    )
 
         return props
-
-    def Extensions(self) -> dict:
-        props = self.Properties()
-        return props.get("extensions")
 
     def Get(self, key: str) -> (object, bool):
         formatted_key = "ce__{0}".format(key.lower())
@@ -67,7 +123,7 @@ class BaseEvent(object):
             self.Set(name, value)
 
     def UnmarshalBinary(self, headers: dict, body: typing.IO):
-        props = self.Properties()
+        props = self.Properties(with_nullable=True)
         exts = props.get("extensions")
         for key in props:
             formatted_key = "ce-{0}".format(key)
