@@ -21,9 +21,9 @@ class Converter(object):
 
     TYPE = None
 
-    def __init__(self,
-                event_class: base.BaseEvent,
-                supported_media_types: typing.Mapping[str, bool]):
+    def __init__(
+            self, event_class: base.BaseEvent,
+            supported_media_types: typing.Mapping[str, bool]):
         self.event = event_class()
         self.supported_media_types = supported_media_types
 

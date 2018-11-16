@@ -68,8 +68,18 @@ class BaseEvent(object):
 
     def UnmarshalBinary(self, headers: dict, body: typing.IO):
         props = self.Properties()
+        exts = props.get("extensions")
         for key in props:
-            self.Set(key, headers.get("ce-{0}".format(key)))
+            formatted_key = "ce-{0}".format(key)
+            if key != "extensions":
+                self.Set(key, headers.get("ce-{0}".format(key)))
+                if formatted_key in headers:
+                    del headers[formatted_key]
+
+        # rest of headers suppose to an extension?
+
+        exts.update(**headers)
+        self.Set("extensions", exts)
 
         data = None
         if body:
@@ -82,9 +92,12 @@ class BaseEvent(object):
         props = self.Properties()
         for key, value in props.items():
             if key not in ["data", "extensions"]:
-                headers["ce-{0}".format(key)] = value
+                if value is not None:
+                    headers["ce-{0}".format(key)] = value
 
         exts = props.get("extensions")
-        headers.update(**exts)
+        if len(exts) > 0:
+            headers.update(**exts)
+
         data, _ = self.Get("data")
         return headers, data
