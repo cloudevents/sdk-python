@@ -11,7 +11,11 @@ from cloudevents.sdk import marshaller
 
 data = "<this is where your CloudEvent comes from>"
 m = marshaller.NewDefaultHTTPMarshaller(upstream.Event)
-event = m.FromRequest({"Content-Type": "application/cloudevents+json"}, data)
+event = m.FromRequest(
+    {"Content-Type": "application/cloudevents+json"}, 
+    data, 
+    lambda x: x.read()
+)
 
 ```
 
