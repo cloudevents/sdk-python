@@ -114,15 +114,21 @@ class BaseEvent(EventGetterSetter):
         exts.update({key: value})
         self.Set("extensions", exts)
 
-    def MarshalJSON(self) -> typing.IO:
-        return io.StringIO(ujson.dumps(self.Properties()))
+    def MarshalJSON(self, data_marshaller: typing.Callable) -> typing.IO:
+        props = self.Properties()
+        props["data"] = data_marshaller(props.get("data"))
+        return io.StringIO(ujson.dumps(props))
 
-    def UnmarshalJSON(self, b: typing.IO):
+    def UnmarshalJSON(self, b: typing.IO,
+                      data_unmarshaller: typing.Callable):
         raw_ce = ujson.load(b)
         for name, value in raw_ce.items():
+            if name == "data":
+                value = data_unmarshaller(value)
             self.Set(name, value)
 
-    def UnmarshalBinary(self, headers: dict, body: typing.IO):
+    def UnmarshalBinary(self, headers: dict, body: typing.IO,
+                        data_unmarshaller: typing.Callable):
         props = self.Properties(with_nullable=True)
         exts = props.get("extensions")
         for key in props:
@@ -133,15 +139,9 @@ class BaseEvent(EventGetterSetter):
                     del headers[formatted_key]
 
         # rest of headers suppose to an extension?
-
         exts.update(**headers)
         self.Set("extensions", exts)
-
-        data = None
-        if body:
-            data = body.read()
-
-        self.Set("data", data)
+        self.Set("data", data_unmarshaller(body))
 
     def MarshalBinary(self) -> (dict, object):
         headers = {}

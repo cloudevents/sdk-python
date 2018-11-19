@@ -34,7 +34,7 @@ def test_binary_converter_upstream():
             binary.NewBinaryHTTPCloudEventConverter(upstream.Event)
         ]
     )
-    event = m.FromRequest(data.headers, None)
+    event = m.FromRequest(data.headers, None, lambda x: x)
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)
     assert event.Get("id") == (data.ce_id, True)
@@ -48,7 +48,8 @@ def test_structured_converter_upstream():
     )
     event = m.FromRequest(
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce))
+        io.StringIO(ujson.dumps(data.ce)),
+        lambda x: x.read()
     )
 
     assert event is not None
@@ -72,7 +73,8 @@ def test_structured_converter_v01():
     )
     event = m.FromRequest(
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce))
+        io.StringIO(ujson.dumps(data.ce)),
+        lambda x: x.read()
     )
 
     assert event is not None
@@ -85,7 +87,8 @@ def test_default_http_marshaller():
 
     event = m.FromRequest(
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce))
+        io.StringIO(ujson.dumps(data.ce)),
+        lambda x: x.read()
     )
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)

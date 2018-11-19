@@ -14,6 +14,7 @@
 
 import typing
 
+from cloudevents.sdk import exceptions
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.event import base as event_base
 
@@ -27,16 +28,20 @@ class JSONHTTPCloudEventConverter(base.Converter):
         super().__init__(event_class, supported_media_types)
 
     def read(self, headers: dict,
-             body: typing.IO) -> event_base.BaseEvent:
+             body: typing.IO,
+             data_unmarshaller: typing.Callable) -> event_base.BaseEvent:
         # we ignore headers, since the whole CE is in request body
         event = self.event
-        event.UnmarshalJSON(body)
+        event.UnmarshalJSON(body, data_unmarshaller)
         return event
 
     def write(self,
               event: event_base.BaseEvent,
               data_marshaller: typing.Callable) -> (dict, typing.IO):
-        return {}, event.MarshalJSON()
+        if not isinstance(data_marshaller, typing.Callable):
+            raise exceptions.InvalidDataMarshaller()
+
+        return {}, event.MarshalJSON(data_marshaller)
 
 
 def NewJSONHTTPCloudEventConverter(

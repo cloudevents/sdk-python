@@ -30,10 +30,8 @@ class Converter(object):
     def can_read(self, media_type: str) -> bool:
         return media_type in self.supported_media_types
 
-    def can_write(self, media_type: str) -> bool:
-        return media_type in self.supported_media_types
-
-    def read(self, headers: dict, body: typing.IO) -> base.BaseEvent:
+    def read(self, headers: dict, body: typing.IO,
+             data_unmarshaller: typing.Callable) -> base.BaseEvent:
         raise Exception("not implemented")
 
     def write(self, event: base.BaseEvent,

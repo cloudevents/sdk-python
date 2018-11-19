@@ -31,7 +31,8 @@ def test_binary_event_to_request_upstream():
     m = marshaller.NewDefaultHTTPMarshaller(upstream.Event)
     event = m.FromRequest(
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce))
+        io.StringIO(ujson.dumps(data.ce)),
+        lambda x: x.read()
     )
 
     assert event is not None
@@ -48,7 +49,9 @@ def test_structured_event_to_request_upstream():
     m = marshaller.NewDefaultHTTPMarshaller(upstream.Event)
     event = m.FromRequest(
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)))
+        io.StringIO(ujson.dumps(data.ce)),
+        lambda x: x.read()
+    )
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)
     assert event.Get("id") == (data.ce_id, True)
@@ -67,7 +70,9 @@ def test_structured_event_to_request_v01():
     )
     event = m.FromRequest(
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)))
+        io.StringIO(ujson.dumps(data.ce)),
+        lambda x: x.read()
+    )
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)
     assert event.Get("id") == (data.ce_id, True)

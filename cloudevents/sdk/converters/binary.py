@@ -32,14 +32,18 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         super().__init__(event_class, supported_media_types)
 
     def read(self,
-             headers: dict, body: typing.IO) -> event_base.BaseEvent:
+             headers: dict, body: typing.IO,
+             data_unmarshaller: typing.Callable) -> event_base.BaseEvent:
         # we ignore headers, since the whole CE is in request body
         event = self.event
-        event.UnmarshalBinary(headers, body)
+        event.UnmarshalBinary(headers, body, data_unmarshaller)
         return event
 
     def write(self, event: event_base.BaseEvent,
               data_marshaller: typing.Callable) -> (dict, typing.IO):
+        if not isinstance(data_marshaller, typing.Callable):
+            raise exceptions.InvalidDataMarshaller()
+
         hs, data = event.MarshalBinary()
         return hs, data_marshaller(data)
 

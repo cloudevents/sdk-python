@@ -13,11 +13,12 @@
 #    under the License.
 
 
-class InvalidMimeType(Exception):
+class InvalidMimeTypeFromRequest(Exception):
 
     def __init__(self, mime_type):
         super().__init__(
-            "Invalid MIME type: {0}".format(mime_type))
+            "Unable to read CloudEvent from request, "
+            "invalid MIME type: {0}".format(mime_type))
 
 
 class UnsupportedEvent(Exception):
@@ -25,3 +26,16 @@ class UnsupportedEvent(Exception):
     def __init__(self, event_class):
         super().__init__("Invalid CloudEvent class: "
                          "'{0}'".format(event_class))
+
+
+class InvalidDataMarshaller(Exception):
+
+    def __init__(self):
+        super().__init__(
+            "Invalid data marshaller, is not a callable")
+
+
+class NoSuchConverter(Exception):
+    def __init__(self, converter_type):
+        super().__init__(
+            "No such converter {0}".format(converter_type))
