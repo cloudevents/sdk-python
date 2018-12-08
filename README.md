@@ -6,14 +6,23 @@ Package **cloudevents** provides primitives to work with CloudEvents specificati
 
 Parsing upstream Event from HTTP Request:
 ```python
+import io
+
 from cloudevents.sdk.event import v02
 from cloudevents.sdk import marshaller
 
-data = "<this is where your CloudEvent comes from>"
-m = marshaller.NewDefaultHTTPMarshaller(v02.Event)
+m = marshaller.NewDefaultHTTPMarshaller()
 event = m.FromRequest(
-    {"Content-Type": "application/cloudevents+json"}, 
-    data, 
+    v02.Event(),
+    {
+        "content-type": "application/cloudevents+json",
+        "ce-specversion": "0.2",
+        "ce-time": "2018-10-23T12:28:22.4579346Z",
+        "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "ce-source": "<source-url>",
+        "ce-type": "word.found.name",
+    },
+    io.BytesIO(b"this is where your CloudEvent data"), 
     lambda x: x.read()
 )
 
@@ -53,7 +62,7 @@ event = (
 )
 m = marshaller.NewHTTPMarshaller(
     [
-        structured.NewJSONHTTPCloudEventConverter(type(event))
+        structured.NewJSONHTTPCloudEventConverter()
     ]
 )
 
