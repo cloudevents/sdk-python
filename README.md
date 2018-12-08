@@ -6,11 +6,11 @@ Package **cloudevents** provides primitives to work with CloudEvents specificati
 
 Parsing upstream Event from HTTP Request:
 ```python
-from cloudevents.sdk.event import upstream
+from cloudevents.sdk.event import v02
 from cloudevents.sdk import marshaller
 
 data = "<this is where your CloudEvent comes from>"
-m = marshaller.NewDefaultHTTPMarshaller(upstream.Event)
+m = marshaller.NewDefaultHTTPMarshaller(v02.Event)
 event = m.FromRequest(
     {"Content-Type": "application/cloudevents+json"}, 
     data, 
@@ -25,12 +25,12 @@ from cloudevents.sdk.event import v01
 
 event = (
     v01.Event().
-    WithContentType("application/json").
-    WithData('{"name":"john"}').
-    WithEventID("my-id").
-    WithSource("from-galaxy-far-far-away").
-    WithEventTime("tomorrow").
-    WithEventType("cloudevent.greet.you")
+    SetContentType("application/json").
+    SetData('{"name":"john"}').
+    SetEventID("my-id").
+    SetSource("from-galaxy-far-far-away").
+    SetEventTime("tomorrow").
+    SetEventType("cloudevent.greet.you")
 )
 
 ```
@@ -44,12 +44,12 @@ from cloudevents.sdk.event import v01
 
 event = (
     v01.Event().
-    WithContentType("application/json").
-    WithData('{"name":"john"}').
-    WithEventID("my-id").
-    WithSource("from-galaxy-far-far-away").
-    WithEventTime("tomorrow").
-    WithEventType("cloudevent.greet.you")
+    SetContentType("application/json").
+    SetData('{"name":"john"}').
+    SetEventID("my-id").
+    SetSource("from-galaxy-far-far-away").
+    SetEventTime("tomorrow").
+    SetEventType("cloudevent.greet.you")
 )
 m = marshaller.NewHTTPMarshaller(
     [

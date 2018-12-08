@@ -15,7 +15,7 @@
 import ujson
 
 from cloudevents.sdk.event import v01
-from cloudevents.sdk.event import upstream
+from cloudevents.sdk.event import v02
 
 from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
@@ -26,15 +26,15 @@ from cloudevents.tests import data
 
 def test_event_pipeline_upstream():
     event = (
-        upstream.Event().
-        WithContentType(data.contentType).
-        WithData(data.body).
-        WithEventID(data.ce_id).
-        WithSource(data.source).
-        WithEventTime(data.eventTime).
-        WithEventType(data.ce_type)
+        v02.Event().
+        SetContentType(data.contentType).
+        SetData(data.body).
+        SetEventID(data.ce_id).
+        SetSource(data.source).
+        SetEventTime(data.eventTime).
+        SetEventType(data.ce_type)
     )
-    m = marshaller.NewDefaultHTTPMarshaller(type(event))
+    m = marshaller.NewDefaultHTTPMarshaller()
     new_headers, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
     assert new_headers is not None
     assert "ce-specversion" in new_headers
@@ -49,16 +49,16 @@ def test_event_pipeline_upstream():
 def test_event_pipeline_v01():
     event = (
         v01.Event().
-        WithContentType(data.contentType).
-        WithData(data.body).
-        WithEventID(data.ce_id).
-        WithSource(data.source).
-        WithEventTime(data.eventTime).
-        WithEventType(data.ce_type)
+        SetContentType(data.contentType).
+        SetData(data.body).
+        SetEventID(data.ce_id).
+        SetSource(data.source).
+        SetEventTime(data.eventTime).
+        SetEventType(data.ce_type)
     )
     m = marshaller.NewHTTPMarshaller(
         [
-            structured.NewJSONHTTPCloudEventConverter(type(event))
+            structured.NewJSONHTTPCloudEventConverter()
         ]
     )
 

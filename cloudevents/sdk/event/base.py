@@ -50,28 +50,28 @@ class EventGetterSetter(object):
     # CloudEvent attribute constructors
     # Each setter return an instance of its class
     #      in order to build a pipeline of setter
-    def WithEventType(self, eventType: str) -> object:
+    def SetEventType(self, eventType: str) -> object:
         raise Exception("not implemented")
 
-    def WithSource(self, source: str) -> object:
+    def SetSource(self, source: str) -> object:
         raise Exception("not implemented")
 
-    def WithEventID(self, eventID: str) -> object:
+    def SetEventID(self, eventID: str) -> object:
         raise Exception("not implemented")
 
-    def WithEventTime(self, eventTime: str) -> object:
+    def SetEventTime(self, eventTime: str) -> object:
         raise Exception("not implemented")
 
-    def WithSchemaURL(self, schemaURL: str) -> object:
+    def SetSchemaURL(self, schemaURL: str) -> object:
         raise Exception("not implemented")
 
-    def WithData(self, data: object) -> object:
+    def SetData(self, data: object) -> object:
         raise Exception("not implemented")
 
-    def WithExtensions(self, extensions: dict) -> object:
+    def SetExtensions(self, extensions: dict) -> object:
         raise Exception("not implemented")
 
-    def WithContentType(self, contentType: str) -> object:
+    def SetContentType(self, contentType: str) -> object:
         raise Exception("not implemented")
 
 
