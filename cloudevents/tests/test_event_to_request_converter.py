@@ -21,15 +21,16 @@ from cloudevents.sdk import marshaller
 
 from cloudevents.sdk.converters import structured
 from cloudevents.sdk.event import v01
-from cloudevents.sdk.event import upstream
+from cloudevents.sdk.event import v02
 
 
 from cloudevents.tests import data
 
 
 def test_binary_event_to_request_upstream():
-    m = marshaller.NewDefaultHTTPMarshaller(upstream.Event)
+    m = marshaller.NewDefaultHTTPMarshaller()
     event = m.FromRequest(
+        v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(ujson.dumps(data.ce)),
         lambda x: x.read()
@@ -46,8 +47,9 @@ def test_binary_event_to_request_upstream():
 
 def test_structured_event_to_request_upstream():
     copy_of_ce = copy.deepcopy(data.ce)
-    m = marshaller.NewDefaultHTTPMarshaller(upstream.Event)
+    m = marshaller.NewDefaultHTTPMarshaller()
     event = m.FromRequest(
+        v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(ujson.dumps(data.ce)),
         lambda x: x.read()
@@ -65,10 +67,11 @@ def test_structured_event_to_request_v01():
     copy_of_ce = copy.deepcopy(data.ce)
     m = marshaller.NewHTTPMarshaller(
         [
-            structured.NewJSONHTTPCloudEventConverter(v01.Event)
+            structured.NewJSONHTTPCloudEventConverter()
         ]
     )
     event = m.FromRequest(
+        v01.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(ujson.dumps(data.ce)),
         lambda x: x.read()

@@ -19,7 +19,7 @@ from cloudevents.sdk.event import base
 class Event(base.BaseEvent):
 
     def __init__(self):
-        self.ce__specversion = opt.Option("specversion", "0.1", True)
+        self.ce__specversion = opt.Option("specversion", "0.2", True)
         self.ce__type = opt.Option("type", None, True)
         self.ce__source = opt.Option("source", None, True)
         self.ce__id = opt.Option("id", None, True)
@@ -56,34 +56,34 @@ class Event(base.BaseEvent):
     def ContentType(self) -> str:
         return self.ce__contenttype.get()
 
-    def WithEventType(self, eventType: str) -> base.BaseEvent:
+    def SetEventType(self, eventType: str) -> base.BaseEvent:
         self.Set("type", eventType)
         return self
 
-    def WithSource(self, source: str) -> base.BaseEvent:
+    def SetSource(self, source: str) -> base.BaseEvent:
         self.Set("source", source)
         return self
 
-    def WithEventID(self, eventID: str) -> base.BaseEvent:
+    def SetEventID(self, eventID: str) -> base.BaseEvent:
         self.Set("id", eventID)
         return self
 
-    def WithEventTime(self, eventTime: str) -> base.BaseEvent:
+    def SetEventTime(self, eventTime: str) -> base.BaseEvent:
         self.Set("time", eventTime)
         return self
 
-    def WithSchemaURL(self, schemaURL: str) -> base.BaseEvent:
+    def SetSchemaURL(self, schemaURL: str) -> base.BaseEvent:
         self.Set("schemaurl", schemaURL)
         return self
 
-    def WithData(self, data: object) -> base.BaseEvent:
+    def SetData(self, data: object) -> base.BaseEvent:
         self.Set("data", data)
         return self
 
-    def WithExtensions(self, extensions: dict) -> base.BaseEvent:
+    def SetExtensions(self, extensions: dict) -> base.BaseEvent:
         self.Set("extension", extensions)
         return self
 
-    def WithContentType(self, contentType: str) -> base.BaseEvent:
+    def SetContentType(self, contentType: str) -> base.BaseEvent:
         self.Set("contenttype", contentType)
         return self

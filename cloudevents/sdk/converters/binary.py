@@ -17,25 +17,20 @@ import typing
 from cloudevents.sdk import exceptions
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.event import base as event_base
-from cloudevents.sdk.event import v01
+from cloudevents.sdk.event import v02
 
 
 class BinaryHTTPCloudEventConverter(base.Converter):
 
     TYPE = "binary"
-
-    def __init__(self, event_class: event_base.BaseEvent,
-                 supported_media_types: typing.Mapping[str, bool]):
-        if event_class == v01.Event:
-            raise exceptions.UnsupportedEvent(event_class)
-
-        super().__init__(event_class, supported_media_types)
+    SUPPORTED_VERSIONS = [v02.Event, ]
 
     def read(self,
+             event: event_base.BaseEvent,
              headers: dict, body: typing.IO,
              data_unmarshaller: typing.Callable) -> event_base.BaseEvent:
-        # we ignore headers, since the whole CE is in request body
-        event = self.event
+        if type(event) not in self.SUPPORTED_VERSIONS:
+            raise exceptions.UnsupportedEvent(type(event))
         event.UnmarshalBinary(headers, body, data_unmarshaller)
         return event
 
@@ -48,11 +43,5 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         return hs, data_marshaller(data)
 
 
-def NewBinaryHTTPCloudEventConverter(
-        event_class: event_base.BaseEvent) -> BinaryHTTPCloudEventConverter:
-    media_types = {
-        "application/json": True,
-        "application/xml": True,
-        "application/octet-stream": True,
-    }
-    return BinaryHTTPCloudEventConverter(event_class, media_types)
+def NewBinaryHTTPCloudEventConverter() -> BinaryHTTPCloudEventConverter:
+    return BinaryHTTPCloudEventConverter()

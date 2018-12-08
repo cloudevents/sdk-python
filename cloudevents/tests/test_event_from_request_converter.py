@@ -20,7 +20,7 @@ from cloudevents.sdk import exceptions
 from cloudevents.sdk import marshaller
 
 from cloudevents.sdk.event import v01
-from cloudevents.sdk.event import upstream
+from cloudevents.sdk.event import v02
 
 from cloudevents.sdk.converters import binary
 from cloudevents.sdk.converters import structured
@@ -31,10 +31,10 @@ from cloudevents.tests import data
 def test_binary_converter_upstream():
     m = marshaller.NewHTTPMarshaller(
         [
-            binary.NewBinaryHTTPCloudEventConverter(upstream.Event)
+            binary.NewBinaryHTTPCloudEventConverter()
         ]
     )
-    event = m.FromRequest(data.headers, None, lambda x: x)
+    event = m.FromRequest(v02.Event(), data.headers, None, lambda x: x)
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)
     assert event.Get("id") == (data.ce_id, True)
@@ -43,10 +43,11 @@ def test_binary_converter_upstream():
 def test_structured_converter_upstream():
     m = marshaller.NewHTTPMarshaller(
         [
-            structured.NewJSONHTTPCloudEventConverter(upstream.Event)
+            structured.NewJSONHTTPCloudEventConverter()
         ]
     )
     event = m.FromRequest(
+        v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(ujson.dumps(data.ce)),
         lambda x: x.read()
@@ -59,19 +60,26 @@ def test_structured_converter_upstream():
 
 # todo: clarify whether spec 0.1 doesn't support binary format
 def test_binary_converter_v01():
+    m = marshaller.NewHTTPMarshaller(
+        [
+            binary.NewBinaryHTTPCloudEventConverter()
+        ]
+    )
+
     pytest.raises(
         exceptions.UnsupportedEvent,
-        binary.NewBinaryHTTPCloudEventConverter,
-        v01.Event)
+        m.FromRequest,
+        v01.Event, None, None, None)
 
 
 def test_structured_converter_v01():
     m = marshaller.NewHTTPMarshaller(
         [
-            structured.NewJSONHTTPCloudEventConverter(v01.Event)
+            structured.NewJSONHTTPCloudEventConverter()
         ]
     )
     event = m.FromRequest(
+        v01.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(ujson.dumps(data.ce)),
         lambda x: x.read()
@@ -83,9 +91,10 @@ def test_structured_converter_v01():
 
 
 def test_default_http_marshaller():
-    m = marshaller.NewDefaultHTTPMarshaller(upstream.Event)
+    m = marshaller.NewDefaultHTTPMarshaller()
 
     event = m.FromRequest(
+        v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(ujson.dumps(data.ce)),
         lambda x: x.read()

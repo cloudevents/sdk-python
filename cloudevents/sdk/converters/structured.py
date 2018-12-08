@@ -23,15 +23,10 @@ class JSONHTTPCloudEventConverter(base.Converter):
 
     TYPE = "structured"
 
-    def __init__(self, event_class: event_base.BaseEvent,
-                 supported_media_types: typing.Mapping[str, bool]):
-        super().__init__(event_class, supported_media_types)
-
-    def read(self, headers: dict,
+    def read(self, event: event_base.BaseEvent,
+             headers: dict,
              body: typing.IO,
              data_unmarshaller: typing.Callable) -> event_base.BaseEvent:
-        # we ignore headers, since the whole CE is in request body
-        event = self.event
         event.UnmarshalJSON(body, data_unmarshaller)
         return event
 
@@ -44,10 +39,5 @@ class JSONHTTPCloudEventConverter(base.Converter):
         return {}, event.MarshalJSON(data_marshaller)
 
 
-def NewJSONHTTPCloudEventConverter(
-        event_class: event_base.BaseEvent) -> JSONHTTPCloudEventConverter:
-    media_types = {
-        "application/cloudevents+json": True,
-    }
-
-    return JSONHTTPCloudEventConverter(event_class, media_types)
+def NewJSONHTTPCloudEventConverter() -> JSONHTTPCloudEventConverter:
+    return JSONHTTPCloudEventConverter()

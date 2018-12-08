@@ -123,3 +123,4 @@ venv
 ChangeLog
 AUTHORS
 .pytest_cache/
+.idea

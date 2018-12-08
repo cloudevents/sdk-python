@@ -21,16 +21,7 @@ class Converter(object):
 
     TYPE = None
 
-    def __init__(
-            self, event_class: base.BaseEvent,
-            supported_media_types: typing.Mapping[str, bool]):
-        self.event = event_class()
-        self.supported_media_types = supported_media_types
-
-    def can_read(self, media_type: str) -> bool:
-        return media_type in self.supported_media_types
-
-    def read(self, headers: dict, body: typing.IO,
+    def read(self, event, headers: dict, body: typing.IO,
              data_unmarshaller: typing.Callable) -> base.BaseEvent:
         raise Exception("not implemented")
 

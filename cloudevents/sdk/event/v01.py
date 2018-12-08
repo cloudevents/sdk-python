@@ -59,35 +59,35 @@ class Event(base.BaseEvent):
     def ContentType(self) -> str:
         return self.ce__contentType.get()
 
-    def WithEventType(self, eventType: str) -> base.BaseEvent:
+    def SetEventType(self, eventType: str) -> base.BaseEvent:
         self.Set("eventType", eventType)
         return self
 
-    def WithSource(self, source: str) -> base.BaseEvent:
+    def SetSource(self, source: str) -> base.BaseEvent:
         self.Set("source", source)
         return self
 
-    def WithEventID(self, eventID: str) -> base.BaseEvent:
+    def SetEventID(self, eventID: str) -> base.BaseEvent:
         self.Set("eventID", eventID)
         return self
 
-    def WithEventTime(self, eventTime: str) -> base.BaseEvent:
+    def SetEventTime(self, eventTime: str) -> base.BaseEvent:
         self.Set("eventTime", eventTime)
         return self
 
-    def WithSchemaURL(self, schemaURL: str) -> base.BaseEvent:
+    def SetSchemaURL(self, schemaURL: str) -> base.BaseEvent:
         self.Set("schemaURL", schemaURL)
         return self
 
-    def WithData(self, data: object) -> base.BaseEvent:
+    def SetData(self, data: object) -> base.BaseEvent:
         self.Set("data", data)
         return self
 
-    def WithExtensions(self, extensions: dict) -> base.BaseEvent:
+    def SetExtensions(self, extensions: dict) -> base.BaseEvent:
         self.Set("extension", extensions)
         return self
 
-    def WithContentType(self, contentType: str) -> base.BaseEvent:
+    def SetContentType(self, contentType: str) -> base.BaseEvent:
         self.Set("contentType", contentType)
         return self
 

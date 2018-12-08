@@ -13,14 +13,6 @@
 #    under the License.
 
 
-class InvalidMimeTypeFromRequest(Exception):
-
-    def __init__(self, mime_type):
-        super().__init__(
-            "Unable to read CloudEvent from request, "
-            "invalid MIME type: {0}".format(mime_type))
-
-
 class UnsupportedEvent(Exception):
 
     def __init__(self, event_class):

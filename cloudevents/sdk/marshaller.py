@@ -37,12 +37,15 @@ class HTTPMarshaller(object):
         """
         self.__converters = {c.TYPE: c for c in converters}
 
-    def FromRequest(self, headers: dict,
+    def FromRequest(self, event: event_base.BaseEvent,
+                    headers: dict,
                     body: typing.IO,
                     data_unmarshaller:
                     typing.Callable) -> event_base.BaseEvent:
         """
         Reads a CloudEvent from an HTTP headers and request body
+        :param event: CloudEvent placeholder
+        :type event: cloudevents.sdk.event.base.BaseEvent
         :param headers: a dict-like HTTP headers
         :type headers: dict
         :param body: a stream-like HTTP request body
@@ -52,12 +55,8 @@ class HTTPMarshaller(object):
         :return: a CloudEvent
         :rtype: event_base.BaseEvent
         """
-        mimeType = headers.get("Content-Type")
         for _, cnvrtr in self.__converters.items():
-            if cnvrtr.can_read(mimeType):
-                return cnvrtr.read(headers, body, data_unmarshaller)
-
-        raise exceptions.InvalidMimeTypeFromRequest(mimeType)
+            return cnvrtr.read(event, headers, body, data_unmarshaller)
 
     def ToRequest(self, event: event_base.BaseEvent,
                   converter_type: str,
@@ -80,19 +79,16 @@ class HTTPMarshaller(object):
         raise exceptions.NoSuchConverter(converter_type)
 
 
-def NewDefaultHTTPMarshaller(
-        event_class: event_base.BaseEvent) -> HTTPMarshaller:
+def NewDefaultHTTPMarshaller() -> HTTPMarshaller:
     """
     Creates the default HTTP marshaller with both structured
         and binary converters
-    :param event_class: CloudEvent spec class
-    :type event_class: event_base.BaseEvent
     :return: an instance of HTTP marshaller
     :rtype: cloudevents.sdk.marshaller.HTTPMarshaller
     """
     return HTTPMarshaller([
-        structured.NewJSONHTTPCloudEventConverter(event_class),
-        binary.NewBinaryHTTPCloudEventConverter(event_class),
+        structured.NewJSONHTTPCloudEventConverter(),
+        binary.NewBinaryHTTPCloudEventConverter(),
     ])
 
 
