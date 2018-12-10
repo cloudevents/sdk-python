@@ -70,6 +70,14 @@ headers, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
 
 ```
 
+## HOWTOs with various Python HTTP frameworks
+
+In this topic you'd find various example how to integrate an SDK with various HTTP frameworks.
+
+### Python requests
+
+
+
 The goal of this package is to provide support for all released versions of CloudEvents, ideally while maintaining
 the same API. It will use semantic versioning with following rules:
 * MAJOR version increments when backwards incompatible changes is introduced.

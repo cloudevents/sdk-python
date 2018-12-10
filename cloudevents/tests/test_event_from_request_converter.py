@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import pytest
 import io
-import ujson
 
 from cloudevents.sdk import exceptions
 from cloudevents.sdk import marshaller
@@ -49,7 +49,7 @@ def test_structured_converter_upstream():
     event = m.FromRequest(
         v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)),
+        io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
 
@@ -81,7 +81,7 @@ def test_structured_converter_v01():
     event = m.FromRequest(
         v01.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)),
+        io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
 
@@ -96,7 +96,7 @@ def test_default_http_marshaller():
     event = m.FromRequest(
         v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)),
+        io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
     assert event is not None

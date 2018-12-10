@@ -12,7 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import ujson
+import io
+import json
 
 from cloudevents.sdk.event import v01
 from cloudevents.sdk.event import v02
@@ -43,7 +44,8 @@ def test_event_pipeline_upstream():
     assert "ce-id" in new_headers
     assert "ce-time" in new_headers
     assert "ce-contenttype" in new_headers
-    assert data.body == body
+    assert isinstance(body, io.BytesIO)
+    assert data.body == body.read().decode("utf-8")
 
 
 def test_event_pipeline_v01():
@@ -63,7 +65,8 @@ def test_event_pipeline_v01():
     )
 
     _, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
-    new_headers = ujson.load(body)
+    assert isinstance(body, io.BytesIO)
+    new_headers = json.load(body)
     assert new_headers is not None
     assert "cloudEventsVersion" in new_headers
     assert "eventType" in new_headers

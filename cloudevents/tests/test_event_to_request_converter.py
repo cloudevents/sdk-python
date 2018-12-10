@@ -13,7 +13,7 @@
 #    under the License.
 
 import io
-import ujson
+import json
 import copy
 
 from cloudevents.sdk import converters
@@ -32,7 +32,7 @@ def test_binary_event_to_request_upstream():
     event = m.FromRequest(
         v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)),
+        io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
 
@@ -51,7 +51,7 @@ def test_structured_event_to_request_upstream():
     event = m.FromRequest(
         v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)),
+        io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
     assert event is not None
@@ -73,7 +73,7 @@ def test_structured_event_to_request_v01():
     event = m.FromRequest(
         v01.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)),
+        io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
     assert event is not None

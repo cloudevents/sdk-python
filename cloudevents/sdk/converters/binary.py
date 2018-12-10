@@ -39,8 +39,7 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         if not isinstance(data_marshaller, typing.Callable):
             raise exceptions.InvalidDataMarshaller()
 
-        hs, data = event.MarshalBinary()
-        return hs, data_marshaller(data)
+        return event.MarshalBinary(data_marshaller)
 
 
 def NewBinaryHTTPCloudEventConverter() -> BinaryHTTPCloudEventConverter:

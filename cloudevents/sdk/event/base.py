@@ -13,7 +13,7 @@
 #    under the License.
 
 import io
-import ujson
+import json
 import typing
 
 
@@ -117,11 +117,11 @@ class BaseEvent(EventGetterSetter):
     def MarshalJSON(self, data_marshaller: typing.Callable) -> typing.IO:
         props = self.Properties()
         props["data"] = data_marshaller(props.get("data"))
-        return io.StringIO(ujson.dumps(props))
+        return io.BytesIO(json.dumps(props).encode("utf-8"))
 
     def UnmarshalJSON(self, b: typing.IO,
                       data_unmarshaller: typing.Callable):
-        raw_ce = ujson.load(b)
+        raw_ce = json.load(b)
         for name, value in raw_ce.items():
             if name == "data":
                 value = data_unmarshaller(value)
@@ -143,7 +143,8 @@ class BaseEvent(EventGetterSetter):
         self.Set("extensions", exts)
         self.Set("data", data_unmarshaller(body))
 
-    def MarshalBinary(self) -> (dict, object):
+    def MarshalBinary(
+            self, data_marshaller: typing.Callable) -> (dict, object):
         headers = {}
         props = self.Properties()
         for key, value in props.items():
@@ -156,4 +157,5 @@ class BaseEvent(EventGetterSetter):
             headers.update(**exts)
 
         data, _ = self.Get("data")
-        return headers, data
+        return headers, io.BytesIO(
+            str(data_marshaller(data)).encode("utf-8"))
