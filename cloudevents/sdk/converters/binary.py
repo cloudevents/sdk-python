@@ -25,6 +25,9 @@ class BinaryHTTPCloudEventConverter(base.Converter):
     TYPE = "binary"
     SUPPORTED_VERSIONS = [v02.Event, ]
 
+    def can_read(self, content_type):
+        return True
+
     def read(self,
              event: event_base.BaseEvent,
              headers: dict, body: typing.IO,

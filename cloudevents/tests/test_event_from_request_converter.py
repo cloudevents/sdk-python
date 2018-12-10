@@ -58,7 +58,6 @@ def test_structured_converter_upstream():
     assert event.Get("id") == (data.ce_id, True)
 
 
-# todo: clarify whether spec 0.1 doesn't support binary format
 def test_binary_converter_v01():
     m = marshaller.NewHTTPMarshaller(
         [
@@ -69,7 +68,20 @@ def test_binary_converter_v01():
     pytest.raises(
         exceptions.UnsupportedEvent,
         m.FromRequest,
-        v01.Event, None, None, None)
+        v01.Event, {}, None, None)
+
+
+def test_unsupported_converter_v01():
+    m = marshaller.NewHTTPMarshaller(
+        [
+            structured.NewJSONHTTPCloudEventConverter()
+        ]
+    )
+
+    pytest.raises(
+        exceptions.UnsupportedEventConverter,
+        m.FromRequest,
+        v01.Event, {}, None, None)
 
 
 def test_structured_converter_v01():

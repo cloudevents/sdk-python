@@ -23,6 +23,9 @@ class JSONHTTPCloudEventConverter(base.Converter):
 
     TYPE = "structured"
 
+    def can_read(self, content_type):
+        return content_type == "application/cloudevents+json"
+
     def read(self, event: event_base.BaseEvent,
              headers: dict,
              body: typing.IO,

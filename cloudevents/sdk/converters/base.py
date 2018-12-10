@@ -25,6 +25,9 @@ class Converter(object):
              data_unmarshaller: typing.Callable) -> base.BaseEvent:
         raise Exception("not implemented")
 
+    def can_read(self, content_type):
+        raise Exception("not implemented")
+
     def write(self, event: base.BaseEvent,
               data_marshaller: typing.Callable) -> (dict, typing.IO):
         raise Exception("not implemented")

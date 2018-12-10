@@ -55,8 +55,14 @@ class HTTPMarshaller(object):
         :return: a CloudEvent
         :rtype: event_base.BaseEvent
         """
+        content_type = headers.get(
+            "content-type", headers.get("Content-Type"))
+
         for _, cnvrtr in self.__converters.items():
-            return cnvrtr.read(event, headers, body, data_unmarshaller)
+            if cnvrtr.can_read(content_type):
+                return cnvrtr.read(event, headers, body, data_unmarshaller)
+
+        raise exceptions.UnsupportedEventConverter(content_type)
 
     def ToRequest(self, event: event_base.BaseEvent,
                   converter_type: str,
