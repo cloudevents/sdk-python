@@ -55,11 +55,15 @@ class HTTPMarshaller(object):
         :return: a CloudEvent
         :rtype: event_base.BaseEvent
         """
+        if not isinstance(data_unmarshaller, typing.Callable):
+            raise exceptions.InvalidDataUnmarshaller()
+
         content_type = headers.get(
             "content-type", headers.get("Content-Type"))
 
         for _, cnvrtr in self.__converters.items():
             if cnvrtr.can_read(content_type):
+                cnvrtr.event_supported(event)
                 return cnvrtr.read(event, headers, body, data_unmarshaller)
 
         raise exceptions.UnsupportedEventConverter(content_type)
@@ -78,6 +82,9 @@ class HTTPMarshaller(object):
         :return: dict of HTTP headers and stream of HTTP request body
         :rtype: tuple
         """
+        if not isinstance(data_marshaller, typing.Callable):
+            raise exceptions.InvalidDataMarshaller()
+
         if converter_type in self.__converters:
             cnvrtr = self.__converters.get(converter_type)
             return cnvrtr.write(event, data_marshaller)

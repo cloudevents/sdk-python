@@ -20,6 +20,13 @@ class UnsupportedEvent(Exception):
                          "'{0}'".format(event_class))
 
 
+class InvalidDataUnmarshaller(Exception):
+
+    def __init__(self):
+        super().__init__(
+            "Invalid data unmarshaller, is not a callable")
+
+
 class InvalidDataMarshaller(Exception):
 
     def __init__(self):
