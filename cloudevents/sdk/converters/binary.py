@@ -29,8 +29,7 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         return True
 
     def event_supported(self, event):
-        if type(event) not in self.SUPPORTED_VERSIONS:
-            raise exceptions.UnsupportedEvent(type(event))
+        return type(event) in self.SUPPORTED_VERSIONS
 
     def read(self,
              event: event_base.BaseEvent,

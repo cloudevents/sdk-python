@@ -43,7 +43,7 @@ def test_event_pipeline_upstream():
     assert "ce-source" in new_headers
     assert "ce-id" in new_headers
     assert "ce-time" in new_headers
-    assert "ce-contenttype" in new_headers
+    assert "content-type" in new_headers
     assert isinstance(body, io.BytesIO)
     assert data.body == body.read().decode("utf-8")
 
@@ -66,7 +66,7 @@ def test_event_pipeline_v01():
 
     _, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
     assert isinstance(body, io.BytesIO)
-    new_headers = json.load(body)
+    new_headers = json.load(io.TextIOWrapper(body, encoding='utf-8'))
     assert new_headers is not None
     assert "cloudEventsVersion" in new_headers
     assert "eventType" in new_headers
