@@ -129,31 +129,32 @@ class BaseEvent(EventGetterSetter):
 
     def UnmarshalBinary(self, headers: dict, body: typing.IO,
                         data_unmarshaller: typing.Callable):
-        props = self.Properties(with_nullable=True)
-        exts = props.get("extensions")
-        for key in props:
-            formatted_key = "ce-{0}".format(key)
-            if key != "extensions":
-                self.Set(key, headers.get("ce-{0}".format(key)))
-                if formatted_key in headers:
-                    del headers[formatted_key]
+        BINARY_MAPPING = {
+            'content-type': 'contenttype',
+            # TODO: add Distributed Tracing. It's not clear if this is one extension or two.
+            # https://github.com/cloudevents/spec/blob/master/extensions/distributed-tracing.md
+        }
+        for header, value in headers.items():
+            header = header.lower()
+            if header in BINARY_MAPPING:
+                self.Set(BINARY_MAPPING[header], value)
+            elif header.startswith("ce-"):
+                self.Set(header[3:], value)
 
-        # rest of headers suppose to an extension?
-        exts.update(**headers)
-        self.Set("extensions", exts)
         self.Set("data", data_unmarshaller(body))
 
     def MarshalBinary(self) -> (dict, object):
         headers = {}
+        if self.ContentType():
+            headers["content-type"] = self.ContentType()
         props = self.Properties()
         for key, value in props.items():
-            if key not in ["data", "extensions"]:
+            if key not in ["data", "extensions", "contenttype"]:
                 if value is not None:
                     headers["ce-{0}".format(key)] = value
 
-        exts = props.get("extensions")
-        if len(exts) > 0:
-            headers.update(**exts)
+        for key, value in props.get("extensions"):
+            headers["ce-{0}".format(key)] = value
 
         data, _ = self.Get("data")
         return headers, data

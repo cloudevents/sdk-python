@@ -27,6 +27,12 @@ class JSONHTTPCloudEventConverter(base.Converter):
              headers: dict,
              body: typing.IO,
              data_unmarshaller: typing.Callable) -> event_base.BaseEvent:
+        # Note: this is fragile for true dictionaries which don't implement
+        # case-insensitive header mappings. HTTP/1.1 specifies that headers
+        #  are case insensitive, so this usually affects tests.
+        if not headers.get("Content-Type", "").startswith("application/cloudevents+json"):
+            raise exceptions.UnsupportedEvent(
+                "Structured mode must be application/cloudevents+json, not {0}".format(headers.get("content-type")))
         event.UnmarshalJSON(body, data_unmarshaller)
         return event
 

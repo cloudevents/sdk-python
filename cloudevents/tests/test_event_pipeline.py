@@ -42,7 +42,7 @@ def test_event_pipeline_upstream():
     assert "ce-source" in new_headers
     assert "ce-id" in new_headers
     assert "ce-time" in new_headers
-    assert "ce-contenttype" in new_headers
+    assert "content-type" in new_headers
     assert data.body == body
 
 

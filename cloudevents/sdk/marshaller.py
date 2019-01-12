@@ -56,7 +56,12 @@ class HTTPMarshaller(object):
         :rtype: event_base.BaseEvent
         """
         for _, cnvrtr in self.__converters.items():
-            return cnvrtr.read(event, headers, body, data_unmarshaller)
+            try:
+                return cnvrtr.read(event, headers, body, data_unmarshaller)
+            except exceptions.UnsupportedEvent:
+                continue
+        raise exceptions.UnsupportedEvent(
+            "No registered marshaller in {0}".format(self.__converters))
 
     def ToRequest(self, event: event_base.BaseEvent,
                   converter_type: str,

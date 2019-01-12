@@ -90,7 +90,7 @@ def test_structured_converter_v01():
     assert event.Get("id") == (data.ce_id, True)
 
 
-def test_default_http_marshaller():
+def test_default_http_marshaller_with_structured():
     m = marshaller.NewDefaultHTTPMarshaller()
 
     event = m.FromRequest(
@@ -101,4 +101,18 @@ def test_default_http_marshaller():
     )
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)
+    assert event.Get("id") == (data.ce_id, True)
+
+def test_default_http_marshaller_with_binary():
+    m = marshaller.NewDefaultHTTPMarshaller()
+
+    event = m.FromRequest(
+        v02.Event(),
+        data.headers,
+        io.StringIO(ujson.dumps(data.body)),
+        ujson.load
+    )
+    assert event is not None
+    assert event.Get("type") == (data.ce_type, True)
+    assert event.Get("data") == (data.body, True)
     assert event.Get("id") == (data.ce_id, True)
