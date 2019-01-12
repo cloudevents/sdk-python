@@ -23,6 +23,8 @@ class JSONHTTPCloudEventConverter(base.Converter):
 
     TYPE = "structured"
 
+    MIME_TYPE = "application/cloudevents+json"
+
     def read(self, event: event_base.BaseEvent,
              headers: dict,
              body: typing.IO,
@@ -30,9 +32,10 @@ class JSONHTTPCloudEventConverter(base.Converter):
         # Note: this is fragile for true dictionaries which don't implement
         # case-insensitive header mappings. HTTP/1.1 specifies that headers
         #  are case insensitive, so this usually affects tests.
-        if not headers.get("Content-Type", "").startswith("application/cloudevents+json"):
+        if not headers.get("Content-Type", "").startswith(MIME_TYPE):
             raise exceptions.UnsupportedEvent(
-                "Structured mode must be application/cloudevents+json, not {0}".format(headers.get("content-type")))
+                "Structured mode must be {0}, not {1}".format(
+                    MIME_TYPE, headers.get("content-type")))
         event.UnmarshalJSON(body, data_unmarshaller)
         return event
 

@@ -131,7 +131,8 @@ class BaseEvent(EventGetterSetter):
                         data_unmarshaller: typing.Callable):
         BINARY_MAPPING = {
             'content-type': 'contenttype',
-            # TODO: add Distributed Tracing. It's not clear if this is one extension or two.
+            # TODO(someone): add Distributed Tracing. It's not clear if this
+            # is one extension or two.
             # https://github.com/cloudevents/spec/blob/master/extensions/distributed-tracing.md
         }
         for header, value in headers.items():

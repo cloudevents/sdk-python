@@ -103,6 +103,7 @@ def test_default_http_marshaller_with_structured():
     assert event.Get("type") == (data.ce_type, True)
     assert event.Get("id") == (data.ce_id, True)
 
+
 def test_default_http_marshaller_with_binary():
     m = marshaller.NewDefaultHTTPMarshaller()
 
