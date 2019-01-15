@@ -66,7 +66,7 @@ def test_binary_converter_v01():
     )
 
     pytest.raises(
-        exceptions.UnsupportedEvent,
+        exceptions.UnsupportedEventConverter,
         m.FromRequest,
         v01.Event, {}, None, lambda x: x)
 
@@ -102,7 +102,7 @@ def test_structured_converter_v01():
     assert event.Get("id") == (data.ce_id, True)
 
 
-def test_default_http_marshaller():
+def test_default_http_marshaller_with_structured():
     m = marshaller.NewDefaultHTTPMarshaller()
 
     event = m.FromRequest(
@@ -116,6 +116,21 @@ def test_default_http_marshaller():
     assert event.Get("id") == (data.ce_id, True)
 
 
+def test_default_http_marshaller_with_binary():
+    m = marshaller.NewDefaultHTTPMarshaller()
+
+    event = m.FromRequest(
+        v02.Event(),
+        data.headers,
+        io.StringIO(json.dumps(data.body)),
+        json.load
+    )
+    assert event is not None
+    assert event.Get("type") == (data.ce_type, True)
+    assert event.Get("data") == (data.body, True)
+    assert event.Get("id") == (data.ce_id, True)
+
+
 def test_unsupported_event_configuration():
     m = marshaller.NewHTTPMarshaller(
         [
@@ -123,7 +138,7 @@ def test_unsupported_event_configuration():
         ]
     )
     pytest.raises(
-        exceptions.UnsupportedEvent,
+        exceptions.UnsupportedEventConverter,
         m.FromRequest,
         v01.Event(),
         {"Content-Type": "application/cloudevents+json"},

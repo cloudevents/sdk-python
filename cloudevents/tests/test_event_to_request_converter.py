@@ -48,9 +48,10 @@ def test_binary_event_to_request_upstream():
 def test_structured_event_to_request_upstream():
     copy_of_ce = copy.deepcopy(data.ce)
     m = marshaller.NewDefaultHTTPMarshaller()
+    http_headers = {"content-type": "application/cloudevents+json"}
     event = m.FromRequest(
         v02.Event(),
-        {"Content-Type": "application/cloudevents+json"},
+        http_headers,
         io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
@@ -60,6 +61,9 @@ def test_structured_event_to_request_upstream():
 
     new_headers, _ = m.ToRequest(event, converters.TypeStructured, lambda x: x)
     for key in new_headers:
+        if key == "content-type":
+            assert new_headers[key] == http_headers[key]
+            continue
         assert key in copy_of_ce
 
 
@@ -70,9 +74,10 @@ def test_structured_event_to_request_v01():
             structured.NewJSONHTTPCloudEventConverter()
         ]
     )
+    http_headers = {"content-type": "application/cloudevents+json"}
     event = m.FromRequest(
         v01.Event(),
-        {"Content-Type": "application/cloudevents+json"},
+        http_headers,
         io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
@@ -82,4 +87,7 @@ def test_structured_event_to_request_v01():
 
     new_headers, _ = m.ToRequest(event, converters.TypeStructured, lambda x: x)
     for key in new_headers:
+        if key == "content-type":
+            assert new_headers[key] == http_headers[key]
+            continue
         assert key in copy_of_ce
