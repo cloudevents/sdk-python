@@ -33,7 +33,7 @@ def test_binary_event_to_request_upstream():
         v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(json.dumps(data.ce)),
-        lambda x: x.read()
+        lambda x: x.read(),
     )
 
     assert event is not None
@@ -50,10 +50,7 @@ def test_structured_event_to_request_upstream():
     m = marshaller.NewDefaultHTTPMarshaller()
     http_headers = {"content-type": "application/cloudevents+json"}
     event = m.FromRequest(
-        v02.Event(),
-        http_headers,
-        io.StringIO(json.dumps(data.ce)),
-        lambda x: x.read()
+        v02.Event(), http_headers, io.StringIO(json.dumps(data.ce)), lambda x: x.read()
     )
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)
@@ -69,17 +66,10 @@ def test_structured_event_to_request_upstream():
 
 def test_structured_event_to_request_v01():
     copy_of_ce = copy.deepcopy(data.ce)
-    m = marshaller.NewHTTPMarshaller(
-        [
-            structured.NewJSONHTTPCloudEventConverter()
-        ]
-    )
+    m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
     http_headers = {"content-type": "application/cloudevents+json"}
     event = m.FromRequest(
-        v01.Event(),
-        http_headers,
-        io.StringIO(json.dumps(data.ce)),
-        lambda x: x.read()
+        v01.Event(), http_headers, io.StringIO(json.dumps(data.ce)), lambda x: x.read()
     )
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)

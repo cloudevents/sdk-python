@@ -27,13 +27,13 @@ from cloudevents.tests import data
 
 def test_event_pipeline_upstream():
     event = (
-        v02.Event().
-        SetContentType(data.contentType).
-        SetData(data.body).
-        SetEventID(data.ce_id).
-        SetSource(data.source).
-        SetEventTime(data.eventTime).
-        SetEventType(data.ce_type)
+        v02.Event()
+        .SetContentType(data.contentType)
+        .SetData(data.body)
+        .SetEventID(data.ce_id)
+        .SetSource(data.source)
+        .SetEventTime(data.eventTime)
+        .SetEventType(data.ce_type)
     )
     m = marshaller.NewDefaultHTTPMarshaller()
     new_headers, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
@@ -44,29 +44,25 @@ def test_event_pipeline_upstream():
     assert "ce-id" in new_headers
     assert "ce-time" in new_headers
     assert "content-type" in new_headers
-    assert isinstance(body, io.BytesIO)
-    assert data.body == body.read().decode("utf-8")
+    assert isinstance(body, str)
+    assert data.body == body
 
 
 def test_event_pipeline_v01():
     event = (
-        v01.Event().
-        SetContentType(data.contentType).
-        SetData(data.body).
-        SetEventID(data.ce_id).
-        SetSource(data.source).
-        SetEventTime(data.eventTime).
-        SetEventType(data.ce_type)
+        v01.Event()
+        .SetContentType(data.contentType)
+        .SetData(data.body)
+        .SetEventID(data.ce_id)
+        .SetSource(data.source)
+        .SetEventTime(data.eventTime)
+        .SetEventType(data.ce_type)
     )
-    m = marshaller.NewHTTPMarshaller(
-        [
-            structured.NewJSONHTTPCloudEventConverter()
-        ]
-    )
+    m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
 
     _, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
     assert isinstance(body, io.BytesIO)
-    new_headers = json.load(io.TextIOWrapper(body, encoding='utf-8'))
+    new_headers = json.load(io.TextIOWrapper(body, encoding="utf-8"))
     assert new_headers is not None
     assert "cloudEventsVersion" in new_headers
     assert "eventType" in new_headers

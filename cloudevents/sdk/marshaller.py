@@ -35,14 +35,16 @@ class HTTPMarshaller(object):
         :param converters: a list of HTTP-to-CloudEvent-to-HTTP constructors
         :type converters: typing.List[base.Converter]
         """
-        self.__converters = (c for c in converters)
+        self.__converters = [c for c in converters]
         self.__converters_by_type = {c.TYPE: c for c in converters}
 
-    def FromRequest(self, event: event_base.BaseEvent,
-                    headers: dict,
-                    body: typing.IO,
-                    data_unmarshaller:
-                    typing.Callable) -> event_base.BaseEvent:
+    def FromRequest(
+        self,
+        event: event_base.BaseEvent,
+        headers: dict,
+        body: typing.IO,
+        data_unmarshaller: typing.Callable,
+    ) -> event_base.BaseEvent:
         """
         Reads a CloudEvent from an HTTP headers and request body
         :param event: CloudEvent placeholder
@@ -59,8 +61,7 @@ class HTTPMarshaller(object):
         if not isinstance(data_unmarshaller, typing.Callable):
             raise exceptions.InvalidDataUnmarshaller()
 
-        content_type = headers.get(
-            "content-type", headers.get("Content-Type"))
+        content_type = headers.get("content-type", headers.get("Content-Type"))
 
         for cnvrtr in self.__converters:
             if cnvrtr.can_read(content_type) and cnvrtr.event_supported(event):
@@ -68,11 +69,16 @@ class HTTPMarshaller(object):
 
         raise exceptions.UnsupportedEventConverter(
             "No registered marshaller for {0} in {1}".format(
-                content_type, self.__converters))
+                content_type, self.__converters
+            )
+        )
 
-    def ToRequest(self, event: event_base.BaseEvent,
-                  converter_type: str,
-                  data_marshaller: typing.Callable) -> (dict, typing.IO):
+    def ToRequest(
+        self,
+        event: event_base.BaseEvent,
+        converter_type: str,
+        data_marshaller: typing.Callable,
+    ) -> (dict, typing.IO):
         """
         Writes a CloudEvent into a HTTP-ready form of headers and request body
         :param event: CloudEvent
@@ -101,14 +107,17 @@ def NewDefaultHTTPMarshaller() -> HTTPMarshaller:
     :return: an instance of HTTP marshaller
     :rtype: cloudevents.sdk.marshaller.HTTPMarshaller
     """
-    return HTTPMarshaller([
-        structured.NewJSONHTTPCloudEventConverter(),
-        binary.NewBinaryHTTPCloudEventConverter(),
-    ])
+    return HTTPMarshaller(
+        [
+            structured.NewJSONHTTPCloudEventConverter(),
+            binary.NewBinaryHTTPCloudEventConverter(),
+        ]
+    )
 
 
 def NewHTTPMarshaller(
-        converters: typing.List[base.Converter]) -> HTTPMarshaller:
+        converters: typing.List[base.Converter]
+) -> HTTPMarshaller:
     """
     Creates the default HTTP marshaller with both
         structured and binary converters

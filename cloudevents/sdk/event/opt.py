@@ -14,7 +14,6 @@
 
 
 class Option(object):
-
     def __init__(self, name, value, is_required):
         self.name = name
         self.value = value
@@ -25,7 +24,9 @@ class Option(object):
         if self.is_required and is_none:
             raise ValueError(
                 "Attribute value error: '{0}', "
-                "invalid new value.".format(self.name))
+                "" "invalid new value."
+                .format(self.name)
+            )
 
         self.value = new_value
 

@@ -18,7 +18,6 @@ import typing
 
 
 class EventGetterSetter(object):
-
     def CloudEventVersion(self) -> str:
         raise Exception("not implemented")
 
@@ -76,18 +75,13 @@ class EventGetterSetter(object):
 
 
 class BaseEvent(EventGetterSetter):
-
     def Properties(self, with_nullable=False) -> dict:
         props = dict()
         for name, value in self.__dict__.items():
             if str(name).startswith("ce__"):
                 v = value.get()
                 if v is not None or with_nullable:
-                    props.update(
-                        {
-                            str(name).replace("ce__", ""): value.get()
-                        }
-                    )
+                    props.update({str(name).replace("ce__", ""): value.get()})
 
         return props
 
@@ -119,33 +113,38 @@ class BaseEvent(EventGetterSetter):
         props["data"] = data_marshaller(props.get("data"))
         return io.BytesIO(json.dumps(props).encode("utf-8"))
 
-    def UnmarshalJSON(self, b: typing.IO,
-                      data_unmarshaller: typing.Callable):
+    def UnmarshalJSON(self, b: typing.IO, data_unmarshaller: typing.Callable):
         raw_ce = json.load(b)
         for name, value in raw_ce.items():
             if name == "data":
                 value = data_unmarshaller(value)
             self.Set(name, value)
 
-    def UnmarshalBinary(self, headers: dict, body: typing.IO,
-                        data_unmarshaller: typing.Callable):
-        BINARY_MAPPING = {
-            'content-type': 'contenttype',
+    def UnmarshalBinary(
+        self,
+        headers: dict,
+        body: typing.IO,
+        data_unmarshaller: typing.Callable
+    ):
+        binary_mapping = {
+            "content-type": "contenttype",
             # TODO(someone): add Distributed Tracing. It's not clear
             # if this is one extension or two.
             # https://github.com/cloudevents/spec/blob/master/extensions/distributed-tracing.md
         }
         for header, value in headers.items():
             header = header.lower()
-            if header in BINARY_MAPPING:
-                self.Set(BINARY_MAPPING[header], value)
+            if header in binary_mapping:
+                self.Set(binary_mapping[header], value)
             elif header.startswith("ce-"):
                 self.Set(header[3:], value)
 
         self.Set("data", data_unmarshaller(body))
 
     def MarshalBinary(
-            self, data_marshaller: typing.Callable) -> (dict, object):
+            self,
+            data_marshaller: typing.Callable
+    ) -> (dict, object):
         headers = {}
         if self.ContentType():
             headers["content-type"] = self.ContentType()
@@ -159,5 +158,4 @@ class BaseEvent(EventGetterSetter):
             headers["ce-{0}".format(key)] = value
 
         data, _ = self.Get("data")
-        return headers, io.BytesIO(
-            str(data_marshaller(data)).encode("utf-8"))
+        return headers, data_marshaller(data)

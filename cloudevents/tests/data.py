@@ -25,7 +25,7 @@ headers = {
     "ce-id": ce_id,
     "ce-time": eventTime,
     "ce-source": source,
-    "Content-Type": contentType
+    "Content-Type": contentType,
 }
 ce = {
     "specversion": specversion,
@@ -33,5 +33,5 @@ ce = {
     "id": ce_id,
     "time": eventTime,
     "source": source,
-    "contenttype": contentType
+    "contenttype": contentType,
 }
