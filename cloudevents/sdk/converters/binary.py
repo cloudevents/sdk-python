@@ -25,6 +25,12 @@ class BinaryHTTPCloudEventConverter(base.Converter):
     TYPE = "binary"
     SUPPORTED_VERSIONS = [v02.Event, ]
 
+    def can_read(self, content_type: str) -> bool:
+        return True
+
+    def event_supported(self, event: object) -> bool:
+        return type(event) in self.SUPPORTED_VERSIONS
+
     def read(self,
              event: event_base.BaseEvent,
              headers: dict, body: typing.IO,
@@ -36,11 +42,7 @@ class BinaryHTTPCloudEventConverter(base.Converter):
 
     def write(self, event: event_base.BaseEvent,
               data_marshaller: typing.Callable) -> (dict, typing.IO):
-        if not isinstance(data_marshaller, typing.Callable):
-            raise exceptions.InvalidDataMarshaller()
-
-        hs, data = event.MarshalBinary()
-        return hs, data_marshaller(data)
+        return event.MarshalBinary(data_marshaller)
 
 
 def NewBinaryHTTPCloudEventConverter() -> BinaryHTTPCloudEventConverter:

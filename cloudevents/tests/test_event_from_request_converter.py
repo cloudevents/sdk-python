@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import pytest
 import io
-import ujson
 
 from cloudevents.sdk import exceptions
 from cloudevents.sdk import marshaller
@@ -49,7 +49,7 @@ def test_structured_converter_upstream():
     event = m.FromRequest(
         v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)),
+        io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
 
@@ -58,7 +58,6 @@ def test_structured_converter_upstream():
     assert event.Get("id") == (data.ce_id, True)
 
 
-# todo: clarify whether spec 0.1 doesn't support binary format
 def test_binary_converter_v01():
     m = marshaller.NewHTTPMarshaller(
         [
@@ -67,9 +66,22 @@ def test_binary_converter_v01():
     )
 
     pytest.raises(
-        exceptions.UnsupportedEvent,
+        exceptions.UnsupportedEventConverter,
         m.FromRequest,
-        v01.Event, None, None, None)
+        v01.Event, {}, None, lambda x: x)
+
+
+def test_unsupported_converter_v01():
+    m = marshaller.NewHTTPMarshaller(
+        [
+            structured.NewJSONHTTPCloudEventConverter()
+        ]
+    )
+
+    pytest.raises(
+        exceptions.UnsupportedEventConverter,
+        m.FromRequest,
+        v01.Event, {}, None, lambda x: x)
 
 
 def test_structured_converter_v01():
@@ -81,7 +93,7 @@ def test_structured_converter_v01():
     event = m.FromRequest(
         v01.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)),
+        io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
 
@@ -90,15 +102,62 @@ def test_structured_converter_v01():
     assert event.Get("id") == (data.ce_id, True)
 
 
-def test_default_http_marshaller():
+def test_default_http_marshaller_with_structured():
     m = marshaller.NewDefaultHTTPMarshaller()
 
     event = m.FromRequest(
         v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(ujson.dumps(data.ce)),
+        io.StringIO(json.dumps(data.ce)),
         lambda x: x.read()
     )
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)
     assert event.Get("id") == (data.ce_id, True)
+
+
+def test_default_http_marshaller_with_binary():
+    m = marshaller.NewDefaultHTTPMarshaller()
+
+    event = m.FromRequest(
+        v02.Event(),
+        data.headers,
+        io.StringIO(json.dumps(data.body)),
+        json.load
+    )
+    assert event is not None
+    assert event.Get("type") == (data.ce_type, True)
+    assert event.Get("data") == (data.body, True)
+    assert event.Get("id") == (data.ce_id, True)
+
+
+def test_unsupported_event_configuration():
+    m = marshaller.NewHTTPMarshaller(
+        [
+            binary.NewBinaryHTTPCloudEventConverter()
+        ]
+    )
+    pytest.raises(
+        exceptions.UnsupportedEventConverter,
+        m.FromRequest,
+        v01.Event(),
+        {"Content-Type": "application/cloudevents+json"},
+        io.StringIO(json.dumps(data.ce)),
+        lambda x: x.read()
+    )
+
+
+def test_invalid_data_unmarshaller():
+    m = marshaller.NewDefaultHTTPMarshaller()
+    pytest.raises(
+        exceptions.InvalidDataUnmarshaller,
+        m.FromRequest,
+        v01.Event(), {}, None, None)
+
+
+def test_invalid_data_marshaller():
+    m = marshaller.NewDefaultHTTPMarshaller()
+    pytest.raises(
+        exceptions.InvalidDataMarshaller,
+        m.ToRequest,
+        v01.Event(), "blah", None)

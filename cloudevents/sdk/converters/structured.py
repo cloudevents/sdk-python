@@ -14,7 +14,6 @@
 
 import typing
 
-from cloudevents.sdk import exceptions
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.event import base as event_base
 
@@ -22,6 +21,14 @@ from cloudevents.sdk.event import base as event_base
 class JSONHTTPCloudEventConverter(base.Converter):
 
     TYPE = "structured"
+    MIME_TYPE = "application/cloudevents+json"
+
+    def can_read(self, content_type: str) -> bool:
+        return content_type and content_type.startswith(self.MIME_TYPE)
+
+    def event_supported(self, event: object) -> bool:
+        # structured format supported by both spec 0.1 and 0.2
+        return True
 
     def read(self, event: event_base.BaseEvent,
              headers: dict,
@@ -33,10 +40,8 @@ class JSONHTTPCloudEventConverter(base.Converter):
     def write(self,
               event: event_base.BaseEvent,
               data_marshaller: typing.Callable) -> (dict, typing.IO):
-        if not isinstance(data_marshaller, typing.Callable):
-            raise exceptions.InvalidDataMarshaller()
-
-        return {}, event.MarshalJSON(data_marshaller)
+        http_headers = {'content-type': self.MIME_TYPE}
+        return http_headers, event.MarshalJSON(data_marshaller)
 
 
 def NewJSONHTTPCloudEventConverter() -> JSONHTTPCloudEventConverter:
