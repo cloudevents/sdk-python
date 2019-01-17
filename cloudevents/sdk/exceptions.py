@@ -16,7 +16,7 @@
 class UnsupportedEvent(Exception):
     def __init__(self, event_class):
         super().__init__(
-            "Invalid CloudEvent class: " "'{0}'".format(event_class)
+            "Invalid CloudEvent class: '{0}'".format(event_class)
         )
 
 
