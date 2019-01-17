@@ -30,10 +30,7 @@ from cloudevents.tests import data
 
 def test_binary_converter_upstream():
     m = marshaller.NewHTTPMarshaller(
-        [
-            binary.NewBinaryHTTPCloudEventConverter()
-        ]
-    )
+        [binary.NewBinaryHTTPCloudEventConverter()])
     event = m.FromRequest(v02.Event(), data.headers, None, lambda x: x)
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)
@@ -42,15 +39,12 @@ def test_binary_converter_upstream():
 
 def test_structured_converter_upstream():
     m = marshaller.NewHTTPMarshaller(
-        [
-            structured.NewJSONHTTPCloudEventConverter()
-        ]
-    )
+        [structured.NewJSONHTTPCloudEventConverter()])
     event = m.FromRequest(
         v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(json.dumps(data.ce)),
-        lambda x: x.read()
+        lambda x: x.read(),
     )
 
     assert event is not None
@@ -60,41 +54,40 @@ def test_structured_converter_upstream():
 
 def test_binary_converter_v01():
     m = marshaller.NewHTTPMarshaller(
-        [
-            binary.NewBinaryHTTPCloudEventConverter()
-        ]
-    )
+        [binary.NewBinaryHTTPCloudEventConverter()])
 
     pytest.raises(
         exceptions.UnsupportedEventConverter,
         m.FromRequest,
-        v01.Event, {}, None, lambda x: x)
+        v01.Event,
+        {},
+        None,
+        lambda x: x,
+    )
 
 
 def test_unsupported_converter_v01():
     m = marshaller.NewHTTPMarshaller(
-        [
-            structured.NewJSONHTTPCloudEventConverter()
-        ]
-    )
+        [structured.NewJSONHTTPCloudEventConverter()])
 
     pytest.raises(
         exceptions.UnsupportedEventConverter,
         m.FromRequest,
-        v01.Event, {}, None, lambda x: x)
+        v01.Event,
+        {},
+        None,
+        lambda x: x,
+    )
 
 
 def test_structured_converter_v01():
     m = marshaller.NewHTTPMarshaller(
-        [
-            structured.NewJSONHTTPCloudEventConverter()
-        ]
-    )
+        [structured.NewJSONHTTPCloudEventConverter()])
     event = m.FromRequest(
         v01.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(json.dumps(data.ce)),
-        lambda x: x.read()
+        lambda x: x.read(),
     )
 
     assert event is not None
@@ -109,7 +102,7 @@ def test_default_http_marshaller_with_structured():
         v02.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(json.dumps(data.ce)),
-        lambda x: x.read()
+        lambda x: x.read(),
     )
     assert event is not None
     assert event.Get("type") == (data.ce_type, True)
@@ -120,8 +113,7 @@ def test_default_http_marshaller_with_binary():
     m = marshaller.NewDefaultHTTPMarshaller()
 
     event = m.FromRequest(
-        v02.Event(),
-        data.headers,
+        v02.Event(), data.headers,
         io.StringIO(json.dumps(data.body)),
         json.load
     )
@@ -133,17 +125,14 @@ def test_default_http_marshaller_with_binary():
 
 def test_unsupported_event_configuration():
     m = marshaller.NewHTTPMarshaller(
-        [
-            binary.NewBinaryHTTPCloudEventConverter()
-        ]
-    )
+        [binary.NewBinaryHTTPCloudEventConverter()])
     pytest.raises(
         exceptions.UnsupportedEventConverter,
         m.FromRequest,
         v01.Event(),
         {"Content-Type": "application/cloudevents+json"},
         io.StringIO(json.dumps(data.ce)),
-        lambda x: x.read()
+        lambda x: x.read(),
     )
 
 
@@ -152,12 +141,12 @@ def test_invalid_data_unmarshaller():
     pytest.raises(
         exceptions.InvalidDataUnmarshaller,
         m.FromRequest,
-        v01.Event(), {}, None, None)
+        v01.Event(), {}, None, None
+    )
 
 
 def test_invalid_data_marshaller():
     m = marshaller.NewDefaultHTTPMarshaller()
     pytest.raises(
-        exceptions.InvalidDataMarshaller,
-        m.ToRequest,
-        v01.Event(), "blah", None)
+        exceptions.InvalidDataMarshaller, m.ToRequest, v01.Event(), "blah", None
+    )

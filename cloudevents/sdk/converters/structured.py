@@ -30,17 +30,20 @@ class JSONHTTPCloudEventConverter(base.Converter):
         # structured format supported by both spec 0.1 and 0.2
         return True
 
-    def read(self, event: event_base.BaseEvent,
-             headers: dict,
-             body: typing.IO,
-             data_unmarshaller: typing.Callable) -> event_base.BaseEvent:
+    def read(
+        self,
+        event: event_base.BaseEvent,
+        headers: dict,
+        body: typing.IO,
+        data_unmarshaller: typing.Callable,
+    ) -> event_base.BaseEvent:
         event.UnmarshalJSON(body, data_unmarshaller)
         return event
 
-    def write(self,
-              event: event_base.BaseEvent,
-              data_marshaller: typing.Callable) -> (dict, typing.IO):
-        http_headers = {'content-type': self.MIME_TYPE}
+    def write(
+        self, event: event_base.BaseEvent, data_marshaller: typing.Callable
+    ) -> (dict, typing.IO):
+        http_headers = {"content-type": self.MIME_TYPE}
         return http_headers, event.MarshalJSON(data_marshaller)
 
 

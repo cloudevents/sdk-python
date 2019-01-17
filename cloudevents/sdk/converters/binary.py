@@ -23,7 +23,7 @@ from cloudevents.sdk.event import v02
 class BinaryHTTPCloudEventConverter(base.Converter):
 
     TYPE = "binary"
-    SUPPORTED_VERSIONS = [v02.Event, ]
+    SUPPORTED_VERSIONS = [v02.Event]
 
     def can_read(self, content_type: str) -> bool:
         return True
@@ -31,17 +31,21 @@ class BinaryHTTPCloudEventConverter(base.Converter):
     def event_supported(self, event: object) -> bool:
         return type(event) in self.SUPPORTED_VERSIONS
 
-    def read(self,
-             event: event_base.BaseEvent,
-             headers: dict, body: typing.IO,
-             data_unmarshaller: typing.Callable) -> event_base.BaseEvent:
+    def read(
+        self,
+        event: event_base.BaseEvent,
+        headers: dict,
+        body: typing.IO,
+        data_unmarshaller: typing.Callable,
+    ) -> event_base.BaseEvent:
         if type(event) not in self.SUPPORTED_VERSIONS:
             raise exceptions.UnsupportedEvent(type(event))
         event.UnmarshalBinary(headers, body, data_unmarshaller)
         return event
 
-    def write(self, event: event_base.BaseEvent,
-              data_marshaller: typing.Callable) -> (dict, typing.IO):
+    def write(
+        self, event: event_base.BaseEvent, data_marshaller: typing.Callable
+    ) -> (dict, typing.IO):
         return event.MarshalBinary(data_marshaller)
 
 

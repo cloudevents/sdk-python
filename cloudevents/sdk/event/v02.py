@@ -12,12 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.sdk.event import opt
 from cloudevents.sdk.event import base
+from cloudevents.sdk.event import opt
 
 
 class Event(base.BaseEvent):
-
     def __init__(self):
         self.ce__specversion = opt.Option("specversion", "0.2", True)
         self.ce__type = opt.Option("type", None, True)
