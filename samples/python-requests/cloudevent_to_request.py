@@ -29,10 +29,9 @@ def run_binary(event, url):
     print("binary CloudEvent")
     for k, v in binary_headers.items():
         print("{0}: {1}\r\n".format(k, v))
-    print(binary_data.getvalue())
-    response = requests.post(url,
-                             headers=binary_headers,
-                             data=binary_data.getvalue())
+    print(binary_data)
+    response = requests.post(
+        url, headers=binary_headers, data=binary_data)
     response.raise_for_status()
 
 
