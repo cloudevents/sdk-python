@@ -80,7 +80,7 @@ class Event(base.BaseEvent):
         return self
 
     def SetExtensions(self, extensions: dict) -> base.BaseEvent:
-        self.Set("extension", extensions)
+        self.Set("extensions", extensions)
         return self
 
     def SetContentType(self, contentType: str) -> base.BaseEvent:
