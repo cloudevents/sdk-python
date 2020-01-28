@@ -17,13 +17,13 @@ import typing
 from cloudevents.sdk import exceptions
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.event import base as event_base
-from cloudevents.sdk.event import v02
+from cloudevents.sdk.event import v02, v1, v03
 
 
 class BinaryHTTPCloudEventConverter(base.Converter):
 
     TYPE = "binary"
-    SUPPORTED_VERSIONS = [v02.Event]
+    SUPPORTED_VERSIONS = [v02.Event, v03.Event, v1.Event]
 
     def can_read(self, content_type: str) -> bool:
         return True
