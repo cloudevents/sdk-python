@@ -52,25 +52,25 @@ async def echo(request):
 def test_reusable_marshaller():
     for i in range(10):
         _, r = app.test_client.post(
-            "/is-ok", headers=test_data.headers, data=test_data.body
+            "/is-ok", headers=test_data.headers[v02.Event], data=test_data.body
         )
         assert r.status == 200
 
 
 def test_web_app_integration():
     _, r = app.test_client.post(
-        "/is-ok", headers=test_data.headers, data=test_data.body
+        "/is-ok", headers=test_data.headers[v02.Event], data=test_data.body
     )
     assert r.status == 200
 
 
 def test_web_app_echo():
-    _, r = app.test_client.post("/echo", headers=test_data.headers, data=test_data.body)
+    _, r = app.test_client.post("/echo", headers=test_data.headers[v02.Event], data=test_data.body)
     assert r.status == 200
     event = m.FromRequest(v02.Event(), dict(r.headers), r.body, lambda x: x)
     assert event is not None
     props = event.Properties()
-    for key in test_data.headers.keys():
+    for key in test_data.headers[v02.Event].keys():
         if key == "Content-Type":
             assert "contenttype" in props
         else:
