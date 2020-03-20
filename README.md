@@ -1,6 +1,15 @@
 # Python SDK for [CloudEvents](https://github.com/cloudevents/spec)
 
-**NOTE: This SDK is still considered work in progress, things might (and will) break with every update.**
+## Status
+
+This SDK is still considered a work in progress, therefore things might (and
+will) break with every update.
+
+This SDK current supports the following versions of CloudEvents:
+- v0.2
+- v0.1
+
+## Python SDK
 
 Package **cloudevents** provides primitives to work with CloudEvents specification: https://github.com/cloudevents/spec.
 
@@ -138,3 +147,15 @@ the same API. It will use semantic versioning with following rules:
 * MAJOR version increments when backwards incompatible changes is introduced.
 * MINOR version increments when backwards compatible feature is introduced INCLUDING support for new CloudEvents version.
 * PATCH version increments when a backwards compatible bug fix is introduced.
+
+## Community
+
+- There are bi-weekly calls immediately following the [Serverless/CloudEvents
+  call](https://github.com/cloudevents/spec#meeting-time) at
+  9am PT (US Pacific). Which means they will typically start at 10am PT, but
+  if the other call ends early then the SDK call will start early as well.
+  See the [CloudEvents meeting minutes](https://docs.google.com/document/d/1OVF68rpuPK5shIHILK9JOqlZBbfe91RNzQ7u_P7YCDE/edit#)
+  to determine which week will have the call.
+- Slack: #cloudeventssdk channel under
+  [CNCF's Slack workspace](https://slack.cncf.io/).
+- Contact for additional information: Denis Makogon (`@denysmakogon` on slack).
