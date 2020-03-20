@@ -158,4 +158,5 @@ the same API. It will use semantic versioning with following rules:
   to determine which week will have the call.
 - Slack: #cloudeventssdk channel under
   [CNCF's Slack workspace](https://slack.cncf.io/).
+- Email: https://lists.cncf.io/g/cncf-cloudevents-sdk
 - Contact for additional information: Denis Makogon (`@denysmakogon` on slack).
