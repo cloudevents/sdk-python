@@ -37,6 +37,7 @@ def test_event_pipeline_upstream():
     )
     m = marshaller.NewDefaultHTTPMarshaller()
     new_headers, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
+
     assert new_headers is not None
     assert "ce-specversion" in new_headers
     assert "ce-type" in new_headers
@@ -46,6 +47,20 @@ def test_event_pipeline_upstream():
     assert "content-type" in new_headers
     assert isinstance(body, str)
     assert data.body == body
+
+
+def test_extensions_are_set_upstream():
+    extensions = {'extension-key': 'extension-value'}
+    event = (
+        v02.Event()
+        .SetExtensions(extensions)
+    )
+
+    m = marshaller.NewDefaultHTTPMarshaller()
+    new_headers, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
+
+    assert event.Extensions() == extensions
+    assert "ce-extension-key" in new_headers
 
 
 def test_event_pipeline_v01():
