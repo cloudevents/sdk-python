@@ -19,7 +19,7 @@ import typing
 
 # TODO(slinkydeveloper) is this really needed?
 class EventGetterSetter(object):
-    
+
     def CloudEventVersion(self) -> str:
         raise Exception("not implemented")
 
