@@ -17,7 +17,7 @@ import typing
 from cloudevents.sdk import exceptions
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.event import base as event_base
-from cloudevents.sdk.event import v02, v1, v03
+from cloudevents.sdk.event import v02, v03, v1
 
 
 class BinaryHTTPCloudEventConverter(base.Converter):

@@ -24,7 +24,11 @@ class Event(base.BaseEvent):
         self.ce__type = opt.Option("type", None, True)
 
         self.ce__datacontenttype = opt.Option("datacontenttype", None, False)
-        self.ce__datacontentencoding = opt.Option("datacontentencoding", None, False)
+        self.ce__datacontentencoding = opt.Option(
+            "datacontentencoding",
+            None,
+            False
+        )
         self.ce__subject = opt.Option("subject", None, False)
         self.ce__time = opt.Option("time", None, False)
         self.ce__schemaurl = opt.Option("schemaurl", None, False)
