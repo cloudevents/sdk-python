@@ -148,7 +148,7 @@ class BaseEvent(EventGetterSetter):
                 if value is not None:
                     headers["ce-{0}".format(key)] = value
 
-        for key, value in props.get("extensions"):
+        for key, value in props.get("extensions").items():
             headers["ce-{0}".format(key)] = value
 
         data, _ = self.Get("data")
