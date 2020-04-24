@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Added Cloudevents V0.3 and V1 implementations ([#22])
 - Add helpful text to README ([#23])
 - Add link to email in README ([#27])
 
@@ -61,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#15]: https://github.com/cloudevents/sdk-python/pull/15
 [#17]: https://github.com/cloudevents/sdk-python/pull/17
 [#21]: https://github.com/cloudevents/sdk-python/pull/21
+[#22]: https://github.com/cloudevents/sdk-python/pull/22
 [#23]: https://github.com/cloudevents/sdk-python/pull/23
 [#25]: https://github.com/cloudevents/sdk-python/pull/25
 [#27]: https://github.com/cloudevents/sdk-python/pull/27

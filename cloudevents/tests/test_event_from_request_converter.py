@@ -21,6 +21,8 @@ from cloudevents.sdk import marshaller
 
 from cloudevents.sdk.event import v01
 from cloudevents.sdk.event import v02
+from cloudevents.sdk.event import v03
+from cloudevents.sdk.event import v1
 
 from cloudevents.sdk.converters import binary
 from cloudevents.sdk.converters import structured
@@ -28,28 +30,32 @@ from cloudevents.sdk.converters import structured
 from cloudevents.tests import data
 
 
-def test_binary_converter_upstream():
+@pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
+def test_binary_converter_upstream(event_class):
     m = marshaller.NewHTTPMarshaller(
         [binary.NewBinaryHTTPCloudEventConverter()])
-    event = m.FromRequest(v02.Event(), data.headers, None, lambda x: x)
+    event = m.FromRequest(event_class(), data.headers[event_class], None, lambda x: x)
     assert event is not None
-    assert event.Get("type") == (data.ce_type, True)
-    assert event.Get("id") == (data.ce_id, True)
+    assert event.EventType() == data.ce_type
+    assert event.EventID() == data.ce_id
+    assert event.ContentType() == data.contentType
 
 
-def test_structured_converter_upstream():
+@pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
+def test_structured_converter_upstream(event_class):
     m = marshaller.NewHTTPMarshaller(
         [structured.NewJSONHTTPCloudEventConverter()])
     event = m.FromRequest(
-        v02.Event(),
+        event_class(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(json.dumps(data.ce)),
+        io.StringIO(json.dumps(data.json_ce[event_class])),
         lambda x: x.read(),
     )
 
     assert event is not None
-    assert event.Get("type") == (data.ce_type, True)
-    assert event.Get("id") == (data.ce_id, True)
+    assert event.EventType() == data.ce_type
+    assert event.EventID() == data.ce_id
+    assert event.ContentType() == data.contentType
 
 
 def test_binary_converter_v01():
@@ -86,7 +92,7 @@ def test_structured_converter_v01():
     event = m.FromRequest(
         v01.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(json.dumps(data.ce)),
+        io.StringIO(json.dumps(data.json_ce[v02.Event])),
         lambda x: x.read(),
     )
 
@@ -94,33 +100,36 @@ def test_structured_converter_v01():
     assert event.Get("type") == (data.ce_type, True)
     assert event.Get("id") == (data.ce_id, True)
 
-
-def test_default_http_marshaller_with_structured():
+@pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
+def test_default_http_marshaller_with_structured(event_class):
     m = marshaller.NewDefaultHTTPMarshaller()
 
     event = m.FromRequest(
-        v02.Event(),
+        event_class(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(json.dumps(data.ce)),
+        io.StringIO(json.dumps(data.json_ce[event_class])),
         lambda x: x.read(),
     )
     assert event is not None
-    assert event.Get("type") == (data.ce_type, True)
-    assert event.Get("id") == (data.ce_id, True)
+    assert event.EventType() == data.ce_type
+    assert event.EventID() == data.ce_id
+    assert event.ContentType() == data.contentType
 
 
-def test_default_http_marshaller_with_binary():
+@pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
+def test_default_http_marshaller_with_binary(event_class):
     m = marshaller.NewDefaultHTTPMarshaller()
 
     event = m.FromRequest(
-        v02.Event(), data.headers,
+        event_class(), data.headers[event_class],
         io.StringIO(json.dumps(data.body)),
         json.load
     )
     assert event is not None
-    assert event.Get("type") == (data.ce_type, True)
-    assert event.Get("data") == (data.body, True)
-    assert event.Get("id") == (data.ce_id, True)
+    assert event.EventType() == data.ce_type
+    assert event.EventID() == data.ce_id
+    assert event.ContentType() == data.contentType
+    assert event.Data() == data.body
 
 
 def test_unsupported_event_configuration():
@@ -131,7 +140,7 @@ def test_unsupported_event_configuration():
         m.FromRequest,
         v01.Event(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(json.dumps(data.ce)),
+        io.StringIO(json.dumps(data.json_ce[v02.Event])),
         lambda x: x.read(),
     )
 

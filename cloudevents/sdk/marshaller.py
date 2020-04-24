@@ -61,7 +61,9 @@ class HTTPMarshaller(object):
         if not isinstance(data_unmarshaller, typing.Callable):
             raise exceptions.InvalidDataUnmarshaller()
 
-        content_type = headers.get("content-type", headers.get("Content-Type"))
+        # Lower all header keys
+        headers = {key.lower(): value for key, value in headers.items()}
+        content_type = headers.get("content-type", None)
 
         for cnvrtr in self.__converters:
             if cnvrtr.can_read(content_type) and cnvrtr.event_supported(event):

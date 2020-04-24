@@ -14,9 +14,9 @@
 
 import io
 import json
+import pytest
 
-from cloudevents.sdk.event import v01
-from cloudevents.sdk.event import v02
+from cloudevents.sdk.event import v01, v02, v03, v1
 
 from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
@@ -24,10 +24,10 @@ from cloudevents.sdk.converters import structured
 
 from cloudevents.tests import data
 
-
-def test_event_pipeline_upstream():
+@pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
+def test_event_pipeline_upstream(event_class):
     event = (
-        v02.Event()
+        event_class()
         .SetContentType(data.contentType)
         .SetData(data.body)
         .SetEventID(data.ce_id)

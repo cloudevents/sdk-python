@@ -17,7 +17,9 @@ import json
 import typing
 
 
+# TODO(slinkydeveloper) is this really needed?
 class EventGetterSetter(object):
+
     def CloudEventVersion(self) -> str:
         raise Exception("not implemented")
 
@@ -126,16 +128,10 @@ class BaseEvent(EventGetterSetter):
         body: typing.IO,
         data_unmarshaller: typing.Callable
     ):
-        binary_mapping = {
-            "content-type": "contenttype",
-            # TODO(someone): add Distributed Tracing. It's not clear
-            # if this is one extension or two.
-            # https://github.com/cloudevents/spec/blob/master/extensions/distributed-tracing.md
-        }
         for header, value in headers.items():
             header = header.lower()
-            if header in binary_mapping:
-                self.Set(binary_mapping[header], value)
+            if header == "content-type":
+                self.SetContentType(value)
             elif header.startswith("ce-"):
                 self.Set(header[3:], value)
 
