@@ -1,49 +1,35 @@
-Release process
-===============
+# Release process
 
-Run tests on target brunch
---------------------------
+## Run tests on target branch
 
 Steps:
 
     tox
 
-Cut off stable branch
----------------------
+## Cut off stable branch
 
 Steps:
 
     git checkout -b vX.X.X-stable
-    git push origin vX.X.X-stable
 
 
-Create GitHub tag
------------------
+## Create GitHub tag
 
 Steps:
 
-    Releases ---> Draft New Release
-    Name: CloudEvents Python SDK version X.X.X stable release
+    git tag -a X.X.X -m "X.X.X"
 
 
-Collect changes from previous version
--------------------------------------
+## Build distribution package
 
 Steps:
 
-    git log --oneline --decorate
+    rm -rf dist
+    pip install -U setuptools wheel
+    python setup.py sdist bdist_wheel
 
 
-Build distribution package
---------------------------
-
-Steps:
-
-    PBR_VERSION=X.X.X python setup.py sdist bdist_wheel
-
-
-Check install capability for the wheel
---------------------------------------
+## Check install capability for the wheel
 
 Steps:
 
@@ -52,15 +38,23 @@ Steps:
     pip install dist/cloudevents-X.X.X-py3-none-any.whl
 
 
-Submit release to PYPI
-----------------------
+## Submit release to PyPI
 
 Steps:
 
-    twine upload dist/cloudevents-X.X.X-py3-none-any.whl
+    pip install -U twine
+    twine upload dist/*
 
-Verify install capability for the wheel
----------------------------------------
+
+## Push the release to GitHub
+
+Steps:
+
+    git push origin vX.X.X-stable
+    git push --tags
+
+
+## Verify install capability for the wheel
 
 Steps:
 

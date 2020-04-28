@@ -6,6 +6,8 @@ This SDK is still considered a work in progress, therefore things might (and
 will) break with every update.
 
 This SDK current supports the following versions of CloudEvents:
+- v1.0
+- v0.3
 - v0.2
 - v0.1
 
@@ -13,70 +15,97 @@ This SDK current supports the following versions of CloudEvents:
 
 Package **cloudevents** provides primitives to work with CloudEvents specification: https://github.com/cloudevents/spec.
 
-Parsing upstream Event from HTTP Request:
+Parsing upstream structured Event from HTTP request:
+
 ```python
 import io
 
-from cloudevents.sdk.event import v02
+from cloudevents.sdk.event import v1
 from cloudevents.sdk import marshaller
 
 m = marshaller.NewDefaultHTTPMarshaller()
-event = m.FromRequest(
-    v02.Event(),
-    {
-        "content-type": "application/cloudevents+json",
-        "ce-specversion": "0.2",
-        "ce-time": "2018-10-23T12:28:22.4579346Z",
-        "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
-        "ce-source": "<source-url>",
-        "ce-type": "word.found.name",
-    },
-    io.BytesIO(b"this is where your CloudEvent data"), 
-    lambda x: x.read()
-)
 
+event = m.FromRequest(
+    v1.Event(),
+    {"content-type": "application/cloudevents+json"},
+    io.StringIO(
+        """
+        {
+            "specversion": "1.0",
+            "datacontenttype": "application/json",
+            "type": "word.found.name",
+            "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+            "time": "2018-10-23T12:28:22.4579346Z",
+            "source": "<source-url>"
+        }
+        """
+    ),
+    lambda x: x.read(),
+)
+```
+
+Parsing upstream binary Event from HTTP request:
+
+```python
+import io
+
+from cloudevents.sdk.event import v1
+from cloudevents.sdk import marshaller
+
+m = marshaller.NewDefaultHTTPMarshaller()
+
+event = m.FromRequest(
+    v1.Event(),
+    {
+        "ce-specversion": "1.0",
+        "content-type": "application/json",
+        "ce-type": "word.found.name",
+        "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "ce-time": "2018-10-23T12:28:22.4579346Z",
+        "ce-source": "<source-url>",
+    },
+    io.BytesIO(b"this is where your CloudEvent data"),
+    lambda x: x.read(),
+)
 ```
 
 Creating a minimal CloudEvent in version 0.1:
+
 ```python
-from cloudevents.sdk.event import v01
+from cloudevents.sdk.event import v1
 
 event = (
-    v01.Event().
-    SetContentType("application/json").
-    SetData('{"name":"john"}').
-    SetEventID("my-id").
-    SetSource("from-galaxy-far-far-away").
-    SetEventTime("tomorrow").
-    SetEventType("cloudevent.greet.you")
+    v1.Event()
+    .SetContentType("application/json")
+    .SetData('{"name":"john"}')
+    .SetEventID("my-id")
+    .SetSource("from-galaxy-far-far-away")
+    .SetEventTime("tomorrow")
+    .SetEventType("cloudevent.greet.you")
 )
-
 ```
 
 Creating HTTP request from CloudEvent:
+
 ```python
 from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
 from cloudevents.sdk.converters import structured
-from cloudevents.sdk.event import v01
+from cloudevents.sdk.event import v1
 
 event = (
-    v01.Event().
-    SetContentType("application/json").
-    SetData('{"name":"john"}').
-    SetEventID("my-id").
-    SetSource("from-galaxy-far-far-away").
-    SetEventTime("tomorrow").
-    SetEventType("cloudevent.greet.you")
+    v1.Event()
+    .SetContentType("application/json")
+    .SetData('{"name":"john"}')
+    .SetEventID("my-id")
+    .SetSource("from-galaxy-far-far-away")
+    .SetEventTime("tomorrow")
+    .SetEventType("cloudevent.greet.you")
 )
-m = marshaller.NewHTTPMarshaller(
-    [
-        structured.NewJSONHTTPCloudEventConverter()
-    ]
-)
+
+m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
 
 headers, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
-
 ```
 
 ## HOWTOs with various Python HTTP frameworks
@@ -85,7 +114,7 @@ In this topic you'd find various example how to integrate an SDK with various HT
 
 ### Python requests
 
-One of popular framework is [0.2-force-improvements](http://docs.python-requests.org/en/master/).
+One of popular framework is [`requests`](http://docs.python-requests.org/en/master/).
 
 
 #### CloudEvent to request
