@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import typing
 
 from cloudevents.sdk import exceptions
@@ -43,7 +44,7 @@ class HTTPMarshaller(object):
         event: event_base.BaseEvent,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: typing.Callable,
+        data_unmarshaller: event_base.UnmarshallerType = json.load,
     ) -> event_base.BaseEvent:
         """
         Reads a CloudEvent from an HTTP headers and request body
@@ -78,9 +79,9 @@ class HTTPMarshaller(object):
     def ToRequest(
         self,
         event: event_base.BaseEvent,
-        converter_type: str,
-        data_marshaller: typing.Callable,
-    ) -> (dict, typing.IO):
+        converter_type: str = None,
+        data_marshaller: event_base.MarshallerType = None,
+    ) -> (dict, bytes):
         """
         Writes a CloudEvent into a HTTP-ready form of headers and request body
         :param event: CloudEvent
@@ -92,8 +93,12 @@ class HTTPMarshaller(object):
         :return: dict of HTTP headers and stream of HTTP request body
         :rtype: tuple
         """
-        if not isinstance(data_marshaller, typing.Callable):
+        if (data_marshaller is not None
+                and not isinstance(data_marshaller, typing.Callable)):
             raise exceptions.InvalidDataMarshaller()
+
+        if converter_type is None:
+            converter_type = self.__converters[0].TYPE
 
         if converter_type in self.__converters_by_type:
             cnvrtr = self.__converters_by_type[converter_type]

@@ -36,7 +36,7 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         event: event_base.BaseEvent,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: typing.Callable,
+        data_unmarshaller: event_base.UnmarshallerType,
     ) -> event_base.BaseEvent:
         if type(event) not in self.SUPPORTED_VERSIONS:
             raise exceptions.UnsupportedEvent(type(event))
@@ -44,8 +44,10 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         return event
 
     def write(
-        self, event: event_base.BaseEvent, data_marshaller: typing.Callable
-    ) -> (dict, typing.IO):
+        self,
+        event: event_base.BaseEvent,
+        data_marshaller: event_base.MarshallerType
+    ) -> (dict, bytes):
         return event.MarshalBinary(data_marshaller)
 
 

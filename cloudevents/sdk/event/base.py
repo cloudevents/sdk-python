@@ -12,9 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import base64
 import io
 import json
 import typing
+
+# Use consistent types for marshal and unmarshal functions across
+# both JSON and Binary format.
+MarshallerType = typing.Callable[[typing.Any], typing.Union[bytes, str]]
+UnmarshallerType = typing.Callable[[typing.IO], typing.Any]
 
 
 # TODO(slinkydeveloper) is this really needed?
@@ -110,23 +116,41 @@ class BaseEvent(EventGetterSetter):
         exts.update({key: value})
         self.Set("extensions", exts)
 
-    def MarshalJSON(self, data_marshaller: typing.Callable) -> typing.IO:
+    def MarshalJSON(self, data_marshaller: MarshallerType) -> str:
+        if data_marshaller is None:
+            def noop(x):
+                return x
+            data_marshaller = noop
         props = self.Properties()
-        props["data"] = data_marshaller(props.get("data"))
-        return io.BytesIO(json.dumps(props).encode("utf-8"))
+        data = ""
+        if "data" in props:
+            data = data_marshaller(props.get("data"))
+            del props["data"]
+        if isinstance(data, bytes):
+            props["data_base64"] = base64.b64encode(data).decode("ascii")
+        else:
+            props["data"] = data
+        return json.dumps(props)
 
-    def UnmarshalJSON(self, b: typing.IO, data_unmarshaller: typing.Callable):
+    def UnmarshalJSON(
+        self,
+        b: typing.IO,
+        data_unmarshaller: UnmarshallerType
+    ):
         raw_ce = json.load(b)
         for name, value in raw_ce.items():
             if name == "data":
-                value = data_unmarshaller(value)
+                value = data_unmarshaller(io.StringIO(value))
+            if name == "data_base64":
+                value = data_unmarshaller(io.BytesIO(base64.b64decode(value)))
+                name = "data"
             self.Set(name, value)
 
     def UnmarshalBinary(
         self,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: typing.Callable
+        data_unmarshaller: UnmarshallerType
     ):
         for header, value in headers.items():
             header = header.lower()
@@ -139,8 +163,10 @@ class BaseEvent(EventGetterSetter):
 
     def MarshalBinary(
             self,
-            data_marshaller: typing.Callable
-    ) -> (dict, object):
+            data_marshaller: MarshallerType
+    ) -> (dict, bytes):
+        if data_marshaller is None:
+            data_marshaller = json.dumps
         headers = {}
         if self.ContentType():
             headers["content-type"] = self.ContentType()
@@ -154,4 +180,7 @@ class BaseEvent(EventGetterSetter):
             headers["ce-{0}".format(key)] = value
 
         data, _ = self.Get("data")
-        return headers, data_marshaller(data)
+        data = data_marshaller(data)
+        if isinstance(data, str):  # Convenience method for json.dumps
+            data = data.encode("utf-8")
+        return headers, data

@@ -34,7 +34,8 @@ from cloudevents.tests import data
 def test_binary_converter_upstream(event_class):
     m = marshaller.NewHTTPMarshaller(
         [binary.NewBinaryHTTPCloudEventConverter()])
-    event = m.FromRequest(event_class(), data.headers[event_class], None, lambda x: x)
+    event = m.FromRequest(
+        event_class(), data.headers[event_class], None, lambda x: x)
     assert event is not None
     assert event.EventType() == data.ce_type
     assert event.EventID() == data.ce_id
@@ -100,6 +101,7 @@ def test_structured_converter_v01():
     assert event.Get("type") == (data.ce_type, True)
     assert event.Get("id") == (data.ce_id, True)
 
+
 @pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
 def test_default_http_marshaller_with_structured(event_class):
     m = marshaller.NewDefaultHTTPMarshaller()
@@ -147,15 +149,11 @@ def test_unsupported_event_configuration():
 
 def test_invalid_data_unmarshaller():
     m = marshaller.NewDefaultHTTPMarshaller()
-    pytest.raises(
-        exceptions.InvalidDataUnmarshaller,
-        m.FromRequest,
-        v01.Event(), {}, None, None
-    )
+    with pytest.raises(exceptions.InvalidDataUnmarshaller):
+        m.FromRequest(v01.Event(), {}, None, "string")
 
 
 def test_invalid_data_marshaller():
     m = marshaller.NewDefaultHTTPMarshaller()
-    pytest.raises(
-        exceptions.InvalidDataMarshaller, m.ToRequest, v01.Event(), "blah", None
-    )
+    with pytest.raises(exceptions.InvalidDataMarshaller):
+        m.ToRequest(v01.Event(), "blah", "string")

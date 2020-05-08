@@ -129,7 +129,7 @@ def run_binary(event, url):
     print("binary CloudEvent")
     for k, v in binary_headers.items():
         print("{0}: {1}\r\n".format(k, v))
-    print(binary_data.getvalue())
+    print(binary_data)
     response = requests.post(url,
                              headers=binary_headers,
                              data=binary_data.getvalue())
@@ -138,14 +138,14 @@ def run_binary(event, url):
 
 def run_structured(event, url):
     structured_headers, structured_data = http_marshaller.ToRequest(
-        event, converters.TypeStructured, json.dumps
-    )
+        event, converters.TypeStructured, json.dumps)
+
     print("structured CloudEvent")
-    print(structured_data.getvalue())
+    print(structured_data.decode("utf-8"))
 
     response = requests.post(url,
                              headers=structured_headers,
-                             data=structured_data.getvalue())
+                             data=structured_data)
     response.raise_for_status()
 
 ```
@@ -163,7 +163,7 @@ The code below shows how integrate both libraries in order to create a CloudEven
     event = v02.Event()
     http_marshaller = marshaller.NewDefaultHTTPMarshaller()
     event = http_marshaller.FromRequest(
-        event, headers, data, json.load)
+        event, headers, data)
 
 ```
 Complete example of turning a CloudEvent into a request you can find [here](samples/python-requests/request_to_cloudevent.py).

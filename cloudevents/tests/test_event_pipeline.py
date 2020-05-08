@@ -45,8 +45,8 @@ def test_event_pipeline_upstream(event_class):
     assert "ce-id" in new_headers
     assert "ce-time" in new_headers
     assert "content-type" in new_headers
-    assert isinstance(body, str)
-    assert data.body == body
+    assert isinstance(body, bytes)
+    assert data.body == body.decode("utf-8")
 
 
 def test_extensions_are_set_upstream():
@@ -76,8 +76,8 @@ def test_event_pipeline_v01():
     m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
 
     _, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
-    assert isinstance(body, io.BytesIO)
-    new_headers = json.load(io.TextIOWrapper(body, encoding="utf-8"))
+    assert isinstance(body, bytes)
+    new_headers = json.loads(body)
     assert new_headers is not None
     assert "cloudEventsVersion" in new_headers
     assert "eventType" in new_headers
@@ -86,3 +86,41 @@ def test_event_pipeline_v01():
     assert "eventTime" in new_headers
     assert "contentType" in new_headers
     assert data.body == new_headers["data"]
+
+def test_binary_event_v1():
+    event = (
+        v1.Event()
+        .SetContentType("application/octet-stream")
+        .SetData(b'\x00\x01')
+    )
+    m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
+
+    _, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
+    assert isinstance(body, bytes)
+    content = json.loads(body)
+    assert "data" not in content
+    assert content["data_base64"] == "AAE=", f"Content is: {content}"
+
+def test_object_event_v1():
+    event = (
+        v1.Event()
+        .SetContentType("application/json")
+        .SetData({"name": "john"})
+    )
+
+    m = marshaller.NewDefaultHTTPMarshaller()
+
+    _, structuredBody = m.ToRequest(event)
+    assert isinstance(structuredBody, bytes)
+    structuredObj = json.loads(structuredBody)
+    errorMsg = f"Body was {structuredBody}, obj is {structuredObj}"
+    assert isinstance(structuredObj, dict), errorMsg
+    assert isinstance(structuredObj["data"], dict), errorMsg
+    assert len(structuredObj["data"]) == 1, errorMsg
+    assert structuredObj["data"]["name"] == "john", errorMsg
+
+    headers, binaryBody = m.ToRequest(event, converters.TypeBinary)
+    assert isinstance(headers, dict)
+    assert isinstance(binaryBody, bytes)
+    assert headers["content-type"] == "application/json"
+    assert binaryBody == b'{"name": "john"}', f"Binary is {binaryBody!r}"
