@@ -33,29 +33,72 @@ _ce_optional_fields = {
 
 
 # TODO(slinkydeveloper) is this really needed?
-class EventGetterSetter(object):
-
+class EventGetterSetter(object):    
+    
+    # ce-specversion
     def CloudEventVersion(self) -> str:
         raise Exception("not implemented")
 
-    # CloudEvent attribute getters
+    def SetCloudEventVersion(self, specversion: str) -> object:
+        raise Exception("not implemented")
+
+    @property
+    def specversion(self):
+        return self.CloudEventVersion()
+
+    @specversion.setter
+    def specversion(self, value: str):
+        self.SetCloudEventVersion(value)
+    
+    # ce-type
     def EventType(self) -> str:
         raise Exception("not implemented")
 
+    def SetEventType(self, eventType: str) -> object:
+        raise Exception("not implemented")
+
+    @property 
+    def type(self):
+        return self.EventType()
+
+    # ce-source
     def Source(self) -> str:
         raise Exception("not implemented")
 
+    @property
+    def source(self):
+        return self.Source()
+    
+    # ce-id
     def EventID(self) -> str:
         raise Exception("not implemented")
 
+    @property
+    def id(self):
+        return self.EventId()
+    
+    # ce-time
     def EventTime(self) -> str:
         raise Exception("not implemented")
 
+    @property
+    def time(self):
+        return self.EventTime()
+    
+    # ce-schema
     def SchemaURL(self) -> str:
         raise Exception("not implemented")
 
+    @property
+    def schema(self) -> str:
+        return self.SchemaURL()
+    
     def Data(self) -> object:
         raise Exception("not implemented")
+
+    @property
+    def data(self) -> obbject:
+        return self.Data()
 
     def Extensions(self) -> dict:
         raise Exception("not implemented")
@@ -66,11 +109,8 @@ class EventGetterSetter(object):
     # CloudEvent attribute constructors
     # Each setter return an instance of its class
     #      in order to build a pipeline of setter
-    def SetCloudEventVersion(self, specversion: str) -> object:
-        raise Exception("not implemented")
 
-    def SetEventType(self, eventType: str) -> object:
-        raise Exception("not implemented")
+
 
     def SetSource(self, source: str) -> object:
         raise Exception("not implemented")
