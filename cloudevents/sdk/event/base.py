@@ -66,6 +66,9 @@ class EventGetterSetter(object):
     # CloudEvent attribute constructors
     # Each setter return an instance of its class
     #      in order to build a pipeline of setter
+    def SetCloudEventVersion(self, specversion: str) -> object:
+        raise Exception("not implemented")
+
     def SetEventType(self, eventType: str) -> object:
         raise Exception("not implemented")
 
