@@ -39,12 +39,12 @@ class EventGetterSetter(object):
     def CloudEventVersion(self) -> str:
         raise Exception("not implemented")
 
-    def SetCloudEventVersion(self, specversion: str) -> object:
-        raise Exception("not implemented")
-
     @property
     def specversion(self):
         return self.CloudEventVersion()
+
+    def SetCloudEventVersion(self, specversion: str) -> object:
+        raise Exception("not implemented")
 
     @specversion.setter
     def specversion(self, value: str):
@@ -54,12 +54,16 @@ class EventGetterSetter(object):
     def EventType(self) -> str:
         raise Exception("not implemented")
 
-    def SetEventType(self, eventType: str) -> object:
-        raise Exception("not implemented")
-
     @property 
     def type(self):
         return self.EventType()
+
+    def SetEventType(self, eventType: str) -> object:
+        raise Exception("not implemented")
+
+    @type.setter
+    def type(self, value: str):
+        self.SetEventType(value)
 
     # ce-source
     def Source(self) -> str:
@@ -68,6 +72,13 @@ class EventGetterSetter(object):
     @property
     def source(self):
         return self.Source()
+
+    def SetSource(self, source: str) -> object:
+        raise Exception("not implemented")
+
+    @source.setter
+    def source(self, value: str):
+        self.SetSource(value)
     
     # ce-id
     def EventID(self) -> str:
@@ -76,6 +87,13 @@ class EventGetterSetter(object):
     @property
     def id(self):
         return self.EventId()
+
+    def SetEventID(self, eventID: str) -> object:
+        raise Exception("not implemented")
+
+    @id.setter
+    def id(self, value: str):
+        self.SetEventID(value)
     
     # ce-time
     def EventTime(self) -> str:
@@ -84,6 +102,13 @@ class EventGetterSetter(object):
     @property
     def time(self):
         return self.EventTime()
+
+    def SetEventTime(self, eventTime: str) -> object:
+        raise Exception("not implemented")
+
+    @time.setter
+    def time(self, value: str):
+        self.SetEventTime(value)
     
     # ce-schema
     def SchemaURL(self) -> str:
@@ -92,46 +117,59 @@ class EventGetterSetter(object):
     @property
     def schema(self) -> str:
         return self.SchemaURL()
-    
-    def Data(self) -> object:
-        raise Exception("not implemented")
-
-    @property
-    def data(self) -> obbject:
-        return self.Data()
-
-    def Extensions(self) -> dict:
-        raise Exception("not implemented")
-
-    def ContentType(self) -> str:
-        raise Exception("not implemented")
-
-    # CloudEvent attribute constructors
-    # Each setter return an instance of its class
-    #      in order to build a pipeline of setter
-
-
-
-    def SetSource(self, source: str) -> object:
-        raise Exception("not implemented")
-
-    def SetEventID(self, eventID: str) -> object:
-        raise Exception("not implemented")
-
-    def SetEventTime(self, eventTime: str) -> object:
-        raise Exception("not implemented")
 
     def SetSchemaURL(self, schemaURL: str) -> object:
         raise Exception("not implemented")
 
+    @schema.setter
+    def schema(self, value: str):
+        self.SetSchemaURL(value)
+    
+    # data
+    def Data(self) -> object:
+        raise Exception("not implemented")
+
+    @property
+    def data(self) -> object:
+        return self.Data()
+
     def SetData(self, data: object) -> object:
         raise Exception("not implemented")
+    
+    @data.setter
+    def data(self, value: object):
+        self.SetData(value)
+
+    
+    def Extensions(self) -> dict:
+        raise Exception("not implemented")
+
+    # ce-extensions
+    @property
+    def extensions(self) -> dict:
+        return self.Extensions()
 
     def SetExtensions(self, extensions: dict) -> object:
         raise Exception("not implemented")
+    
+    @extensions.setter
+    def extensions(self, value: dict):
+        self.SetExtensions(value)
+
+    # Content-Type
+    def ContentType(self) -> str:
+        raise Exception("not implemented")
+    
+    @property
+    def content_type(self) -> str:
+        return self.ContentType()
 
     def SetContentType(self, contentType: str) -> object:
         raise Exception("not implemented")
+    
+    @content_type.setter
+    def content_type(self, value: str):
+        self.SetContentType(value)
 
 
 class BaseEvent(EventGetterSetter):
