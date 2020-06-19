@@ -200,7 +200,6 @@ class BaseEvent(EventGetterSetter):
             attr.set(value)
             setattr(self, formatted_key, attr)
             return
-
         exts = self.Extensions()
         exts.update({key: value})
         self.Set("extensions", exts)

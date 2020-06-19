@@ -56,17 +56,20 @@ def test_general_binary_properties(event_class):
     new_id = str(uuid4())
     new_content_type = str(uuid4())
     new_source = str(uuid4())
-
+    
+    event.extensions = {'test': str(uuid4)}
     event.type = new_type
     event.id = new_id
     event.content_type = new_content_type
     event.source = new_source
 
     assert event is not None
-    assert event.type == new_type
-    assert event.id == new_id
-    assert event.content_type == new_content_type
-    assert event.source == new_source
+    assert (event.type == new_type) and (event.type == event.EventType())
+    assert (event.id == new_id) and (event.id == event.EventID())
+    assert (event.content_type == new_content_type) and (event.content_type == event.ContentType())
+    assert (event.source == new_source) and (event.source == event.Source())
+    assert event.extensions['test'] == event.Extensions()['test']
+    assert (event.specversion == event.CloudEventVersion())
 
 
 @pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
@@ -97,13 +100,16 @@ def test_general_structured_properties(event_class):
     new_content_type = str(uuid4())
     new_source = str(uuid4())
 
+    event.extensions = {'test': str(uuid4)}
     event.type = new_type
     event.id = new_id
     event.content_type = new_content_type
     event.source = new_source
-
+    
     assert event is not None
-    assert event.type == new_type
-    assert event.id == new_id
-    assert event.content_type == new_content_type
-    assert event.source == new_source
+    assert (event.type == new_type) and (event.type == event.EventType())
+    assert (event.id == new_id) and (event.id == event.EventID())
+    assert (event.content_type == new_content_type) and (event.content_type == event.ContentType())
+    assert (event.source == new_source) and (event.source == event.Source())
+    assert event.extensions['test'] == event.Extensions()['test']
+    assert (event.specversion == event.CloudEventVersion())
