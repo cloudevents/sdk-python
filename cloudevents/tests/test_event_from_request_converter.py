@@ -33,7 +33,11 @@ def test_binary_converter_upstream(event_class):
     m = marshaller.NewHTTPMarshaller(
         [binary.NewBinaryHTTPCloudEventConverter()])
     event = m.FromRequest(
-        event_class(), data.headers[event_class], None, lambda x: x)
+        event_class(),
+        data.headers[event_class],
+        None,
+        lambda x: x
+    )
     assert event is not None
     assert event.EventType() == data.ce_type
     assert event.EventID() == data.ce_id
