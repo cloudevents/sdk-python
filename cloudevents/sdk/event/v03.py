@@ -71,7 +71,6 @@ class Event(base.BaseEvent):
     @property
     def datacontentencoding(self):
         return self.ContentEncoding()
-    
 
     def SetEventType(self, eventType: str) -> base.BaseEvent:
         self.Set("type", eventType)
