@@ -19,7 +19,7 @@ import sys
 from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
 
-from cloudevents.sdk.event import v02
+from cloudevents.sdk.event import v1
 
 
 def run_binary(event, url):
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     http_marshaller = marshaller.NewDefaultHTTPMarshaller()
     event = (
-        v02.Event().
+        v1.Event().
         SetContentType("application/json").
         SetData({"name": "denis"}).
         SetEventID("my-id").
