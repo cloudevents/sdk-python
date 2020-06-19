@@ -86,7 +86,7 @@ class EventGetterSetter(object):
 
     @property
     def id(self):
-        return self.EventId()
+        return self.EventID()
 
     def SetEventID(self, eventID: str) -> object:
         raise Exception("not implemented")

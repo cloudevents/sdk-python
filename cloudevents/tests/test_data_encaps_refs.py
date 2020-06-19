@@ -17,6 +17,8 @@ import json
 import copy
 import pytest
 
+from uuid import uuid4
+
 from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
 
@@ -29,7 +31,7 @@ from cloudevents.tests import data
 
 
 @pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
-def test_general_binary_getters(event_class):
+def test_general_binary_properties(event_class):
     m = marshaller.NewDefaultHTTPMarshaller()
     event = m.FromRequest(
         event_class(),
@@ -37,26 +39,45 @@ def test_general_binary_getters(event_class):
         io.StringIO(json.dumps(data.json_ce[event_class])),
         lambda x: x.read(),
     )
+    
+    new_headers, _ = m.ToRequest(event, converters.TypeBinary, lambda x: x)
+    assert new_headers is not None
+    assert "ce-specversion" in new_headers
 
+    # Test properties
     assert event is not None
     assert event.type == data.ce_type
     assert event.id == data.ce_id
     assert event.content_type == data.contentType
     assert event.source == data.source
 
-    new_headers, _ = m.ToRequest(event, converters.TypeBinary, lambda x: x)
-    assert new_headers is not None
-    assert "ce-specversion" in new_headers
+    # Test setters
+    new_type = str(uuid4())
+    new_id = str(uuid4())
+    new_content_type = str(uuid4())
+    new_source = str(uuid4())
+
+    event.type = new_type
+    event.id = new_id
+    event.content_type = new_content_type
+    event.source = new_source
+
+    assert event is not None
+    assert event.type == new_type
+    assert event.id == new_id
+    assert event.content_type == new_content_type
+    assert event.source == new_source
 
 
 @pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
-def test_general_structured_getters(event_class):
+def test_general_structured_properties(event_class):
     copy_of_ce = copy.deepcopy(data.json_ce[event_class])
     m = marshaller.NewDefaultHTTPMarshaller()
     http_headers = {"content-type": "application/cloudevents+json"}
     event = m.FromRequest(
         event_class(), http_headers, io.StringIO(json.dumps(data.json_ce[event_class])), lambda x: x.read()
     )
+    # Test python properties
     assert event is not None
     assert event.type == data.ce_type
     assert event.id == data.ce_id
@@ -69,3 +90,20 @@ def test_general_structured_getters(event_class):
             assert new_headers[key] == http_headers[key]
             continue
         assert key in copy_of_ce
+
+    # Test setters
+    new_type = str(uuid4())
+    new_id = str(uuid4())
+    new_content_type = str(uuid4())
+    new_source = str(uuid4())
+
+    event.type = new_type
+    event.id = new_id
+    event.content_type = new_content_type
+    event.source = new_source
+
+    assert event is not None
+    assert event.type == new_type
+    assert event.id == new_id
+    assert event.content_type == new_content_type
+    assert event.source == new_source
