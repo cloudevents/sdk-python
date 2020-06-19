@@ -68,6 +68,11 @@ class Event(base.BaseEvent):
     def ContentEncoding(self) -> str:
         return self.ce__datacontentencoding.get()
 
+    @property
+    def datacontentencoding(self):
+        return self.ContentEncoding()
+    
+
     def SetEventType(self, eventType: str) -> base.BaseEvent:
         self.Set("type", eventType)
         return self
@@ -107,3 +112,7 @@ class Event(base.BaseEvent):
     def SetContentEncoding(self, contentEncoding: str) -> base.BaseEvent:
         self.Set("datacontentencoding", contentEncoding)
         return self
+
+    @datacontentencoding.setter
+    def datacontentencoding(self, value: str):
+        self.SetContentEncoding(value)
