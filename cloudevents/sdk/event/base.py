@@ -33,8 +33,8 @@ _ce_optional_fields = {
 
 
 # TODO(slinkydeveloper) is this really needed?
-class EventGetterSetter(object):    
-    
+class EventGetterSetter(object):
+
     # ce-specversion
     def CloudEventVersion(self) -> str:
         raise Exception("not implemented")
@@ -49,12 +49,12 @@ class EventGetterSetter(object):
     @specversion.setter
     def specversion(self, value: str):
         self.SetCloudEventVersion(value)
-    
+
     # ce-type
     def EventType(self) -> str:
         raise Exception("not implemented")
 
-    @property 
+    @property
     def type(self):
         return self.EventType()
 
@@ -79,7 +79,7 @@ class EventGetterSetter(object):
     @source.setter
     def source(self, value: str):
         self.SetSource(value)
-    
+
     # ce-id
     def EventID(self) -> str:
         raise Exception("not implemented")
@@ -94,7 +94,7 @@ class EventGetterSetter(object):
     @id.setter
     def id(self, value: str):
         self.SetEventID(value)
-    
+
     # ce-time
     def EventTime(self) -> str:
         raise Exception("not implemented")
@@ -109,7 +109,7 @@ class EventGetterSetter(object):
     @time.setter
     def time(self, value: str):
         self.SetEventTime(value)
-    
+
     # ce-schema
     def SchemaURL(self) -> str:
         raise Exception("not implemented")
@@ -124,7 +124,7 @@ class EventGetterSetter(object):
     @schema.setter
     def schema(self, value: str):
         self.SetSchemaURL(value)
-    
+
     # data
     def Data(self) -> object:
         raise Exception("not implemented")
@@ -135,23 +135,22 @@ class EventGetterSetter(object):
 
     def SetData(self, data: object) -> object:
         raise Exception("not implemented")
-    
+
     @data.setter
     def data(self, value: object):
         self.SetData(value)
 
-    
+    # ce-extensions
     def Extensions(self) -> dict:
         raise Exception("not implemented")
 
-    # ce-extensions
     @property
     def extensions(self) -> dict:
         return self.Extensions()
 
     def SetExtensions(self, extensions: dict) -> object:
         raise Exception("not implemented")
-    
+
     @extensions.setter
     def extensions(self, value: dict):
         self.SetExtensions(value)
@@ -159,14 +158,14 @@ class EventGetterSetter(object):
     # Content-Type
     def ContentType(self) -> str:
         raise Exception("not implemented")
-    
+
     @property
     def content_type(self) -> str:
         return self.ContentType()
 
     def SetContentType(self, contentType: str) -> object:
         raise Exception("not implemented")
-    
+
     @content_type.setter
     def content_type(self, value: str):
         self.SetContentType(value)
