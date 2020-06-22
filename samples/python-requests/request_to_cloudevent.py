@@ -19,7 +19,7 @@ import sys
 
 from cloudevents.sdk import marshaller
 
-from cloudevents.sdk.event import v02
+from cloudevents.sdk.event import v1
 
 
 if __name__ == "__main__":
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     response.raise_for_status()
     headers = response.headers
     data = io.BytesIO(response.content)
-    event = v02.Event()
+    event = v1.Event()
     http_marshaller = marshaller.NewDefaultHTTPMarshaller()
     event = http_marshaller.FromRequest(
         event, headers, data, json.load)
