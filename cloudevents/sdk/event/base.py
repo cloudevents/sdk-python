@@ -16,6 +16,21 @@ import io
 import json
 import typing
 
+_ce_required_fields = {
+    'id',
+    'source',
+    'type',
+    'specversion'
+}
+
+
+_ce_optional_fields = {
+    'datacontenttype',
+    'schema',
+    'subject',
+    'time'
+}
+
 
 # TODO(slinkydeveloper) is this really needed?
 class EventGetterSetter(object):
@@ -117,6 +132,7 @@ class BaseEvent(EventGetterSetter):
 
     def UnmarshalJSON(self, b: typing.IO, data_unmarshaller: typing.Callable):
         raw_ce = json.load(b)
+
         for name, value in raw_ce.items():
             if name == "data":
                 value = data_unmarshaller(value)
@@ -134,7 +150,6 @@ class BaseEvent(EventGetterSetter):
                 self.SetContentType(value)
             elif header.startswith("ce-"):
                 self.Set(header[3:], value)
-
         self.Set("data", data_unmarshaller(body))
 
     def MarshalBinary(

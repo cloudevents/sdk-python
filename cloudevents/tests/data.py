@@ -23,7 +23,7 @@ body = '{"name":"john"}'
 
 headers = {
     v03.Event: {
-        "ce-specversion": "0.3",
+        "ce-specversion": "1.0",
         "ce-type": ce_type,
         "ce-id": ce_id,
         "ce-time": eventTime,
@@ -42,7 +42,7 @@ headers = {
 
 json_ce = {
     v03.Event: {
-        "specversion": "0.3",
+        "specversion": "1.0",
         "type": ce_type,
         "id": ce_id,
         "time": eventTime,
