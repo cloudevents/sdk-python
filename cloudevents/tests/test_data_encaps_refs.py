@@ -23,14 +23,13 @@ from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
 
 from cloudevents.sdk.converters import structured
-from cloudevents.sdk.event import v01, v02, v03, v1
-from cloudevents.sdk.event import v02
+from cloudevents.sdk.event import v03, v1
 
 
 from cloudevents.tests import data
 
 
-@pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
+@pytest.mark.parametrize("event_class", [ v03.Event, v1.Event])
 def test_general_binary_properties(event_class):
     m = marshaller.NewDefaultHTTPMarshaller()
     event = m.FromRequest(
@@ -72,7 +71,7 @@ def test_general_binary_properties(event_class):
     assert (event.specversion == event.CloudEventVersion())
 
 
-@pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
+@pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
 def test_general_structured_properties(event_class):
     copy_of_ce = copy.deepcopy(data.json_ce[event_class])
     m = marshaller.NewDefaultHTTPMarshaller()
