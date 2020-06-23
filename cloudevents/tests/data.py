@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.sdk.event import v02, v03, v1
+from cloudevents.sdk.event import v03, v1
 
 contentType = "application/json"
 ce_type = "word.found.exclamation"
@@ -22,16 +22,8 @@ eventTime = "2018-10-23T12:28:23.3464579Z"
 body = '{"name":"john"}'
 
 headers = {
-    v02.Event: {
-        "ce-specversion": "0.2",
-        "ce-type": ce_type,
-        "ce-id": ce_id,
-        "ce-time": eventTime,
-        "ce-source": source,
-        "Content-Type": contentType,
-    },
     v03.Event: {
-        "ce-specversion": "0.3",
+        "ce-specversion": "1.0",
         "ce-type": ce_type,
         "ce-id": ce_id,
         "ce-time": eventTime,
@@ -49,16 +41,8 @@ headers = {
 }
 
 json_ce = {
-    v02.Event: {
-        "specversion": "0.2",
-        "type": ce_type,
-        "id": ce_id,
-        "time": eventTime,
-        "source": source,
-        "contenttype": contentType,
-    },
     v03.Event: {
-        "specversion": "0.3",
+        "specversion": "1.0",
         "type": ce_type,
         "id": ce_id,
         "time": eventTime,

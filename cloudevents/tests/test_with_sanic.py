@@ -14,7 +14,7 @@
 
 from cloudevents.sdk import marshaller
 from cloudevents.sdk import converters
-from cloudevents.sdk.event import v02
+from cloudevents.sdk.event import v1
 
 from sanic import Sanic
 from sanic import response
@@ -29,7 +29,7 @@ app = Sanic(__name__)
 @app.route("/is-ok", ["POST"])
 async def is_ok(request):
     m.FromRequest(
-        v02.Event(),
+        v1.Event(),
         dict(request.headers),
         request.body,
         lambda x: x
@@ -40,7 +40,7 @@ async def is_ok(request):
 @app.route("/echo", ["POST"])
 async def echo(request):
     event = m.FromRequest(
-        v02.Event(),
+        v1.Event(),
         dict(request.headers),
         request.body,
         lambda x: x
@@ -50,28 +50,29 @@ async def echo(request):
 
 
 def test_reusable_marshaller():
-    for i in range(10):
+    for _ in range(10):
         _, r = app.test_client.post(
-            "/is-ok", headers=test_data.headers[v02.Event], data=test_data.body
+            "/is-ok", headers=test_data.headers[v1.Event], data=test_data.body
         )
         assert r.status == 200
 
 
 def test_web_app_integration():
     _, r = app.test_client.post(
-        "/is-ok", headers=test_data.headers[v02.Event], data=test_data.body
+        "/is-ok", headers=test_data.headers[v1.Event], data=test_data.body
     )
     assert r.status == 200
 
 
 def test_web_app_echo():
-    _, r = app.test_client.post("/echo", headers=test_data.headers[v02.Event], data=test_data.body)
+    _, r = app.test_client.post(
+        "/echo", headers=test_data.headers[v1.Event], data=test_data.body)
     assert r.status == 200
-    event = m.FromRequest(v02.Event(), dict(r.headers), r.body, lambda x: x)
+    event = m.FromRequest(v1.Event(), dict(r.headers), r.body, lambda x: x)
     assert event is not None
     props = event.Properties()
-    for key in test_data.headers[v02.Event].keys():
+    for key in test_data.headers[v1.Event].keys():
         if key == "Content-Type":
-            assert "contenttype" in props
+            assert "datacontenttype" in props
         else:
             assert key.lstrip("ce-") in props

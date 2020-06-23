@@ -1,9 +1,10 @@
-- Link to issue this resolves
+Fixes #<issuelink>
 
-- What I did
+## Changes
 
-- How I did it
 
-- How to verify it
+## One line description for the changelog
 
-- One line description for the changelog
+
+- [ ] Tests pass
+- [ ] Appropriate changes to README are included in PR
