@@ -101,6 +101,7 @@ def test_emit_binary_event(specversion):
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
 def test_missing_ce_prefix_binary_event(specversion):
+    prefixed_headers = {}
     headers = {
         "ce-id": "my-id",
         "ce-source": "<event-source>",
@@ -108,16 +109,16 @@ def test_missing_ce_prefix_binary_event(specversion):
         "ce-specversion": specversion
     }
     for key in headers:
-        val = headers.pop(key)
-
+        
         # breaking prefix e.g. e-id instead of ce-id
-        headers[key[1:]] = val
+        prefixed_headers[key[1:]] = headers[key]
+        
         with pytest.raises((TypeError, NotImplementedError)):
             # CloudEvent constructor throws TypeError if missing required field
             # and NotImplementedError because structured calls aren't
             # implemented. In this instance one of the required keys should have
             # prefix e-id instead of ce-id therefore it should throw
-            _ = CloudEvent(headers, test_data)
+            _ = CloudEvent(prefixed_headers, test_data)
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
