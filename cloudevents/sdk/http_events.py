@@ -18,7 +18,6 @@ import typing
 
 from cloudevents.sdk import marshaller
 
-from cloudevents.sdk.event import base
 from cloudevents.sdk.event import v03, v1
 
 
@@ -54,41 +53,46 @@ class CloudEvent():
         """
         headers = {key.lower(): value for key, value in headers.items()}
         data = {key.lower(): value for key, value in data.items()}
+
+        # returns an event class depending on proper version
         event_version = CloudEvent.detect_event_version(headers, data)
-        if CloudEvent.is_binary_cloud_event(headers):
 
-            # Headers validation for binary events
-            for field in base._ce_required_fields:
-                ce_prefixed_field = f"ce-{field}"
+        isbinary = CloudEvent.is_binary_cloud_event(event_version, headers)
 
-                # Verify field exists else throw TypeError
-                if ce_prefixed_field not in headers:
-                    raise TypeError(
-                        "parameter headers has no required attribute {0}"
-                        .format(
-                            ce_prefixed_field
-                        ))
+        # Headers validation for binary events
+        for field in event_version._ce_required_fields:
 
-                if not isinstance(headers[ce_prefixed_field], str):
-                    raise TypeError(
-                        "in parameter headers attribute "
-                        "{0} expected type str but found type {1}".format(
-                            ce_prefixed_field, type(headers[ce_prefixed_field])
-                        ))
+            # prefixes with ce- if this is a binary event
+            fieldname = CloudEvent.field_name_modifier(field, isbinary)
 
-            for field in base._ce_optional_fields:
-                ce_prefixed_field = f"ce-{field}"
-                if ce_prefixed_field in headers and not \
-                        isinstance(headers[ce_prefixed_field], str):
-                    raise TypeError(
-                        "in parameter headers attribute "
-                        "{0} expected type str but found type {1}".format(
-                            ce_prefixed_field, type(headers[ce_prefixed_field])
-                        ))
+            # fields_refs holds a reference to where fields should be
+            fields_refs = headers if isbinary else data
 
-        else:
-            # TODO: Support structured CloudEvents
-            raise NotImplementedError
+            fields_refs_name = 'headers' if isbinary else 'data'
+
+            # Verify field exists else throw TypeError
+            if fieldname not in fields_refs:
+                raise TypeError(
+                    f"parameter {fields_refs_name} has no required "
+                    f"attribute {fieldname}."
+                )
+
+            if not isinstance(fields_refs[fieldname], str):
+                raise TypeError(
+                    f"in parameter {fields_refs_name}, {fieldname} "
+                    f"expected type str but found type "
+                    f"{type(fields_refs[fieldname])}."
+                )
+
+        for field in event_version._ce_optional_fields:
+            fieldname = CloudEvent.field_name_modifier(field, isbinary)
+            if (fieldname in fields_refs) and not \
+                    isinstance(fields_refs[fieldname], str):
+                raise TypeError(
+                    f"in parameter {fields_refs_name}, {fieldname} "
+                    f"expected type str but found type "
+                    f"{type(fields_refs[fieldname])}."
+                )
 
         self.headers = copy.deepcopy(headers)
         self.data = copy.deepcopy(data)
@@ -102,8 +106,8 @@ class CloudEvent():
         )
 
     @staticmethod
-    def is_binary_cloud_event(headers):
-        for field in base._ce_required_fields:
+    def is_binary_cloud_event(event_handler, headers):
+        for field in event_handler._ce_required_fields:
             if f"ce-{field}" not in headers:
                 return False
         return True
@@ -123,6 +127,10 @@ class CloudEvent():
         else:
             raise TypeError(f"specversion {specversion} "
                             "currently unsupported")
+
+    @staticmethod
+    def field_name_modifier(field, isbinary):
+        return f"ce-{field}" if isbinary else field
 
     def __repr__(self):
         return json.dumps(
