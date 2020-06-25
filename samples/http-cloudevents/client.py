@@ -35,7 +35,10 @@ def send_binary_cloud_event(url):
 
     # send and print event
     requests.post(url, headers=event.headers, json=event.data)
-    print(f"Sent binary event {event}")
+    print(
+        f"Sent {event['ce-id']} from {event['ce-source']} with "
+        f"{event['data']}"
+    )
 
 
 def send_structured_cloud_event(url):
@@ -57,7 +60,10 @@ def send_structured_cloud_event(url):
 
     # send and print event
     requests.post(url, headers=event.headers, json=event.data)
-    print(f"Sent structured event {event}")
+    print(
+        f"Sent {event['ce-id']} from {event['ce-source']} with "
+        f"{event['data']}"
+    )
 
 if __name__ == "__main__":
     # expects a url from command line. e.g.

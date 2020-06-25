@@ -105,6 +105,7 @@ class CloudEvent():
         # structured data is inside json resp['data']
         self.data = copy.deepcopy(data) if self.isbinary else \
             copy.deepcopy(data['data'])
+
         self.headers = {
             **self.required_attribute_values,
             **self.optional_attribute_values
@@ -119,6 +120,9 @@ class CloudEvent():
             self.data,
             data_unmarshaller
         )
+
+    def __getitem__(self, key):
+        return self.data if key == 'data' else self.headers[key]
 
     @staticmethod
     def is_binary_cloud_event(event_handler, headers):
