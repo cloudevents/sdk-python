@@ -68,8 +68,3 @@ if __name__ == "__main__":
     url = sys.argv[1]
     send_binary_cloud_event(url)
     send_structured_cloud_event(url)
-    # CloudEvent headers and data
-
-
-
-    
