@@ -16,6 +16,7 @@ import copy
 import json
 import typing
 
+from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
 
 from cloudevents.sdk.event import v03, v1
@@ -122,6 +123,15 @@ class CloudEvent():
             self.headers,
             self.data,
             data_unmarshaller
+        )
+
+    def http_msg(self):
+        converter_type = converters.binary if self.isbinary else \
+            converters.structured
+        return self.marshall.ToRequest(
+            self.event_handler, 
+            converter_type,
+            lambda x: x
         )
 
     def __getitem__(self, key):
