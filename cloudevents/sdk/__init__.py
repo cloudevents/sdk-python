@@ -13,4 +13,4 @@
 #    under the License.
 
 # Convenience aliases
-from cloudevents.sdk.event.base import MarshallerType, UnmarshallerType
+from cloudevents.sdk.event.base import MarshallerType, UnmarshallerType  # noqa: F401

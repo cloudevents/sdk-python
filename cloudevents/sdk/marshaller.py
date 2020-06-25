@@ -15,7 +15,7 @@
 import json
 import typing
 
-from cloudevents.sdk import exceptions, MarshallerType, UnmarshallerType
+from cloudevents.sdk import MarshallerType, UnmarshallerType, exceptions
 
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.converters import binary
