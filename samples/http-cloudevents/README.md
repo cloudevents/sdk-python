@@ -1,19 +1,19 @@
 ## Quickstart
 
-Install dependencies
+Install dependencies:
 
 ```sh
 pip3 install -r requirements.txt
 ```
 
-Start server
+Start server:
 
 ```sh
 python3 server.py
 ```
 
-Open a new terminal and run the client code which sends a HTTP POST binary
-CloudEvent to your local server
+In a new shell, run the client code which sends a structured and binary
+cloudevent to your local server:
 
 ```sh
 python3 client.py http://localhost:3000/
