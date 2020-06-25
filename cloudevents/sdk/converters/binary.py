@@ -14,7 +14,7 @@
 
 import typing
 
-from cloudevents.sdk import exceptions
+from cloudevents.sdk import exceptions, types
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.event import base as event_base
 from cloudevents.sdk.event import v03, v1
@@ -36,7 +36,7 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         event: event_base.BaseEvent,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: event_base.UnmarshallerType,
+        data_unmarshaller: types.UnmarshallerType,
     ) -> event_base.BaseEvent:
         if type(event) not in self.SUPPORTED_VERSIONS:
             raise exceptions.UnsupportedEvent(type(event))
@@ -46,7 +46,7 @@ class BinaryHTTPCloudEventConverter(base.Converter):
     def write(
         self,
         event: event_base.BaseEvent,
-        data_marshaller: event_base.MarshallerType
+        data_marshaller: types.MarshallerType
     ) -> (dict, bytes):
         return event.MarshalBinary(data_marshaller)
 

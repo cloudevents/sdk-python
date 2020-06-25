@@ -14,6 +14,8 @@
 
 import typing
 
+from cloudevents.sdk import types
+
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.event import base as event_base
 
@@ -35,7 +37,7 @@ class JSONHTTPCloudEventConverter(base.Converter):
         event: event_base.BaseEvent,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: event_base.UnmarshallerType,
+        data_unmarshaller: types.UnmarshallerType,
     ) -> event_base.BaseEvent:
         event.UnmarshalJSON(body, data_unmarshaller)
         return event
@@ -43,7 +45,7 @@ class JSONHTTPCloudEventConverter(base.Converter):
     def write(
         self,
         event: event_base.BaseEvent,
-        data_marshaller: event_base.MarshallerType
+        data_marshaller: types.MarshallerType
     ) -> (dict, bytes):
         http_headers = {"content-type": self.MIME_TYPE}
         return http_headers, event.MarshalJSON(data_marshaller).encode("utf-8")

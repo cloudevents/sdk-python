@@ -17,11 +17,7 @@ import io
 import json
 import typing
 
-# Use consistent types for marshal and unmarshal functions across
-# both JSON and Binary format.
-MarshallerType = typing.Optional[
-    typing.Callable[[typing.Any], typing.Union[bytes, str]]]
-UnmarshallerType = typing.Optional[typing.Callable[[typing.IO], typing.Any]]
+from cloudevents.sdk import types
 
 
 _ce_required_fields = {
@@ -212,7 +208,7 @@ class BaseEvent(EventGetterSetter):
         exts.update({key: value})
         self.Set("extensions", exts)
 
-    def MarshalJSON(self, data_marshaller: MarshallerType) -> str:
+    def MarshalJSON(self, data_marshaller: types.MarshallerType) -> str:
         if data_marshaller is None:
             def noop(x):
                 return x
@@ -229,7 +225,7 @@ class BaseEvent(EventGetterSetter):
     def UnmarshalJSON(
         self,
         b: typing.IO,
-        data_unmarshaller: UnmarshallerType
+        data_unmarshaller: types.UnmarshallerType
     ):
         raw_ce = json.load(b)
 
@@ -245,7 +241,7 @@ class BaseEvent(EventGetterSetter):
         self,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: UnmarshallerType
+        data_unmarshaller: types.UnmarshallerType
     ):
         for header, value in headers.items():
             header = header.lower()
@@ -257,7 +253,7 @@ class BaseEvent(EventGetterSetter):
 
     def MarshalBinary(
             self,
-            data_marshaller: MarshallerType
+            data_marshaller: types.MarshallerType
     ) -> (dict, bytes):
         if data_marshaller is None:
             data_marshaller = json.dumps
