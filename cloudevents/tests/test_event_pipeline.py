@@ -16,7 +16,7 @@ import io
 import json
 import pytest
 
-from cloudevents.sdk.event import v01, v02, v03, v1
+from cloudevents.sdk.event import v03, v1
 
 from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
@@ -24,7 +24,8 @@ from cloudevents.sdk.converters import structured
 
 from cloudevents.tests import data
 
-@pytest.mark.parametrize("event_class", [v02.Event, v03.Event, v1.Event])
+
+@pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
 def test_event_pipeline_upstream(event_class):
     event = (
         event_class()
@@ -52,16 +53,15 @@ def test_event_pipeline_upstream(event_class):
 def test_extensions_are_set_upstream():
     extensions = {'extension-key': 'extension-value'}
     event = (
-        v02.Event()
+        v1.Event()
         .SetExtensions(extensions)
     )
 
     m = marshaller.NewDefaultHTTPMarshaller()
-    new_headers, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
+    new_headers, _ = m.ToRequest(event, converters.TypeBinary, lambda x: x)
 
     assert event.Extensions() == extensions
     assert "ce-extension-key" in new_headers
-
 
 def test_event_pipeline_v01():
     event = (

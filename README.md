@@ -6,10 +6,9 @@ This SDK is still considered a work in progress, therefore things might (and
 will) break with every update.
 
 This SDK current supports the following versions of CloudEvents:
+
 - v1.0
 - v0.3
-- v0.2
-- v0.1
 
 ## Python SDK
 
@@ -116,7 +115,6 @@ In this topic you'd find various example how to integrate an SDK with various HT
 
 One of popular framework is [`requests`](http://docs.python-requests.org/en/master/).
 
-
 #### CloudEvent to request
 
 The code below shows how integrate both libraries in order to convert a CloudEvent into an HTTP request:
@@ -155,27 +153,29 @@ Complete example of turning a CloudEvent into a request you can find [here](samp
 #### Request to CloudEvent
 
 The code below shows how integrate both libraries in order to create a CloudEvent from an HTTP request:
+
 ```python
     response = requests.get(url)
     response.raise_for_status()
     headers = response.headers
     data = io.BytesIO(response.content)
-    event = v02.Event()
+    event = v1.Event()
     http_marshaller = marshaller.NewDefaultHTTPMarshaller()
     event = http_marshaller.FromRequest(
         event, headers, data)
 
 ```
-Complete example of turning a CloudEvent into a request you can find [here](samples/python-requests/request_to_cloudevent.py).
 
+Complete example of turning a CloudEvent into a request you can find [here](samples/python-requests/request_to_cloudevent.py).
 
 ## SDK versioning
 
 The goal of this package is to provide support for all released versions of CloudEvents, ideally while maintaining
 the same API. It will use semantic versioning with following rules:
-* MAJOR version increments when backwards incompatible changes is introduced.
-* MINOR version increments when backwards compatible feature is introduced INCLUDING support for new CloudEvents version.
-* PATCH version increments when a backwards compatible bug fix is introduced.
+
+- MAJOR version increments when backwards incompatible changes is introduced.
+- MINOR version increments when backwards compatible feature is introduced INCLUDING support for new CloudEvents version.
+- PATCH version increments when a backwards compatible bug fix is introduced.
 
 ## Community
 
