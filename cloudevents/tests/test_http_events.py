@@ -182,7 +182,7 @@ def test_missing_ce_prefix_binary_event(specversion):
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
-def test_valid_cloud_events(specversion):
+def test_valid_binary_events(specversion):
     # Test creating multiple cloud events
     events_queue = []
     headers = {}
@@ -200,7 +200,36 @@ def test_valid_cloud_events(specversion):
     for i, event in enumerate(events_queue):
         headers = event.headers
         data = event.data
-        print(headers)
+        assert headers['ce-id'] == f"id{i}"
+        assert headers['ce-source'] == f"source{i}.com.test"
+        assert headers['ce-specversion'] == specversion
+        assert data['payload'] == f"payload-{i}"
+
+
+@pytest.mark.parametrize("specversion", ['1.0', '0.3'])
+def test_valid_structured_events(specversion):
+    # Test creating multiple cloud events
+    events_queue = []
+    headers = {}
+    num_cloudevents = 30
+    for i in range(num_cloudevents):
+        headers = {
+
+        }
+        data = {
+            "id": f"id{i}",
+            "source": f"source{i}.com.test",
+            "type": f"cloudevent.test.type",
+            "specversion": specversion,
+            "data": {
+                'payload': f"payload-{i}"
+            }
+        }
+        events_queue.append(CloudEvent(headers, data))
+
+    for i, event in enumerate(events_queue):
+        headers = event.headers
+        data = event.data
         assert headers['ce-id'] == f"id{i}"
         assert headers['ce-source'] == f"source{i}.com.test"
         assert headers['ce-specversion'] == specversion
