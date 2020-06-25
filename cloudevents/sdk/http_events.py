@@ -104,7 +104,7 @@ class CloudEvent():
 
         # structured data is inside json resp['data']
         self.data = copy.deepcopy(data) if self.isbinary else \
-            copy.deepcopy(data['data'])
+            copy.deepcopy(data.get('data', {}))
 
         self.headers = {
             **self.required_attribute_values,
