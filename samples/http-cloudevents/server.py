@@ -16,7 +16,7 @@ from flask import Flask, request
 app = Flask(__name__)
 
 
-# create an endpoint at http://localhost:/3000/event
+# create an endpoint at http://localhost:/3000/
 @app.route('/', methods=['POST'])
 def home():
     # convert headers to dict

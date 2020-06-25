@@ -65,6 +65,7 @@ def send_structured_cloud_event(url):
         f"{event['data']}"
     )
 
+
 if __name__ == "__main__":
     # expects a url from command line. e.g.
     if len(sys.argv) < 2:
