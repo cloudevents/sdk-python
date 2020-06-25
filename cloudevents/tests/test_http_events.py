@@ -206,6 +206,44 @@ def test_valid_binary_events(specversion):
         assert data['payload'] == f"payload-{i}"
 
 
+@pytest.mark.parametrize("specversion", ['1.0', '0.3'])
+def test_structured_ToRequest(specversion):
+    data = {
+        "specversion": specversion,
+        "type": "word.found.name",
+        "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "source": "pytest",
+        "data": {"message": "Hello World!"}
+    }
+    event = CloudEvent(data)
+    headers, body = event.ToRequest()
+    decoded_body = event.data_unmarshaller(body)['data']
+
+    assert headers['content-type'] == 'application/cloudevents+json'
+    for key in data:
+        assert decoded_body[key] == data[key]
+
+
+@pytest.mark.parametrize("specversion", ['1.0', '0.3'])
+def test_binary_ToRequest(specversion):
+    test_headers = {
+        "ce-specversion": specversion,
+        "ce-type": "word.found.name",
+        "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "ce-source": "pytest"
+    }
+    data = {
+        "message": "Hello World!"
+    }
+    event = CloudEvent(data, headers=test_headers)
+    headers, body = event.ToRequest()
+
+    for key in data:
+        assert body[key] == data[key]
+    for key in test_headers:
+        assert test_headers[key] == headers[key]
+
+
 def test_empty_data_structured_event():
     # Testing if cloudevent breaks when no structured data field present
     data = {

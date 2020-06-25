@@ -13,6 +13,8 @@
 #    under the License.
 import copy
 
+import io
+
 import json
 import typing
 
@@ -32,7 +34,14 @@ class CloudEvent():
             self,
             data: typing.Union[dict,None],
             headers: dict = {},
-            data_unmarshaller: typing.Callable = lambda x: x
+            data_unmarshaller: typing.Callable = lambda x: json.loads(
+                x.read()
+                .decode('utf-8')
+            ),
+            data_marshaller: typing.Callable = lambda x: io.BytesIO(
+                json.dumps(x)
+                .encode()
+            )
     ):
         """
         Event HTTP Constructor
@@ -54,7 +63,8 @@ class CloudEvent():
         """
         self.required_attribute_values = {}
         self.optional_attribute_values = {}
-
+        self.data_unmarshaller = data_unmarshaller
+        self.data_marshaller = data_marshaller
         if data is None:
             data = {}
         
@@ -63,8 +73,17 @@ class CloudEvent():
 
         # returns an event class depending on proper version
         event_version = CloudEvent.detect_event_version(headers, data)
-
         self.isbinary = CloudEvent.is_binary_cloud_event(event_version, headers)
+
+        self.marshall = marshaller.NewDefaultHTTPMarshaller()
+        self.event_handler = event_version()
+
+        self.__event = self.marshall.FromRequest(
+            self.event_handler,
+            headers,
+            self.data_marshaller(data),
+            self.data_unmarshaller
+        )
 
         # headers validation for binary events
         for field in event_version._ce_required_fields:
@@ -115,21 +134,13 @@ class CloudEvent():
             **self.optional_attribute_values
         }
 
-        self.marshall = marshaller.NewDefaultHTTPMarshaller()
-        self.event_handler = event_version()
 
-        self.marshall.FromRequest(
-            self.event_handler,
-            self.headers,
-            self.data,
-            data_unmarshaller
-        )
+    def ToRequest(self):
+        converter_type = converters.TypeBinary if self.isbinary else \
+            converters.TypeStructured
 
-    def http_msg(self):
-        converter_type = converters.binary if self.isbinary else \
-            converters.structured
         return self.marshall.ToRequest(
-            self.event_handler, 
+            self.__event, 
             converter_type,
             lambda x: x
         )
