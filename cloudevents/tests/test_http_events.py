@@ -43,6 +43,26 @@ invalid_test_headers = [
     }
 ]
 
+invalid_test_data = [
+    {
+        "source": "<event-source>",
+        "type": "cloudevent.event.type",
+        "specversion": "1.0"
+    }, {
+        "id": "my-id",
+        "type": "cloudevent.event.type",
+        "specversion": "1.0"
+    }, {
+        "id": "my-id",
+        "source": "<event-source>",
+        "specversion": "1.0"
+    }, {
+        "id": "my-id",
+        "source": "<event-source>",
+        "type": "cloudevent.event.type",
+    }
+]
+
 test_data = {
     "payload-content": "Hello World!"
 }
@@ -61,8 +81,18 @@ async def echo(request):
     return response.text(json.dumps(event.data), headers=event.headers)
 
 
+@pytest.mark.parametrize("body", invalid_test_data)
+def test_missing_required_fields_structured(body):
+    with pytest.raises((TypeError, NotImplementedError)):
+        # CloudEvent constructor throws TypeError if missing required field
+        # and NotImplementedError because structured calls aren't
+        # implemented. In this instance one of the required keys should have
+        # prefix e-id instead of ce-id therefore it should throw
+        _ = CloudEvent({'Content-Type': 'application/json'}, body)
+
+
 @pytest.mark.parametrize("headers", invalid_test_headers)
-def test_invalid_binary_headers(headers):
+def test_missing_required_fields_binary(headers):
     with pytest.raises((TypeError, NotImplementedError)):
         # CloudEvent constructor throws TypeError if missing required field
         # and NotImplementedError because structured calls aren't
@@ -78,7 +108,7 @@ def test_emit_binary_event(specversion):
         "ce-source": "<event-source>",
         "ce-type": "cloudevent.event.type",
         "ce-specversion": specversion,
-        "Content-Type": "application/json"
+        "Content-Type": "application/cloudevents+json"
     }
     event = CloudEvent(headers, test_data)
     _, r = app.test_client.post(
@@ -86,7 +116,7 @@ def test_emit_binary_event(specversion):
         headers=event.headers,
         data=json.dumps(event.data)
     )
-    
+
     # Convert byte array to dict
     # e.g. r.body = b'{"payload-content": "Hello World!"}'
     body = json.loads(r.body.decode('utf-8'))
@@ -95,7 +125,37 @@ def test_emit_binary_event(specversion):
     for key in test_data:
         assert body[key] == test_data[key]
     for key in headers:
-        assert r.headers[key] == headers[key]
+        if key != 'Content-Type':
+            assert r.headers[key] == headers[key]
+    assert r.status_code == 200
+
+
+@pytest.mark.parametrize("specversion", ['1.0', '0.3'])
+def test_emit_structured_event(specversion):
+    headers = {
+        "Content-Type": "application/json"
+    }
+    body = {
+        "id": "my-id",
+        "source": "<event-source>",
+        "type": "cloudevent.event.type",
+        "specversion": specversion,
+        "data": test_data
+    }
+    event = CloudEvent(headers, body)
+    _, r = app.test_client.post(
+        "/event",
+        headers=event.headers,
+        data=json.dumps(event.data)
+    )
+
+    # Convert byte array to dict
+    # e.g. r.body = b'{"payload-content": "Hello World!"}'
+    body = json.loads(r.body.decode('utf-8'))
+
+    # Check response fields
+    for key in test_data:
+        assert body[key] == test_data[key]
     assert r.status_code == 200
 
 
@@ -109,10 +169,10 @@ def test_missing_ce_prefix_binary_event(specversion):
         "ce-specversion": specversion
     }
     for key in headers:
-        
+
         # breaking prefix e.g. e-id instead of ce-id
         prefixed_headers[key[1:]] = headers[key]
-        
+
         with pytest.raises((TypeError, NotImplementedError)):
             # CloudEvent constructor throws TypeError if missing required field
             # and NotImplementedError because structured calls aren't
@@ -140,7 +200,7 @@ def test_valid_cloud_events(specversion):
     for i, event in enumerate(events_queue):
         headers = event.headers
         data = event.data
-
+        print(headers)
         assert headers['ce-id'] == f"id{i}"
         assert headers['ce-source'] == f"source{i}.com.test"
         assert headers['ce-specversion'] == specversion

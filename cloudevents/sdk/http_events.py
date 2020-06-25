@@ -51,6 +51,9 @@ class CloudEvent():
         :param data_unmarshaller: callable function for reading/extracting data
         :type data_unmarshaller: typing.Callable
         """
+        self.required_attribute_values = {}
+        self.optional_attribute_values = {}
+
         headers = {key.lower(): value for key, value in headers.items()}
         data = {key.lower(): value for key, value in data.items()}
 
@@ -77,12 +80,15 @@ class CloudEvent():
                     f"attribute {fieldname}."
                 )
 
-            if not isinstance(fields_refs[fieldname], str):
+            elif not isinstance(fields_refs[fieldname], str):
                 raise TypeError(
                     f"in parameter {fields_refs_name}, {fieldname} "
                     f"expected type str but found type "
                     f"{type(fields_refs[fieldname])}."
                 )
+
+            else:
+                self.required_attribute_values[f"ce-{field}"] = fields_refs[fieldname]
 
         for field in event_version._ce_optional_fields:
             fieldname = CloudEvent.field_name_modifier(field, isbinary)
@@ -93,11 +99,16 @@ class CloudEvent():
                     f"expected type str but found type "
                     f"{type(fields_refs[fieldname])}."
                 )
+            else:
+                self.optional_attribute_values[f"ce-{field}"] = field
 
         # structured data is inside json resp['data']
         self.data = copy.deepcopy(data) if isbinary else \
             copy.deepcopy(data['data'])
-        self.headers = copy.deepcopy(headers)
+        self.headers = {
+            **self.required_attribute_values,
+            **self.optional_attribute_values
+        }
 
         self.marshall = marshaller.NewDefaultHTTPMarshaller()
         self.event_handler = event_version()
