@@ -94,10 +94,14 @@ class CloudEvent():
                     f"{type(fields_refs[fieldname])}."
                 )
 
+        # structured data is inside json resp['data']
+        self.data = copy.deepcopy(data) if isbinary else \
+            copy.deepcopy(data['data'])
         self.headers = copy.deepcopy(headers)
-        self.data = copy.deepcopy(data)
+
         self.marshall = marshaller.NewDefaultHTTPMarshaller()
         self.event_handler = event_version()
+
         self.marshall.FromRequest(
             self.event_handler,
             self.headers,
