@@ -19,8 +19,9 @@ import typing
 
 # Use consistent types for marshal and unmarshal functions across
 # both JSON and Binary format.
-MarshallerType = typing.Callable[[typing.Any], typing.Union[bytes, str]]
-UnmarshallerType = typing.Callable[[typing.IO], typing.Any]
+MarshallerType = typing.Optional[
+    typing.Callable[[typing.Any], typing.Union[bytes, str]]]
+UnmarshallerType = typing.Optional[typing.Callable[[typing.IO], typing.Any]]
 
 
 # TODO(slinkydeveloper) is this really needed?
@@ -122,14 +123,12 @@ class BaseEvent(EventGetterSetter):
                 return x
             data_marshaller = noop
         props = self.Properties()
-        data = ""
         if "data" in props:
-            data = data_marshaller(props.get("data"))
-            del props["data"]
-        if isinstance(data, bytes):
-            props["data_base64"] = base64.b64encode(data).decode("ascii")
-        else:
-            props["data"] = data
+            data = data_marshaller(props.pop("data"))
+            if isinstance(data, bytes):
+                props["data_base64"] = base64.b64encode(data).decode("ascii")
+            else:
+                props["data"] = data
         return json.dumps(props)
 
     def UnmarshalJSON(

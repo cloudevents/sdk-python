@@ -63,29 +63,6 @@ def test_extensions_are_set_upstream():
     assert event.Extensions() == extensions
     assert "ce-extension-key" in new_headers
 
-def test_event_pipeline_v01():
-    event = (
-        v01.Event()
-        .SetContentType(data.contentType)
-        .SetData(data.body)
-        .SetEventID(data.ce_id)
-        .SetSource(data.source)
-        .SetEventTime(data.eventTime)
-        .SetEventType(data.ce_type)
-    )
-    m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
-
-    _, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
-    assert isinstance(body, bytes)
-    new_headers = json.loads(body)
-    assert new_headers is not None
-    assert "cloudEventsVersion" in new_headers
-    assert "eventType" in new_headers
-    assert "source" in new_headers
-    assert "eventID" in new_headers
-    assert "eventTime" in new_headers
-    assert "contentType" in new_headers
-    assert data.body == new_headers["data"]
 
 def test_binary_event_v1():
     event = (

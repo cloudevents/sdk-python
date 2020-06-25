@@ -15,7 +15,7 @@
 import json
 import typing
 
-from cloudevents.sdk import exceptions
+from cloudevents.sdk import exceptions, MarshallerType, UnmarshallerType
 
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.converters import binary
@@ -44,7 +44,7 @@ class HTTPMarshaller(object):
         event: event_base.BaseEvent,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: event_base.UnmarshallerType = json.load,
+        data_unmarshaller: UnmarshallerType = json.load,
     ) -> event_base.BaseEvent:
         """
         Reads a CloudEvent from an HTTP headers and request body
@@ -80,7 +80,7 @@ class HTTPMarshaller(object):
         self,
         event: event_base.BaseEvent,
         converter_type: str = None,
-        data_marshaller: event_base.MarshallerType = None,
+        data_marshaller: MarshallerType = None,
     ) -> (dict, bytes):
         """
         Writes a CloudEvent into a HTTP-ready form of headers and request body

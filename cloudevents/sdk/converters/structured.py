@@ -43,7 +43,7 @@ class JSONHTTPCloudEventConverter(base.Converter):
     def write(
         self,
         event: event_base.BaseEvent,
-        data_marshaller: event_base.UnmarshallerType
+        data_marshaller: event_base.MarshallerType
     ) -> (dict, bytes):
         http_headers = {"content-type": self.MIME_TYPE}
         return http_headers, event.MarshalJSON(data_marshaller).encode("utf-8")
