@@ -77,7 +77,7 @@ def post(url, headers, json):
 @app.route("/event", ["POST"])
 async def echo(request):
     assert isinstance(request.json, dict)
-    event = CloudEvent(dict(request.headers), request.json)
+    event = CloudEvent(request.json, headers=dict(request.headers))
     return response.text(json.dumps(event.data), headers=event.headers)
 
 
@@ -88,7 +88,7 @@ def test_missing_required_fields_structured(body):
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
         # prefix e-id instead of ce-id therefore it should throw
-        _ = CloudEvent({'Content-Type': 'application/json'}, body)
+        _ = CloudEvent(body, headers={'Content-Type': 'application/json'})
 
 
 @pytest.mark.parametrize("headers", invalid_test_headers)
@@ -98,7 +98,7 @@ def test_missing_required_fields_binary(headers):
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
         # prefix e-id instead of ce-id therefore it should throw
-        _ = CloudEvent(headers, test_data)
+        _ = CloudEvent(test_data, headers=headers)
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
@@ -110,7 +110,7 @@ def test_emit_binary_event(specversion):
         "ce-specversion": specversion,
         "Content-Type": "application/cloudevents+json"
     }
-    event = CloudEvent(headers, test_data)
+    event = CloudEvent(test_data, headers=headers)
     _, r = app.test_client.post(
         "/event",
         headers=event.headers,
@@ -142,7 +142,7 @@ def test_emit_structured_event(specversion):
         "specversion": specversion,
         "data": test_data
     }
-    event = CloudEvent(headers, body)
+    event = CloudEvent(body, headers=headers)
     _, r = app.test_client.post(
         "/event",
         headers=event.headers,
@@ -178,7 +178,7 @@ def test_missing_ce_prefix_binary_event(specversion):
             # and NotImplementedError because structured calls aren't
             # implemented. In this instance one of the required keys should have
             # prefix e-id instead of ce-id therefore it should throw
-            _ = CloudEvent(prefixed_headers, test_data)
+            _ = CloudEvent(test_data, headers=prefixed_headers)
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
@@ -195,7 +195,7 @@ def test_valid_binary_events(specversion):
             "ce-specversion": specversion
         }
         data = {'payload': f"payload-{i}"}
-        events_queue.append(CloudEvent(headers, data))
+        events_queue.append(CloudEvent(data, headers=headers))
 
     for i, event in enumerate(events_queue):
         headers = event.headers
@@ -225,7 +225,7 @@ def test_valid_structured_events(specversion):
                 'payload': f"payload-{i}"
             }
         }
-        events_queue.append(CloudEvent(headers, data))
+        events_queue.append(CloudEvent(data, headers=headers))
 
     for i, event in enumerate(events_queue):
         headers = event.headers

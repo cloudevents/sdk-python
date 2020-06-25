@@ -29,8 +29,8 @@ class CloudEvent():
 
     def __init__(
             self,
-            headers: dict,
             data: dict,
+            headers: dict = {},
             data_unmarshaller: typing.Callable = lambda x: x
     ):
         """
@@ -134,6 +134,7 @@ class CloudEvent():
         headers for binary cloudevents or within data for structured
         cloud events
         """
+        print("SUPER DUPER README", headers, data)
         specversion = headers.get('ce-specversion', data.get('specversion'))
         if specversion == '1.0':
             return v1.Event
