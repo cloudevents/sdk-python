@@ -29,12 +29,14 @@ class CloudEvent():
 
     def __init__(
             self,
-            data: dict,
+            data: typing.Union[dict,None],
             headers: dict = {},
             data_unmarshaller: typing.Callable = lambda x: x
     ):
         """
         Event HTTP Constructor
+        :param data: a nullable dict to be stored inside Event. 
+        :type data: dict or None
         :param headers: a dict with HTTP headers
             e.g. {
                 "content-type": "application/cloudevents+json",
@@ -44,8 +46,6 @@ class CloudEvent():
                 "ce-specversion": "0.2"
             }
         :type headers: dict
-        :param data: a dict to be stored inside Event
-        :type data: dict
         :param binary: a bool indicating binary events
         :type binary: bool
         :param data_unmarshaller: callable function for reading/extracting data
@@ -54,6 +54,9 @@ class CloudEvent():
         self.required_attribute_values = {}
         self.optional_attribute_values = {}
 
+        if data is None:
+            data = {}
+        
         headers = {key.lower(): value for key, value in headers.items()}
         data = {key.lower(): value for key, value in data.items()}
 

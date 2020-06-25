@@ -208,16 +208,30 @@ def test_valid_binary_events(specversion):
 
 def test_empty_data_structured_event():
     # Testing if cloudevent breaks when no structured data field present
-    headers = {"Content-Type": "application/cloudevents+json"}
     data = {
         "specversion": "1.0",
         "datacontenttype": "application/json",
         "type": "word.found.name",
         "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
         "time": "2018-10-23T12:28:22.4579346Z",
-        "source": "<source-url>"
+        "source": "<source-url>",
+        "data": {"message": "Hello World!"}
     }
-    event = CloudEvent(data, headers=headers)
+    event = CloudEvent(data)
+
+
+def test_empty_data_binary_event():
+    # Testing if cloudevent breaks when no structured data field present
+    headers = {
+        "Content-Type": "application/cloudevents+json",         
+        "ce-specversion": "1.0",
+        "ce-type": "word.found.name",
+        "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "ce-time": "2018-10-23T12:28:22.4579346Z",
+        "ce-source": "<source-url>",
+    }
+    event = CloudEvent(None, headers=headers)
+
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
 def test_valid_structured_events(specversion):

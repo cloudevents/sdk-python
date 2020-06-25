@@ -68,20 +68,30 @@ event = m.FromRequest(
 )
 ```
 
-Creating a minimal CloudEvent in version 0.1:
+Creating minimal CloudEvents with data in version 1.0.0:
 
 ```python
-from cloudevents.sdk.event import v1
+from cloudevents.sdk.http_events import CloudEvent
 
-event = (
-    v1.Event()
-    .SetContentType("application/json")
-    .SetData('{"name":"john"}')
-    .SetEventID("my-id")
-    .SetSource("from-galaxy-far-far-away")
-    .SetEventTime("tomorrow")
-    .SetEventType("cloudevent.greet.you")
-)
+data = {
+    "specversion": "1.0",
+    "type": "word.found.name",
+    "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+    "source": "<source-url>",
+    "data": {"message": "Hello World!"}
+}
+structured_event = CloudEvent(data)
+
+headers = {
+    "Content-Type": "application/cloudevents+json",         
+    "ce-specversion": "1.0",
+    "ce-type": "word.found.name",
+    "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+    "ce-time": "2018-10-23T12:28:22.4579346Z",
+    "ce-source": "<source-url>",
+}
+data = {"message": "Hello World!"}
+binary_event = CloudEvent(data, headers=headers)
 ```
 
 Creating HTTP request from CloudEvent:
