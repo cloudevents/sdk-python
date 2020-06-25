@@ -60,18 +60,18 @@ class CloudEvent():
         # returns an event class depending on proper version
         event_version = CloudEvent.detect_event_version(headers, data)
 
-        isbinary = CloudEvent.is_binary_cloud_event(event_version, headers)
+        self.isbinary = CloudEvent.is_binary_cloud_event(event_version, headers)
 
         # Headers validation for binary events
         for field in event_version._ce_required_fields:
 
             # prefixes with ce- if this is a binary event
-            fieldname = CloudEvent.field_name_modifier(field, isbinary)
+            fieldname = CloudEvent.field_name_modifier(field, self.isbinary)
 
             # fields_refs holds a reference to where fields should be
-            fields_refs = headers if isbinary else data
+            fields_refs = headers if self.isbinary else data
 
-            fields_refs_name = 'headers' if isbinary else 'data'
+            fields_refs_name = 'headers' if self.isbinary else 'data'
 
             # Verify field exists else throw TypeError
             if fieldname not in fields_refs:
@@ -91,7 +91,7 @@ class CloudEvent():
                 self.required_attribute_values[f"ce-{field}"] = fields_refs[fieldname]
 
         for field in event_version._ce_optional_fields:
-            fieldname = CloudEvent.field_name_modifier(field, isbinary)
+            fieldname = CloudEvent.field_name_modifier(field, self.isbinary)
             if (fieldname in fields_refs) and not \
                     isinstance(fields_refs[fieldname], str):
                 raise TypeError(
@@ -103,7 +103,7 @@ class CloudEvent():
                 self.optional_attribute_values[f"ce-{field}"] = field
 
         # structured data is inside json resp['data']
-        self.data = copy.deepcopy(data) if isbinary else \
+        self.data = copy.deepcopy(data) if self.isbinary else \
             copy.deepcopy(data['data'])
         self.headers = {
             **self.required_attribute_values,
@@ -134,7 +134,6 @@ class CloudEvent():
         headers for binary cloudevents or within data for structured
         cloud events
         """
-        print("SUPER DUPER README", headers, data)
         specversion = headers.get('ce-specversion', data.get('specversion'))
         if specversion == '1.0':
             return v1.Event
