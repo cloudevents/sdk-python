@@ -16,16 +16,16 @@ from flask import Flask, request
 app = Flask(__name__)
 
 
-# Create an endpoint at http://localhost:/3000/event
+# create an endpoint at http://localhost:/3000/event
 @app.route('/', methods=['POST'])
 def home():
-    # Convert headers to dict
+    # convert headers to dict
     headers = dict(request.headers)
 
-    # Create a CloudEvent
+    # create a CloudEvent
     event = CloudEvent(headers=headers, data=request.json)
 
-    # Print the received CloudEvent
+    # print the received CloudEvent
     print(f"Received CloudEvent {event}")
     return '', 204
 

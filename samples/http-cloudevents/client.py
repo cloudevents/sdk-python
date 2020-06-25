@@ -33,7 +33,7 @@ def send_binary_cloud_event(url):
     # create a CloudEvent 
     event = CloudEvent(data, headers=headers)
 
-    # Send and print event
+    # send and print event
     requests.post(url, headers=event.headers, json=event.data)
     print(f"Sent binary event {event}")
 
@@ -55,7 +55,7 @@ def send_structured_cloud_event(url):
     # create a CloudEvent 
     event = CloudEvent(data)
 
-    # Send and print event
+    # send and print event
     requests.post(url, headers=event.headers, json=event.data)
     print(f"Sent structured event {event}")
 

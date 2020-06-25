@@ -62,7 +62,7 @@ class CloudEvent():
 
         self.isbinary = CloudEvent.is_binary_cloud_event(event_version, headers)
 
-        # Headers validation for binary events
+        # headers validation for binary events
         for field in event_version._ce_required_fields:
 
             # prefixes with ce- if this is a binary event
@@ -73,7 +73,7 @@ class CloudEvent():
 
             fields_refs_name = 'headers' if self.isbinary else 'data'
 
-            # Verify field exists else throw TypeError
+            # verify field exists else throw TypeError
             if fieldname not in fields_refs:
                 raise TypeError(
                     f"parameter {fields_refs_name} has no required "
