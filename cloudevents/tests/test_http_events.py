@@ -283,9 +283,6 @@ def test_valid_structured_events(specversion):
     headers = {}
     num_cloudevents = 30
     for i in range(num_cloudevents):
-        headers = {
-
-        }
         data = {
             "id": f"id{i}",
             "source": f"source{i}.com.test",
@@ -295,7 +292,7 @@ def test_valid_structured_events(specversion):
                 'payload': f"payload-{i}"
             }
         }
-        events_queue.append(CloudEvent(data, headers=headers))
+        events_queue.append(CloudEvent(data))
 
     for i, event in enumerate(events_queue):
         headers = event.headers
