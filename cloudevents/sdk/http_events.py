@@ -144,7 +144,7 @@ class CloudEvent():
             converter_type,
             data_unmarshaller
         )
-        data = data if self.binary else data_unmarshaller(data)['data']
+        data = data if self.isbinary else data_unmarshaller(data)['data']
         return headers, data
 
     def __getitem__(self, key):
