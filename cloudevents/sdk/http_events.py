@@ -159,8 +159,8 @@ class CloudEvent():
         return self.data if key == 'data' else self.headers[key]
 
     @staticmethod
-    def is_binary_cloud_event(event_handler, headers):
-        for field in event_handler._ce_required_fields:
+    def is_binary_cloud_event(event_version, headers):
+        for field in event_version._ce_required_fields:
             if f"ce-{field}" not in headers:
                 return False
         return True
