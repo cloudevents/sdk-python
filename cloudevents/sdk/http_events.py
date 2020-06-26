@@ -78,12 +78,14 @@ class CloudEvent():
             io.BytesIO(json.dumps(data).encode()),
             data_unmarshaller
         )
+        field_name_modifier = \
+            lambda field, isbinary: f"ce-{field}" if isbinary else field
 
         # headers validation for binary events
         for field in event_version._ce_required_fields:
 
             # prefixes with ce- if this is a binary event
-            fieldname = CloudEvent.field_name_modifier(field, self.isbinary)
+            fieldname = field_name_modifier(field, self.isbinary)
 
             # fields_refs holds a reference to where fields should be
             fields_refs = headers if self.isbinary else data
@@ -109,7 +111,7 @@ class CloudEvent():
                     fields_refs[fieldname]
 
         for field in event_version._ce_optional_fields:
-            fieldname = CloudEvent.field_name_modifier(field, self.isbinary)
+            fieldname = field_name_modifier(field, self.isbinary)
             if (fieldname in fields_refs) and not \
                     isinstance(fields_refs[fieldname], str):
                 raise TypeError(
@@ -180,10 +182,6 @@ class CloudEvent():
         else:
             raise TypeError(f"specversion {specversion} "
                             "currently unsupported")
-
-    @staticmethod
-    def field_name_modifier(field, isbinary):
-        return f"ce-{field}" if isbinary else field
 
     def __repr__(self):
         return json.dumps(
