@@ -35,3 +35,9 @@ class Option(object):
 
     def required(self):
         return self.is_required
+
+    def __eq__(self, obj):
+        return isinstance(obj, Option) and \
+            obj.name == self.name and \
+            obj.value == self.value and \
+            obj.is_required == self.is_required
