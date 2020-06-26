@@ -21,7 +21,8 @@ app = Flask(__name__)
 def home():
     # convert headers to dict
     headers = dict(request.headers)
-
+    print(request.json)
+    print(headers)
     # create a CloudEvent
     event = CloudEvent(headers=headers, data=request.json)
 

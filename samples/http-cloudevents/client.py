@@ -32,9 +32,10 @@ def send_binary_cloud_event(url):
 
     # create a CloudEvent 
     event = CloudEvent(data, headers=headers)
+    headers, body = event.ToRequest()
 
     # send and print event
-    requests.post(url, headers=event.headers, json=event.data)
+    requests.post(url, headers=headers, json=body)
     print(
         f"Sent {event['ce-id']} from {event['ce-source']} with "
         f"{event['data']}"
@@ -57,9 +58,10 @@ def send_structured_cloud_event(url):
 
     # create a CloudEvent 
     event = CloudEvent(data)
+    headers, body = event.ToRequest()
 
     # send and print event
-    requests.post(url, headers=event.headers, json=event.data)
+    requests.post(url, headers=headers, json=body)
     print(
         f"Sent {event['ce-id']} from {event['ce-source']} with "
         f"{event['data']}"
