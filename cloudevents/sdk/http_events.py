@@ -102,7 +102,8 @@ class CloudEvent():
                 )
 
             else:
-                self.required_attribute_values[f"ce-{field}"] = fields_refs[fieldname]
+                self.required_attribute_values[f"ce-{field}"] = \
+                    fields_refs[fieldname]
 
         for field in event_version._ce_optional_fields:
             fieldname = CloudEvent.field_name_modifier(field, self.isbinary)
@@ -128,7 +129,10 @@ class CloudEvent():
 
     def ToRequest(
         self, 
-        data_unmarshaller: typing.Callable = lambda x: json.loads(x.read().decode('utf-8'))
+        data_unmarshaller: typing.Callable = lambda x: json.loads(
+            x.read()
+            .decode('utf-8')
+        )
     ) -> (dict, dict):
         converter_type = converters.TypeBinary if self.isbinary else \
             converters.TypeStructured
@@ -138,7 +142,8 @@ class CloudEvent():
             converter_type,
             data_unmarshaller
         )
-        return headers, (data if self.isbinary else data_unmarshaller(data)['data'])
+        return headers, (data if self.isbinary else \
+            data_unmarshaller(data)['data'])
 
     def __getitem__(self, key):
         return self.data if key == 'data' else self.headers[key]
