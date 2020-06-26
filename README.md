@@ -63,6 +63,8 @@ headers, body = event.ToRequest()
 requests.post("<some-url>", json=structured_body, headers=structured_headers)
 ```
 
+### Event base classes usage
+ 
 Parsing upstream structured Event from HTTP request:
 
 ```python
