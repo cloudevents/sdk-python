@@ -20,22 +20,6 @@ import typing
 from cloudevents.sdk import types
 
 
-_ce_required_fields = {
-    'id',
-    'source',
-    'type',
-    'specversion'
-}
-
-
-_ce_optional_fields = {
-    'datacontenttype',
-    'schema',
-    'subject',
-    'time'
-}
-
-
 # TODO(slinkydeveloper) is this really needed?
 class EventGetterSetter(object):
 

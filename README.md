@@ -14,6 +14,57 @@ This SDK current supports the following versions of CloudEvents:
 
 Package **cloudevents** provides primitives to work with CloudEvents specification: https://github.com/cloudevents/spec.
 
+Sending CloudEvents:
+
+### Binary HTTP CloudEvent
+
+```python
+from cloudevents.sdk.http_events import CloudEvent
+import requests
+
+
+# This data defines a binary cloudevent
+headers = {
+    "Content-Type": "application/json",
+    "ce-specversion": "1.0",
+    "ce-type": "README.sample.binary",
+    "ce-id": "binary-event",
+    "ce-time": "2018-10-23T12:28:22.4579346Z",
+    "ce-source": "README",
+}
+data = {"message": "Hello World!"}
+
+event = CloudEvent(data, headers=headers)
+headers, body = event.to_request()
+
+# POST
+requests.post("<some-url>", json=body, headers=headers)
+```
+
+### Structured HTTP CloudEvent
+
+```python
+from cloudevents.sdk.http_events import CloudEvent
+import requests
+
+
+# This data defines a structured cloudevent
+data = {
+    "specversion": "1.0",
+    "type": "README.sample.structured",
+    "id": "structured-event",
+    "source": "README",
+    "data": {"message": "Hello World!"}
+}
+event = CloudEvent(data)
+headers, body = event.to_request()
+
+# POST
+requests.post("<some-url>", json=body, headers=headers)
+```
+
+### Event base classes usage
+ 
 Parsing upstream structured Event from HTTP request:
 
 ```python
@@ -65,22 +116,6 @@ event = m.FromRequest(
     },
     io.BytesIO(b"this is where your CloudEvent data"),
     lambda x: x.read(),
-)
-```
-
-Creating a minimal CloudEvent in version 0.1:
-
-```python
-from cloudevents.sdk.event import v1
-
-event = (
-    v1.Event()
-    .SetContentType("application/json")
-    .SetData('{"name":"john"}')
-    .SetEventID("my-id")
-    .SetSource("from-galaxy-far-far-away")
-    .SetEventTime("tomorrow")
-    .SetEventType("cloudevent.greet.you")
 )
 ```
 
