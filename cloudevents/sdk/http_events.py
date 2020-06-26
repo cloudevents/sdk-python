@@ -78,14 +78,12 @@ class CloudEvent():
             io.BytesIO(json.dumps(data).encode()),
             data_unmarshaller
         )
-        field_name_modifier = \
-            lambda field, isbinary: f"ce-{field}" if isbinary else field
 
         # headers validation for binary events
         for field in event_version._ce_required_fields:
 
             # prefixes with ce- if this is a binary event
-            fieldname = field_name_modifier(field, self.isbinary)
+            fieldname = f"ce-{field}" if self.isbinary else field
 
             # fields_refs holds a reference to where fields should be
             fields_refs = headers if self.isbinary else data
@@ -111,7 +109,7 @@ class CloudEvent():
                     fields_refs[fieldname]
 
         for field in event_version._ce_optional_fields:
-            fieldname = field_name_modifier(field, self.isbinary)
+            fieldname = f"ce-{field}" if self.isbinary else field
             if (fieldname in fields_refs) and not \
                     isinstance(fields_refs[fieldname], str):
                 raise TypeError(
@@ -141,7 +139,7 @@ class CloudEvent():
         """
         Returns a tuple of HTTP headers/body dicts representing this cloudevent
 
-        :param data_unmarshaller: callable function used to read the data io 
+        :param data_unmarshaller: callable function used to read the data io
         object
         :type data_unmarshaller: typing.Callable
         :returns: (http_headers: dict, http_body: dict) 

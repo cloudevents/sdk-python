@@ -69,7 +69,8 @@ def send_structured_cloud_event(url):
 
 
 if __name__ == "__main__":
-    # expects a url from command line. e.g.
+    # expects a url from command line.
+    # e.g. python3 client.py http://localhost:3000/
     if len(sys.argv) < 2:
         sys.exit("Usage: python with_requests.py "
                  "<CloudEvents controller URL>")
