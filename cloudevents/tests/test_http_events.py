@@ -45,7 +45,7 @@ invalid_test_headers = [
     }
 ]
 
-invalid_test_data = [
+invalid_cloudevent_request_bodie = [
     {
         "source": "<event-source>",
         "type": "cloudevent.event.type",
@@ -83,7 +83,7 @@ async def echo(request):
     return response.text(json.dumps(event.data), headers=event.headers)
 
 
-@pytest.mark.parametrize("body", invalid_test_data)
+@pytest.mark.parametrize("body", invalid_cloudevent_request_bodie)
 def test_missing_required_fields_structured(body):
     with pytest.raises((TypeError, NotImplementedError)):
         # CloudEvent constructor throws TypeError if missing required field
