@@ -60,7 +60,7 @@ event = CloudEvent(data)
 headers, body = event.ToRequest()
 
 # POST
-requests.post("<some-url>", json=structured_body, headers=structured_headers)
+requests.post("<some-url>", json=body, headers=headers)
 ```
 
 ### Event base classes usage
