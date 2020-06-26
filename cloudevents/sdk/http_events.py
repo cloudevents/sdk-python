@@ -32,13 +32,13 @@ class CloudEvent():
 
     def __init__(
             self,
-            data: typing.Union[dict,None],
+            data: typing.Union[dict, None],
             headers: dict = {},
-            data_unmarshaller= lambda x: x,
+            data_unmarshaller: typing.Callable = lambda x: x,
     ):
         """
         Event HTTP Constructor
-        :param data: a nullable dict to be stored inside Event. 
+        :param data: a nullable dict to be stored inside Event.
         :type data: dict or None
         :param headers: a dict with HTTP headers
             e.g. {
@@ -58,13 +58,16 @@ class CloudEvent():
         self.optional_attribute_values = {}
         if data is None:
             data = {}
-        
+
         headers = {key.lower(): value for key, value in headers.items()}
         data = {key.lower(): value for key, value in data.items()}
 
         # returns an event class depending on proper version
         event_version = CloudEvent.detect_event_version(headers, data)
-        self.isbinary = CloudEvent.is_binary_cloud_event(event_version, headers)
+        self.isbinary = CloudEvent.is_binary_cloud_event(
+            event_version,
+            headers
+        )
 
         self.marshall = marshaller.NewDefaultHTTPMarshaller()
         self.event_handler = event_version()
@@ -126,9 +129,8 @@ class CloudEvent():
             **self.optional_attribute_values
         }
 
-
-    def ToRequest(
-        self, 
+    def to_request(
+        self,
         data_unmarshaller: typing.Callable = lambda x: json.loads(
             x.read()
             .decode('utf-8')
@@ -138,12 +140,12 @@ class CloudEvent():
             converters.TypeStructured
 
         headers, data = self.marshall.ToRequest(
-            self.__event, 
+            self.__event,
             converter_type,
             data_unmarshaller
         )
-        return headers, (data if self.isbinary else \
-            data_unmarshaller(data)['data'])
+        return headers, (data if self.isbinary else 
+        data_unmarshaller(data)['data'])
 
     def __getitem__(self, key):
         return self.data if key == 'data' else self.headers[key]

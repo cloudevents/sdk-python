@@ -35,7 +35,7 @@ headers = {
 data = {"message": "Hello World!"}
 
 event = CloudEvent(data, headers=headers)
-headers, body = event.ToRequest()
+headers, body = event.to_request()
 
 # POST
 requests.post("<some-url>", json=body, headers=headers)
@@ -57,7 +57,7 @@ data = {
     "data": {"message": "Hello World!"}
 }
 event = CloudEvent(data)
-headers, body = event.ToRequest()
+headers, body = event.to_request()
 
 # POST
 requests.post("<some-url>", json=body, headers=headers)

@@ -209,7 +209,7 @@ def test_valid_binary_events(specversion):
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
-def test_structured_ToRequest(specversion):
+def test_structured_to_request(specversion):
     data = {
         "specversion": specversion,
         "type": "word.found.name",
@@ -218,9 +218,8 @@ def test_structured_ToRequest(specversion):
         "data": {"message": "Hello World!"}
     }
     event = CloudEvent(data)
-    headers, body = event.ToRequest()
+    headers, body = event.to_request()
     assert isinstance(body, dict)
-    print(body)
 
     assert headers['content-type'] == 'application/cloudevents+json'
     for key in data:
@@ -228,7 +227,7 @@ def test_structured_ToRequest(specversion):
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
-def test_binary_ToRequest(specversion):
+def test_binary_to_request(specversion):
     test_headers = {
         "ce-specversion": specversion,
         "ce-type": "word.found.name",
@@ -239,9 +238,8 @@ def test_binary_ToRequest(specversion):
         "message": "Hello World!"
     }
     event = CloudEvent(data, headers=test_headers)
-    headers, body = event.ToRequest()
+    headers, body = event.to_request()
     assert isinstance(body, dict)
-    print("LOOK", body)
 
     for key in data:
         assert body[key] == data[key]
@@ -261,7 +259,7 @@ def test_empty_data_structured_event(specversion):
         "source": "<source-url>",
         "data": {"message": "Hello World!"}
     }
-    event = CloudEvent(data)
+    _ = CloudEvent(data)
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
@@ -275,7 +273,7 @@ def test_empty_data_binary_event(specversion):
         "ce-time": "2018-10-23T12:28:22.4579346Z",
         "ce-source": "<source-url>",
     }
-    event = CloudEvent(None, headers=headers)
+    _ = CloudEvent(None, headers=headers)
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
