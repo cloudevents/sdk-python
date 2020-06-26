@@ -142,7 +142,7 @@ class CloudEvent():
         :param data_unmarshaller: callable function used to read the data io
         object
         :type data_unmarshaller: typing.Callable
-        :returns: (http_headers: dict, http_body: dict) 
+        :returns: (http_headers: dict, http_body: dict)
         """
         converter_type = converters.TypeBinary if self.isbinary else \
             converters.TypeStructured
