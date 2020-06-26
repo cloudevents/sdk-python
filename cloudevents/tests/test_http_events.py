@@ -11,6 +11,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import io
+
 import json
 
 import copy
@@ -217,11 +219,12 @@ def test_structured_ToRequest(specversion):
     }
     event = CloudEvent(data)
     headers, body = event.ToRequest()
-    decoded_body = event.data_unmarshaller(body)['data']
+    assert isinstance(body, dict)
+    print(body)
 
     assert headers['content-type'] == 'application/cloudevents+json'
     for key in data:
-        assert decoded_body[key] == data[key]
+        assert body[key] == data[key]
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
@@ -237,6 +240,8 @@ def test_binary_ToRequest(specversion):
     }
     event = CloudEvent(data, headers=test_headers)
     headers, body = event.ToRequest()
+    assert isinstance(body, dict)
+    print("LOOK", body)
 
     for key in data:
         assert body[key] == data[key]

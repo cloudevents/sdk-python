@@ -34,14 +34,7 @@ class CloudEvent():
             self,
             data: typing.Union[dict,None],
             headers: dict = {},
-            data_unmarshaller: typing.Callable = lambda x: json.loads(
-                x.read()
-                .decode('utf-8')
-            ),
-            data_marshaller: typing.Callable = lambda x: io.BytesIO(
-                json.dumps(x)
-                .encode()
-            )
+            data_unmarshaller= lambda x: x,
     ):
         """
         Event HTTP Constructor
@@ -63,8 +56,6 @@ class CloudEvent():
         """
         self.required_attribute_values = {}
         self.optional_attribute_values = {}
-        self.data_unmarshaller = data_unmarshaller
-        self.data_marshaller = data_marshaller
         if data is None:
             data = {}
         
@@ -81,8 +72,8 @@ class CloudEvent():
         self.__event = self.marshall.FromRequest(
             self.event_handler,
             headers,
-            self.data_marshaller(data),
-            self.data_unmarshaller
+            io.BytesIO(json.dumps(data).encode()),
+            data_unmarshaller
         )
 
         # headers validation for binary events
@@ -135,15 +126,19 @@ class CloudEvent():
         }
 
 
-    def ToRequest(self):
+    def ToRequest(
+        self, 
+        data_unmarshaller: typing.Callable = lambda x: json.loads(x.read().decode('utf-8'))
+    ) -> (dict, dict):
         converter_type = converters.TypeBinary if self.isbinary else \
             converters.TypeStructured
 
-        return self.marshall.ToRequest(
+        headers, data = self.marshall.ToRequest(
             self.__event, 
             converter_type,
-            lambda x: x
+            data_unmarshaller
         )
+        return headers, (data if self.isbinary else data_unmarshaller(data)['data'])
 
     def __getitem__(self, key):
         return self.data if key == 'data' else self.headers[key]
