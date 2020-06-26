@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0]
 ### Added
 - Added a user friendly CloudEvent class with data validation [#36]
+- CloudEvent structured cloudevent support [#47]
 
 ### Changed
 - Removed support for Cloudevents V0.2 and V0.1 [#43]
@@ -75,3 +76,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#27]: https://github.com/cloudevents/sdk-python/pull/27
 [#36]: https://github.com/cloudevents/sdk-python/pull/36
 [#43]: https://github.com/cloudevents/sdk-python/pull/43
+[#47]: https://github.com/cloudevents/sdk-python/pull/47
