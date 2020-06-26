@@ -14,7 +14,7 @@ This SDK current supports the following versions of CloudEvents:
 
 Package **cloudevents** provides primitives to work with CloudEvents specification: https://github.com/cloudevents/spec.
 
-Creating minimal CloudEvents with data in version 1.0.0:
+Sending CloudEvents:
 
 ### Binary HTTP CloudEvent
 
