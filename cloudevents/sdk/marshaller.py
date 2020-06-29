@@ -43,8 +43,8 @@ class HTTPMarshaller(object):
         self,
         event: event_base.BaseEvent,
         headers: dict,
-        body: typing.IO,
-        data_unmarshaller: types.UnmarshallerType = json.load,
+        body: typing.Union[str, bytes],
+        data_unmarshaller: types.UnmarshallerType = json.loads,
     ) -> event_base.BaseEvent:
         """
         Reads a CloudEvent from an HTTP headers and request body
@@ -52,8 +52,8 @@ class HTTPMarshaller(object):
         :type event: cloudevents.sdk.event.base.BaseEvent
         :param headers: a dict-like HTTP headers
         :type headers: dict
-        :param body: a stream-like HTTP request body
-        :type body: typing.IO
+        :param body: an HTTP request body as a string or bytes
+        :type body: typing.Union[str, bytes]
         :param data_unmarshaller: a callable-like
                                   unmarshaller the CloudEvent data
         :return: a CloudEvent

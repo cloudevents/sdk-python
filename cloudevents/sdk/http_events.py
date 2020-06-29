@@ -11,15 +11,19 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import copy
-
-import io
-
+import datetime
 import json
+import io
 import typing
+import uuid
 
 from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
+from cloudevents.sdk import types
+from cloudevents.sdk.converters import binary
+from cloudevents.sdk.converters import structured
 
 from cloudevents.sdk.event import v03, v1
 
@@ -27,167 +31,128 @@ from cloudevents.sdk.event import v03, v1
 class CloudEvent():
     """
     Python-friendly cloudevent class supporting v1 events
-    Currently only supports binary content mode CloudEvents
+    Supports both binary and structured mode CloudEvents
     """
 
-    def __init__(
-            self,
-            data: typing.Union[dict, None],
-            headers: dict = {},
-            data_unmarshaller: typing.Callable = lambda x: x,
+    @classmethod
+    def FromHttp(
+        cls,
+        data: typing.Union[str, bytes],
+        headers: dict = {},
+        data_unmarshaller: types.UnmarshallerType = None
     ):
+        """Unwrap a CloudEvent (binary or structured) from an HTTP request.
+        :param data: the HTTP request body
+        :type data: typing.IO
+        :param headers: the HTTP headers
+        :type headers: dict
+        :param data_unmarshaller: A function to decode data into a python object.
+        :type data_unmarshaller: types.UnmarshallerType
         """
-        Event HTTP Constructor
-        :param data: a nullable dict to be stored inside Event.
-        :type data: dict or None
-        :param headers: a dict with HTTP headers
+        def json_or_string(content: typing.Union[str, bytes]):
+            if len(content) == 0:
+                return None
+            try:
+                return json.loads(content)
+            except json.JSONDecodeError:
+                return content
+        if data_unmarshaller is None:
+            data_unmarshaller = json_or_string
+
+        event = marshaller.NewDefaultHTTPMarshaller().FromRequest(
+            v1.Event(), headers, data, data_unmarshaller)
+        attrs = event.Properties()
+        attrs.pop('data', None)
+        attrs.pop('extensions', None)
+        attrs.update(**event.extensions)
+
+        return cls(attrs, event.data)
+
+    def __init__(self, attributes: dict = {}, data: typing.Any = None):
+        """
+        Event Constructor
+        :param attributes: a dict with HTTP headers
             e.g. {
                 "content-type": "application/cloudevents+json",
-                "ce-id": "16fb5f0b-211e-1102-3dfe-ea6e2806f124",
-                "ce-source": "<event-source>",
-                "ce-type": "cloudevent.event.type",
-                "ce-specversion": "0.2"
+                "id": "16fb5f0b-211e-1102-3dfe-ea6e2806f124",
+                "source": "<event-source>",
+                "type": "cloudevent.event.type",
+                "specversion": "0.2"
             }
         :type headers: dict
-        :param binary: a bool indicating binary events
-        :type binary: bool
-        :param data_unmarshaller: callable function for reading/extracting data
-        :type data_unmarshaller: typing.Callable
+        :param data: The payload of the event, as a python object
+        :type data: typing.Any
         """
-        self.required_attribute_values = {}
-        self.optional_attribute_values = {}
-        if data is None:
-            data = {}
+        self._attributes = {k.lower(): v for k, v in attributes.items()}
+        self.data = data
+        required_by_version = {
+            "1.0": v1.Event._ce_required_fields, "0.3": v03.Event._ce_required_fields}
+        if 'specversion' not in self._attributes:
+            self._attributes['specversion'] = "1.0"
+        if 'id' not in self._attributes:
+            self._attributes['id'] = str(uuid.uuid4())
+        if 'time' not in self._attributes:
+            self._attributes['time'] = datetime.datetime.now(
+                datetime.timezone.utc).isoformat()
 
-        headers = {key.lower(): value for key, value in headers.items()}
-        data = {key.lower(): value for key, value in data.items()}
+        if self._attributes['specversion'] not in required_by_version:
+            raise ValueError(
+                f"Invalid specversion: {self._attributes['specversion']}")
+        required_set = required_by_version[self._attributes['specversion']]
+        # There is no good way to default 'source' and 'type', so this checks for those.
+        # required_set = required_by_version.get(attributes.get("specversion"))
+        if not required_set <= self._attributes.keys():
+            raise ValueError(
+                f"Missing required keys: {required_set - attributes.keys()}")
 
-        # returns an event class depending on proper version
-        event_version = CloudEvent.detect_event_version(headers, data)
-        self.isbinary = CloudEvent.is_binary_cloud_event(
-            event_version,
-            headers
-        )
-
-        self.marshall = marshaller.NewDefaultHTTPMarshaller()
-        self.event_handler = event_version()
-
-        self.__event = self.marshall.FromRequest(
-            self.event_handler,
-            headers,
-            io.BytesIO(json.dumps(data).encode()),
-            data_unmarshaller
-        )
-
-        # headers validation for binary events
-        for field in event_version._ce_required_fields:
-
-            # prefixes with ce- if this is a binary event
-            fieldname = f"ce-{field}" if self.isbinary else field
-
-            # fields_refs holds a reference to where fields should be
-            fields_refs = headers if self.isbinary else data
-
-            fields_refs_name = 'headers' if self.isbinary else 'data'
-
-            # verify field exists else throw TypeError
-            if fieldname not in fields_refs:
-                raise TypeError(
-                    f"parameter {fields_refs_name} has no required "
-                    f"attribute {fieldname}."
-                )
-
-            elif not isinstance(fields_refs[fieldname], str):
-                raise TypeError(
-                    f"in parameter {fields_refs_name}, {fieldname} "
-                    f"expected type str but found type "
-                    f"{type(fields_refs[fieldname])}."
-                )
-
-            else:
-                self.required_attribute_values[f"ce-{field}"] = \
-                    fields_refs[fieldname]
-
-        for field in event_version._ce_optional_fields:
-            fieldname = f"ce-{field}" if self.isbinary else field
-            if (fieldname in fields_refs) and not \
-                    isinstance(fields_refs[fieldname], str):
-                raise TypeError(
-                    f"in parameter {fields_refs_name}, {fieldname} "
-                    f"expected type str but found type "
-                    f"{type(fields_refs[fieldname])}."
-                )
-            else:
-                self.optional_attribute_values[f"ce-{field}"] = field
-
-        # structured data is inside json resp['data']
-        self.data = copy.deepcopy(data) if self.isbinary else \
-            copy.deepcopy(data.get('data', {}))
-
-        self.headers = {
-            **self.required_attribute_values,
-            **self.optional_attribute_values
-        }
-
-    def to_request(
+    def to_http(
         self,
-        data_unmarshaller: typing.Callable = lambda x: json.loads(
-            x.read()
-            .decode('utf-8')
-        )
-    ) -> (dict, dict):
+        format: str = converters.TypeStructured,
+        data_marshaller: types.MarshallerType = None
+    ) -> (dict, typing.Union[bytes, str]):
         """
         Returns a tuple of HTTP headers/body dicts representing this cloudevent
 
-        :param data_unmarshaller: callable function used to read the data io
-        object
-        :type data_unmarshaller: typing.Callable
-        :returns: (http_headers: dict, http_body: dict)
+        :param format: constant specifying an encoding format
+        :type format: str
+        :param data_unmarshaller: callable function used to read the data io object
+        :type data_unmarshaller: types.UnmarshallerType
+        :returns: (http_headers: dict, http_body: bytes or str)
         """
-        converter_type = converters.TypeBinary if self.isbinary else \
-            converters.TypeStructured
+        marshaller_by_format = {converters.TypeStructured: lambda x: x,
+                                converters.TypeBinary: json.dumps}
+        if data_marshaller is None:
+            data_marshaller = marshaller_by_format[format]
+        obj_by_type = {"1.0": v1.Event, "0.3": v03.Event}
+        if self._attributes["specversion"] not in obj_by_type:
+            raise ValueError(
+                "Unsupported specversion: {self._attributes['specversion']}")
 
-        headers, data = self.marshall.ToRequest(
-            self.__event,
-            converter_type,
-            data_unmarshaller
-        )
-        data = data if self.isbinary else data_unmarshaller(data)['data']
-        return headers, data
+        event = obj_by_type[self._attributes["specversion"]]()
+        for k, v in self._attributes.items():
+            event.Set(k, v)
+        event.data = self.data
 
+        return marshaller.NewDefaultHTTPMarshaller().ToRequest(event, format, data_marshaller)
+
+    # Attribute access is managed via Mapping type
     def __getitem__(self, key):
-        return self.data if key == 'data' else self.headers[key]
+        return self._attributes[key]
 
-    @staticmethod
-    def is_binary_cloud_event(event_version, headers):
-        for field in event_version._ce_required_fields:
-            if f"ce-{field}" not in headers:
-                return False
-        return True
+    def __setitem__(self, key, value):
+        self._attributes[key] = value
 
-    @staticmethod
-    def detect_event_version(headers, data):
-        """
-        Returns event handler depending on specversion within
-        headers for binary cloudevents or within data for structured
-        cloud events
-        """
-        specversion = headers.get('ce-specversion', data.get('specversion'))
-        if specversion == '1.0':
-            return v1.Event
-        elif specversion == '0.3':
-            return v03.Event
-        else:
-            raise TypeError(f"specversion {specversion} "
-                            "currently unsupported")
+    def __delitem__(self, key):
+        del self._attributes[key]
+
+    def __iter__(self):
+        return iter(self._attributes)
+
+    def __len__(self):
+        return len(self._attributes)
+
+    def __contains__(self, key):
+        return key in self._attributes
 
     def __repr__(self):
-        return json.dumps(
-            {
-                'Event': {
-                    'headers': self.headers,
-                    'data': self.data
-                }
-            },
-            indent=4
-        )
+        return self.to_http()[1]

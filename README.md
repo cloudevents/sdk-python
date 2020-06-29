@@ -19,26 +19,25 @@ Sending CloudEvents:
 ### Binary HTTP CloudEvent
 
 ```python
+from cloudevents.sdk import converters
 from cloudevents.sdk.http_events import CloudEvent
 import requests
 
 
 # This data defines a binary cloudevent
-headers = {
+attributes = {
     "Content-Type": "application/json",
-    "ce-specversion": "1.0",
-    "ce-type": "README.sample.binary",
-    "ce-id": "binary-event",
-    "ce-time": "2018-10-23T12:28:22.4579346Z",
-    "ce-source": "README",
+    "type": "README.sample.binary",
+    "id": "binary-event",
+    "source": "README",
 }
 data = {"message": "Hello World!"}
 
-event = CloudEvent(data, headers=headers)
-headers, body = event.to_request()
+event = CloudEvent(attributes, data)
+headers, body = event.to_http(converters.TypeBinary)
 
 # POST
-requests.post("<some-url>", json=body, headers=headers)
+requests.post("<some-url>", data=body, headers=headers)
 ```
 
 ### Structured HTTP CloudEvent
@@ -49,18 +48,17 @@ import requests
 
 
 # This data defines a structured cloudevent
-data = {
-    "specversion": "1.0",
+attributes = {
     "type": "README.sample.structured",
     "id": "structured-event",
     "source": "README",
-    "data": {"message": "Hello World!"}
 }
-event = CloudEvent(data)
-headers, body = event.to_request()
+data = {"message": "Hello World!"}
+event = CloudEvent(attributes, data)
+headers, body = event.to_http()
 
 # POST
-requests.post("<some-url>", json=body, headers=headers)
+requests.post("<some-url>", data=body, headers=headers)
 ```
 
 ### Event base classes usage
@@ -90,7 +88,6 @@ event = m.FromRequest(
         }
         """
     ),
-    lambda x: x.read(),
 )
 ```
 
@@ -114,8 +111,8 @@ event = m.FromRequest(
         "ce-time": "2018-10-23T12:28:22.4579346Z",
         "ce-source": "<source-url>",
     },
-    io.BytesIO(b"this is where your CloudEvent data"),
-    lambda x: x.read(),
+    (b"this is where your CloudEvent data is",
+    lambda x: x,  # Do not decode body as JSON
 )
 ```
 
@@ -137,7 +134,7 @@ event = (
     .SetEventType("cloudevent.greet.you")
 )
 
-m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
+m = marshaller.NewDefaultHTTPMarshaller()
 
 headers, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
 ```

@@ -51,7 +51,7 @@ def test_structured_converter_upstream(event_class):
     event = m.FromRequest(
         event_class(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(json.dumps(data.json_ce[event_class])),
+        json.dumps(data.json_ce[event_class]),
         lambda x: x.read(),
     )
 
@@ -68,7 +68,7 @@ def test_default_http_marshaller_with_structured(event_class):
     event = m.FromRequest(
         event_class(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(json.dumps(data.json_ce[event_class])),
+        json.dumps(data.json_ce[event_class]),
         lambda x: x.read(),
     )
     assert event is not None
@@ -83,8 +83,8 @@ def test_default_http_marshaller_with_binary(event_class):
 
     event = m.FromRequest(
         event_class(), data.headers[event_class],
-        io.StringIO(json.dumps(data.body)),
-        json.load
+        json.dumps(data.body),
+        json.loads
     )
     assert event is not None
     assert event.EventType() == data.ce_type

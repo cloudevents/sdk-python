@@ -16,6 +16,8 @@ import typing
 
 # Use consistent types for marshal and unmarshal functions across
 # both JSON and Binary format.
+
 MarshallerType = typing.Optional[
     typing.Callable[[typing.Any], typing.Union[bytes, str]]]
-UnmarshallerType = typing.Optional[typing.Callable[[typing.IO], typing.Any]]
+UnmarshallerType = typing.Optional[typing.Callable[[
+    typing.Union[bytes, str]], typing.Any]]

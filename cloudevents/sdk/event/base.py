@@ -194,9 +194,7 @@ class BaseEvent(EventGetterSetter):
 
     def MarshalJSON(self, data_marshaller: types.MarshallerType) -> str:
         if data_marshaller is None:
-            def noop(x):
-                return x
-            data_marshaller = noop
+            data_marshaller = lambda x: x
         props = self.Properties()
         if "data" in props:
             data = data_marshaller(props.pop("data"))
@@ -208,25 +206,32 @@ class BaseEvent(EventGetterSetter):
 
     def UnmarshalJSON(
         self,
-        b: typing.IO,
+        b: typing.Union[str, bytes],
         data_unmarshaller: types.UnmarshallerType
     ):
-        raw_ce = json.load(b)
+        raw_ce = json.loads(b)
+
+        missing_fields = self._ce_required_fields - raw_ce.keys()
+        if len(missing_fields) > 0:
+            raise ValueError(f"Missing required attributes: {missing_fields}")
 
         for name, value in raw_ce.items():
             if name == "data":
-                value = data_unmarshaller(io.StringIO(value))
+                # Use the user-provided serializer, which may have customized JSON decoding
+                value = data_unmarshaller(json.dumps(value))
             if name == "data_base64":
-                value = data_unmarshaller(io.BytesIO(base64.b64decode(value)))
+                value = data_unmarshaller(base64.b64decode(value))
                 name = "data"
             self.Set(name, value)
 
     def UnmarshalBinary(
         self,
         headers: dict,
-        body: typing.IO,
+        body: typing.Union[bytes,str],
         data_unmarshaller: types.UnmarshallerType
     ):
+        if 'ce-specversion' not in headers:
+            raise ValueError(f"Missing required attribute: 'specversion'")
         for header, value in headers.items():
             header = header.lower()
             if header == "content-type":
@@ -234,6 +239,9 @@ class BaseEvent(EventGetterSetter):
             elif header.startswith("ce-"):
                 self.Set(header[3:], value)
         self.Set("data", data_unmarshaller(body))
+        missing_attributes = self._ce_required_fields - self.Properties().keys()
+        if len(missing_attributes) > 0:
+            raise ValueError(f"Missing required attributes: {missing_attributes}")
 
     def MarshalBinary(
             self,
