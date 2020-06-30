@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0]
 ### Added
-- Added a user friendly CloudEvent class with data validation [#36]
+- Added a user friendly CloudEvent class with data validation ([#36])
 - CloudEvent structured cloudevent support [#47]
 
 ### Changed
