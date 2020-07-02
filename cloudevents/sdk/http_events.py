@@ -12,25 +12,25 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
 import datetime
 import json
-import io
 import typing
 import uuid
 
 from cloudevents.sdk import converters
 from cloudevents.sdk import marshaller
 from cloudevents.sdk import types
-from cloudevents.sdk.converters import binary
-from cloudevents.sdk.converters import structured
 
 from cloudevents.sdk.event import v03, v1
 
-_marshaller_by_format = {converters.TypeStructured: lambda x: x,
-                          converters.TypeBinary: json.dumps}
-_required_by_version = {"1.0": v1.Event._ce_required_fields,
-                         "0.3": v03.Event._ce_required_fields}
+_marshaller_by_format = {
+    converters.TypeStructured: lambda x: x,
+    converters.TypeBinary: json.dumps,
+}
+_required_by_version = {
+    "1.0": v1.Event._ce_required_fields,
+    "0.3": v03.Event._ce_required_fields,
+}
 _obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
 
 
@@ -61,7 +61,7 @@ class CloudEvent():
         :type data: typing.IO
         :param headers: the HTTP headers
         :type headers: typing.Dict[str, str]
-        :param data_unmarshaller: A function to decode data into a python object.
+        :param data_unmarshaller: Function to decode data into a python object.
         :type data_unmarshaller: types.UnmarshallerType
         """
         if data_unmarshaller is None:
@@ -76,7 +76,11 @@ class CloudEvent():
 
         return cls(attrs, event.data)
 
-    def __init__(self, attributes: typing.Dict[str, str], data: typing.Any = None):
+    def __init__(
+        self,
+        attributes: typing.Dict[str, str],
+        data: typing.Any = None
+    ):
         """
         Event Constructor
         :param attributes: a dict with HTTP headers
@@ -104,7 +108,8 @@ class CloudEvent():
         if self._attributes['specversion'] not in _required_by_version:
             raise ValueError(
                 f"Invalid specversion: {self._attributes['specversion']}")
-        # There is no good way to default 'source' and 'type', so this checks for those.
+        # There is no good way to default 'source' and 'type', so this
+        # checks for those (or any new required attributes).
         required_set = _required_by_version[self._attributes['specversion']]
         if not required_set <= self._attributes.keys():
             raise ValueError(
@@ -120,7 +125,7 @@ class CloudEvent():
 
         :param format: constant specifying an encoding format
         :type format: str
-        :param data_unmarshaller: callable function used to read the data io object
+        :param data_unmarshaller: Function used to read the data to string.
         :type data_unmarshaller: types.UnmarshallerType
         :returns: (http_headers: dict, http_body: bytes or str)
         """
@@ -135,7 +140,8 @@ class CloudEvent():
             event.Set(k, v)
         event.data = self.data
 
-        return marshaller.NewDefaultHTTPMarshaller().ToRequest(event, format, data_marshaller)
+        return marshaller.NewDefaultHTTPMarshaller().ToRequest(
+            event, format, data_marshaller)
 
     # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type

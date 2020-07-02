@@ -13,7 +13,6 @@
 #    under the License.
 
 import base64
-import io
 import json
 import typing
 
@@ -194,7 +193,7 @@ class BaseEvent(EventGetterSetter):
 
     def MarshalJSON(self, data_marshaller: types.MarshallerType) -> str:
         if data_marshaller is None:
-            data_marshaller = lambda x: x
+            data_marshaller = lambda x: x  # noqa: E731
         props = self.Properties()
         if "data" in props:
             data = data_marshaller(props.pop("data"))
@@ -217,7 +216,8 @@ class BaseEvent(EventGetterSetter):
 
         for name, value in raw_ce.items():
             if name == "data":
-                # Use the user-provided serializer, which may have customized JSON decoding
+                # Use the user-provided serializer, which may have customized
+                # JSON decoding
                 value = data_unmarshaller(json.dumps(value))
             if name == "data_base64":
                 value = data_unmarshaller(base64.b64decode(value))
@@ -227,11 +227,11 @@ class BaseEvent(EventGetterSetter):
     def UnmarshalBinary(
         self,
         headers: dict,
-        body: typing.Union[bytes,str],
+        body: typing.Union[bytes, str],
         data_unmarshaller: types.UnmarshallerType
     ):
         if 'ce-specversion' not in headers:
-            raise ValueError(f"Missing required attribute: 'specversion'")
+            raise ValueError("Missing required attribute: 'specversion'")
         for header, value in headers.items():
             header = header.lower()
             if header == "content-type":
@@ -239,9 +239,9 @@ class BaseEvent(EventGetterSetter):
             elif header.startswith("ce-"):
                 self.Set(header[3:], value)
         self.Set("data", data_unmarshaller(body))
-        missing_attributes = self._ce_required_fields - self.Properties().keys()
-        if len(missing_attributes) > 0:
-            raise ValueError(f"Missing required attributes: {missing_attributes}")
+        missing_attrs = self._ce_required_fields - self.Properties().keys()
+        if len(missing_attrs) > 0:
+            raise ValueError(f"Missing required attributes: {missing_attrs}")
 
     def MarshalBinary(
             self,

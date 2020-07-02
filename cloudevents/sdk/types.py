@@ -19,5 +19,6 @@ import typing
 
 MarshallerType = typing.Optional[
     typing.Callable[[typing.Any], typing.Union[bytes, str]]]
-UnmarshallerType = typing.Optional[typing.Callable[[
-    typing.Union[bytes, str]], typing.Any]]
+UnmarshallerType = typing.Optional[
+    typing.Callable[
+        [typing.Union[bytes, str]], typing.Any]]
