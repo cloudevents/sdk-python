@@ -14,57 +14,56 @@
 import sys
 import io
 from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.types import converters
 
 import requests
 
 
 def send_binary_cloud_event(url):
     # define cloudevents data
-    headers = {
-        "ce-id": "binary-event-id",
-        "ce-source": "localhost",
-        "ce-type": "template.http.binary",
-        "ce-specversion": "1.0",
-        "Content-Type": "application/json",
-        "ce-time": "2018-10-23T12:28:23.3464579Z"
+    attributes = {
+        "id": "binary-event-id",
+        "source": "localhost",
+        "type": "template.http.binary",
+        "dataontenttype": "application/json",
+        # Time will be filled in automatically if not set
+        "time": "2018-10-23T12:28:23.3464579Z"
     }
     data = {"payload-content": "Hello World!"}
 
     # create a CloudEvent 
-    event = CloudEvent(data, headers=headers)
-    headers, body = event.to_request()
+    event = CloudEvent(attributes, data)
+    headers, body = event.to_http(converters.TypeBinary)
 
     # send and print event
     requests.post(url, headers=headers, json=body)
     print(
-        f"Sent {event['ce-id']} from {event['ce-source']} with "
-        f"{event['data']}"
+        f"Sent {event['id']} from {event['source']} with "
+        f"{event.data}"
     )
 
 
 def send_structured_cloud_event(url):
     # define cloudevents data
-    data = {
+    attributes = {
         "id": "structured-event-id",
         "source": "localhost",
         "type": "template.http.structured",
-        "specversion": "1.0",
-        "Content-Type": "application/json",
+        "datacontenttype": "application/json",
+        # Time will be filled in automatically if not set
         "time": "2018-10-23T12:28:23.3464579Z",
-        "data": {
-            "payload-content": "Hello World!"
-        }
     }
+    data = {"payload-content": "Hello World!"}
 
     # create a CloudEvent 
-    event = CloudEvent(data)
+    event = CloudEvent(attributes, data)
     headers, body = event.to_request()
 
     # send and print event
     requests.post(url, headers=headers, json=body)
     print(
-        f"Sent {event['ce-id']} from {event['ce-source']} with "
-        f"{event['data']}"
+        f"Sent {event['id']} from {event['source']} with "
+        f"{event.data}"
     )
 
 

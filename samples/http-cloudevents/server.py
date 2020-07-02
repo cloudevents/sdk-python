@@ -20,11 +20,10 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def home():
     # convert headers to dict
-    headers = dict(request.headers)
-    print(request.json)
-    print(headers)
+    print(request.get_data())
+    print(request.headers)
     # create a CloudEvent
-    event = CloudEvent(headers=headers, data=request.json)
+    event = CloudEvent.from_http(request.get_data(), request.headers)
 
     # print the received CloudEvent
     print(f"Received CloudEvent {event}")
