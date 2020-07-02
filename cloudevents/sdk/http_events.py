@@ -27,6 +27,21 @@ from cloudevents.sdk.converters import structured
 
 from cloudevents.sdk.event import v03, v1
 
+_marshaller_by_format = {converters.TypeStructured: lambda x: x,
+                          converters.TypeBinary: json.dumps}
+_required_by_version = {"1.0": v1.Event._ce_required_fields,
+                         "0.3": v03.Event._ce_required_fields}
+_obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
+
+
+def _json_or_string(content: typing.Union[str, bytes]):
+    if len(content) == 0:
+        return None
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        return content
+
 
 class CloudEvent():
     """
@@ -35,29 +50,22 @@ class CloudEvent():
     """
 
     @classmethod
-    def FromHttp(
+    def from_http(
         cls,
         data: typing.Union[str, bytes],
-        headers: dict = {},
+        headers: typing.Dict[str, str],
         data_unmarshaller: types.UnmarshallerType = None
     ):
         """Unwrap a CloudEvent (binary or structured) from an HTTP request.
         :param data: the HTTP request body
         :type data: typing.IO
         :param headers: the HTTP headers
-        :type headers: dict
+        :type headers: typing.Dict[str, str]
         :param data_unmarshaller: A function to decode data into a python object.
         :type data_unmarshaller: types.UnmarshallerType
         """
-        def json_or_string(content: typing.Union[str, bytes]):
-            if len(content) == 0:
-                return None
-            try:
-                return json.loads(content)
-            except json.JSONDecodeError:
-                return content
         if data_unmarshaller is None:
-            data_unmarshaller = json_or_string
+            data_unmarshaller = _json_or_string
 
         event = marshaller.NewDefaultHTTPMarshaller().FromRequest(
             v1.Event(), headers, data, data_unmarshaller)
@@ -68,7 +76,7 @@ class CloudEvent():
 
         return cls(attrs, event.data)
 
-    def __init__(self, attributes: dict = {}, data: typing.Any = None):
+    def __init__(self, attributes: typing.Dict[str, str], data: typing.Any = None):
         """
         Event Constructor
         :param attributes: a dict with HTTP headers
@@ -79,14 +87,12 @@ class CloudEvent():
                 "type": "cloudevent.event.type",
                 "specversion": "0.2"
             }
-        :type headers: dict
+        :type attributes: typing.Dict[str, str]
         :param data: The payload of the event, as a python object
         :type data: typing.Any
         """
         self._attributes = {k.lower(): v for k, v in attributes.items()}
         self.data = data
-        required_by_version = {
-            "1.0": v1.Event._ce_required_fields, "0.3": v03.Event._ce_required_fields}
         if 'specversion' not in self._attributes:
             self._attributes['specversion'] = "1.0"
         if 'id' not in self._attributes:
@@ -95,12 +101,11 @@ class CloudEvent():
             self._attributes['time'] = datetime.datetime.now(
                 datetime.timezone.utc).isoformat()
 
-        if self._attributes['specversion'] not in required_by_version:
+        if self._attributes['specversion'] not in _required_by_version:
             raise ValueError(
                 f"Invalid specversion: {self._attributes['specversion']}")
-        required_set = required_by_version[self._attributes['specversion']]
         # There is no good way to default 'source' and 'type', so this checks for those.
-        # required_set = required_by_version.get(attributes.get("specversion"))
+        required_set = _required_by_version[self._attributes['specversion']]
         if not required_set <= self._attributes.keys():
             raise ValueError(
                 f"Missing required keys: {required_set - attributes.keys()}")
@@ -119,22 +124,20 @@ class CloudEvent():
         :type data_unmarshaller: types.UnmarshallerType
         :returns: (http_headers: dict, http_body: bytes or str)
         """
-        marshaller_by_format = {converters.TypeStructured: lambda x: x,
-                                converters.TypeBinary: json.dumps}
         if data_marshaller is None:
-            data_marshaller = marshaller_by_format[format]
-        obj_by_type = {"1.0": v1.Event, "0.3": v03.Event}
-        if self._attributes["specversion"] not in obj_by_type:
+            data_marshaller = _marshaller_by_format[format]
+        if self._attributes["specversion"] not in _obj_by_version:
             raise ValueError(
-                "Unsupported specversion: {self._attributes['specversion']}")
+                f"Unsupported specversion: {self._attributes['specversion']}")
 
-        event = obj_by_type[self._attributes["specversion"]]()
+        event = _obj_by_version[self._attributes["specversion"]]()
         for k, v in self._attributes.items():
             event.Set(k, v)
         event.data = self.data
 
         return marshaller.NewDefaultHTTPMarshaller().ToRequest(event, format, data_marshaller)
 
+    # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type
     def __getitem__(self, key):
         return self._attributes[key]
