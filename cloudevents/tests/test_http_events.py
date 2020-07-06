@@ -11,11 +11,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import io
 
-import json
-
+import bz2
 import copy
+import io
+import json
 
 from cloudevents.sdk.http_events import CloudEvent
 from cloudevents.sdk import converters
@@ -73,16 +73,19 @@ test_data = {
 app = Sanic(__name__)
 
 
-def post(url, headers, json):
-    return app.test_client.post(url, headers=headers, data=json)
+def post(url, headers, data):
+    return app.test_client.post(url, headers=headers, data=data)
 
 
 @app.route("/event", ["POST"])
 async def echo(request):
-    event = CloudEvent.from_http(request.body, headers=dict(request.headers))
+    decoder = None
+    if "binary-payload" in request.headers:
+        decoder = lambda x: x
+    event = CloudEvent.from_http(request.body, headers=dict(request.headers), data_unmarshaller=decoder)
     data = event.data if isinstance(
-        event.data, bytes) else json.dumps(event.data)
-    return response.text(data, headers={k: event[k] for k in event})
+        event.data, (bytes, bytearray, memoryview)) else json.dumps(event.data).encode()
+    return response.raw(data, headers={k: event[k] for k in event})
 
 
 @pytest.mark.parametrize("body", invalid_cloudevent_request_bodie)
@@ -131,8 +134,8 @@ def test_emit_binary_event(specversion):
         assert body[key] == test_data[key], body
     for key in headers:
         if key != 'Content-Type':
-            attributeKey = key[3:]
-            assert r.headers[attributeKey] == headers[key]
+            attribute_key = key[3:]
+            assert r.headers[attribute_key] == headers[key]
     assert r.status_code == 200
 
 
@@ -162,6 +165,26 @@ def test_emit_structured_event(specversion):
     for key in test_data:
         assert body[key] == test_data[key]
     assert r.status_code == 200
+
+@pytest.mark.parametrize("converter", [converters.TypeStructured, converters.TypeStructured])
+@pytest.mark.parametrize("specversion", ["1.0", "0.3"])
+def test_emit_non_json_event(converter, specversion):
+    input_data = io.BytesIO()
+    for i in range(100):
+        for j in range(20):
+            assert 1 == input_data.write(j.to_bytes(1, byteorder='big'))
+    compressed_data = bz2.compress(input_data.getvalue())
+    attrs = {"source": "test", "type": "t"}
+
+    event = CloudEvent(attrs, compressed_data)
+    headers, data = event.to_http(converter, data_marshaller=lambda x: x)
+    headers["binary-payload"] = "true"  # Decoding hint for server
+    _, r = app.test_client.post("/event", headers=headers, data=data)
+
+    assert r.status_code == 200
+    for key in attrs:
+        assert r.headers[key] == attrs[key]
+    assert compressed_data == r.body, r.body
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])

@@ -197,7 +197,7 @@ class BaseEvent(EventGetterSetter):
         props = self.Properties()
         if "data" in props:
             data = data_marshaller(props.pop("data"))
-            if isinstance(data, bytes):
+            if isinstance(data, (bytes, bytes, memoryview)):
                 props["data_base64"] = base64.b64encode(data).decode("ascii")
             else:
                 props["data"] = data
