@@ -168,7 +168,7 @@ def test_emit_structured_event(specversion):
 
 @pytest.mark.parametrize("converter", [converters.TypeStructured, converters.TypeStructured])
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_emit_non_json_event(converter, specversion):
+def test_roundtrip_non_json_event(converter, specversion):
     input_data = io.BytesIO()
     for i in range(100):
         for j in range(20):
@@ -185,7 +185,6 @@ def test_emit_non_json_event(converter, specversion):
     for key in attrs:
         assert r.headers[key] == attrs[key]
     assert compressed_data == r.body, r.body
-
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
 def test_missing_ce_prefix_binary_event(specversion):

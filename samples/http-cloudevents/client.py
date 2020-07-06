@@ -14,7 +14,7 @@
 import sys
 import io
 from cloudevents.sdk.http_events import CloudEvent
-from cloudevents.sdk.types import converters
+from cloudevents.sdk import converters
 
 import requests
 
