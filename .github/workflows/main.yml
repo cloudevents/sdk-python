@@ -12,9 +12,9 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
-      - name: Install linting
+      - name: Install tox
         run: python -m pip install tox 
-      - name: Run lint
+      - name: Run linting
         run: python -m tox -e lint
 
   test:
