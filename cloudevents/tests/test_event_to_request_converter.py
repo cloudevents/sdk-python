@@ -32,8 +32,7 @@ def test_binary_event_to_request_upstream(event_class):
     event = m.FromRequest(
         event_class(),
         {"Content-Type": "application/cloudevents+json"},
-        io.StringIO(json.dumps(data.json_ce[event_class])),
-        lambda x: x.read(),
+        json.dumps(data.json_ce[event_class]),
     )
 
     assert event is not None
@@ -54,10 +53,7 @@ def test_structured_event_to_request_upstream(event_class):
     event = m.FromRequest(
         event_class(),
         http_headers,
-        io.StringIO(
-            json.dumps(data.json_ce[event_class])
-        ),
-        lambda x: x.read()
+        json.dumps(data.json_ce[event_class])
     )
     assert event is not None
     assert event.EventType() == data.ce_type
