@@ -11,13 +11,14 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import io
 
+import bz2
+import copy
+import io
 import json
 
-import copy
-
 from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk import converters
 
 from sanic import response
 from sanic import Sanic
@@ -72,15 +73,19 @@ test_data = {
 app = Sanic(__name__)
 
 
-def post(url, headers, json):
-    return app.test_client.post(url, headers=headers, data=json)
+def post(url, headers, data):
+    return app.test_client.post(url, headers=headers, data=data)
 
 
 @app.route("/event", ["POST"])
 async def echo(request):
-    assert isinstance(request.json, dict)
-    event = CloudEvent(request.json, headers=dict(request.headers))
-    return response.text(json.dumps(event.data), headers=event.headers)
+    decoder = None
+    if "binary-payload" in request.headers:
+        decoder = lambda x: x
+    event = CloudEvent.from_http(request.body, headers=dict(request.headers), data_unmarshaller=decoder)
+    data = event.data if isinstance(
+        event.data, (bytes, bytearray, memoryview)) else json.dumps(event.data).encode()
+    return response.raw(data, headers={k: event[k] for k in event})
 
 
 @pytest.mark.parametrize("body", invalid_cloudevent_request_bodie)
@@ -90,17 +95,18 @@ def test_missing_required_fields_structured(body):
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
         # prefix e-id instead of ce-id therefore it should throw
-        _ = CloudEvent(body, headers={'Content-Type': 'application/json'})
+        _ = CloudEvent.from_http(json.dumps(body), attributes={
+                                'Content-Type': 'application/json'})
 
 
 @pytest.mark.parametrize("headers", invalid_test_headers)
 def test_missing_required_fields_binary(headers):
-    with pytest.raises((TypeError, NotImplementedError)):
+    with pytest.raises((ValueError)):
         # CloudEvent constructor throws TypeError if missing required field
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
         # prefix e-id instead of ce-id therefore it should throw
-        _ = CloudEvent(test_data, headers=headers)
+        _ = CloudEvent.from_http(json.dumps(test_data), headers=headers)
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
@@ -110,13 +116,13 @@ def test_emit_binary_event(specversion):
         "ce-source": "<event-source>",
         "ce-type": "cloudevent.event.type",
         "ce-specversion": specversion,
-        "Content-Type": "application/cloudevents+json"
+        "Content-Type": "text/plain"
     }
-    event = CloudEvent(test_data, headers=headers)
+    data = json.dumps(test_data)
     _, r = app.test_client.post(
         "/event",
-        headers=event.headers,
-        data=json.dumps(event.data)
+        headers=headers,
+        data=data
     )
 
     # Convert byte array to dict
@@ -125,17 +131,18 @@ def test_emit_binary_event(specversion):
 
     # Check response fields
     for key in test_data:
-        assert body[key] == test_data[key]
+        assert body[key] == test_data[key], body
     for key in headers:
         if key != 'Content-Type':
-            assert r.headers[key] == headers[key]
+            attribute_key = key[3:]
+            assert r.headers[attribute_key] == headers[key]
     assert r.status_code == 200
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
 def test_emit_structured_event(specversion):
     headers = {
-        "Content-Type": "application/json"
+        "Content-Type": "application/cloudevents+json"
     }
     body = {
         "id": "my-id",
@@ -144,11 +151,10 @@ def test_emit_structured_event(specversion):
         "specversion": specversion,
         "data": test_data
     }
-    event = CloudEvent(body, headers=headers)
     _, r = app.test_client.post(
         "/event",
-        headers=event.headers,
-        data=json.dumps(event.data)
+        headers=headers,
+        data=json.dumps(body)
     )
 
     # Convert byte array to dict
@@ -160,6 +166,25 @@ def test_emit_structured_event(specversion):
         assert body[key] == test_data[key]
     assert r.status_code == 200
 
+@pytest.mark.parametrize("converter", [converters.TypeStructured, converters.TypeStructured])
+@pytest.mark.parametrize("specversion", ["1.0", "0.3"])
+def test_roundtrip_non_json_event(converter, specversion):
+    input_data = io.BytesIO()
+    for i in range(100):
+        for j in range(20):
+            assert 1 == input_data.write(j.to_bytes(1, byteorder='big'))
+    compressed_data = bz2.compress(input_data.getvalue())
+    attrs = {"source": "test", "type": "t"}
+
+    event = CloudEvent(attrs, compressed_data)
+    headers, data = event.to_http(converter, data_marshaller=lambda x: x)
+    headers["binary-payload"] = "true"  # Decoding hint for server
+    _, r = app.test_client.post("/event", headers=headers, data=data)
+
+    assert r.status_code == 200
+    for key in attrs:
+        assert r.headers[key] == attrs[key]
+    assert compressed_data == r.body, r.body
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
 def test_missing_ce_prefix_binary_event(specversion):
@@ -175,12 +200,12 @@ def test_missing_ce_prefix_binary_event(specversion):
         # breaking prefix e.g. e-id instead of ce-id
         prefixed_headers[key[1:]] = headers[key]
 
-        with pytest.raises((TypeError, NotImplementedError)):
+        with pytest.raises(ValueError):
             # CloudEvent constructor throws TypeError if missing required field
             # and NotImplementedError because structured calls aren't
             # implemented. In this instance one of the required keys should have
             # prefix e-id instead of ce-id therefore it should throw
-            _ = CloudEvent(test_data, headers=prefixed_headers)
+            _ = CloudEvent.from_http(test_data, headers=prefixed_headers)
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
@@ -197,83 +222,87 @@ def test_valid_binary_events(specversion):
             "ce-specversion": specversion
         }
         data = {'payload': f"payload-{i}"}
-        events_queue.append(CloudEvent(data, headers=headers))
+        events_queue.append(CloudEvent.from_http(
+            json.dumps(data), headers=headers))
 
     for i, event in enumerate(events_queue):
-        headers = event.headers
         data = event.data
-        assert headers['ce-id'] == f"id{i}"
-        assert headers['ce-source'] == f"source{i}.com.test"
-        assert headers['ce-specversion'] == specversion
-        assert data['payload'] == f"payload-{i}"
+        assert event['id'] == f"id{i}"
+        assert event['source'] == f"source{i}.com.test"
+        assert event['specversion'] == specversion
+        assert event.data['payload'] == f"payload-{i}"
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
 def test_structured_to_request(specversion):
-    data = {
+    attributes = {
         "specversion": specversion,
         "type": "word.found.name",
         "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
         "source": "pytest",
-        "data": {"message": "Hello World!"}
     }
-    event = CloudEvent(data)
-    headers, body = event.to_request()
-    assert isinstance(body, dict)
+    data = {"message": "Hello World!"}
+
+    event = CloudEvent(attributes, data)
+    headers, body_bytes = event.to_http()
+    assert isinstance(body_bytes, bytes)
+    body = json.loads(body_bytes)
 
     assert headers['content-type'] == 'application/cloudevents+json'
-    for key in data:
-        assert body[key] == data[key]
+    for key in attributes:
+        assert body[key] == attributes[key]
+    assert body["data"] == data, f"|{body_bytes}|| {body}"
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
 def test_binary_to_request(specversion):
-    test_headers = {
-        "ce-specversion": specversion,
-        "ce-type": "word.found.name",
-        "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
-        "ce-source": "pytest"
+    attributes = {
+        "specversion": specversion,
+        "type": "word.found.name",
+        "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "source": "pytest"
     }
     data = {
         "message": "Hello World!"
     }
-    event = CloudEvent(data, headers=test_headers)
-    headers, body = event.to_request()
-    assert isinstance(body, dict)
+    event = CloudEvent(attributes, data)
+    headers, body_bytes = event.to_http(converters.TypeBinary)
+    body = json.loads(body_bytes)
 
     for key in data:
         assert body[key] == data[key]
-    for key in test_headers:
-        assert test_headers[key] == headers[key]
+    for key in attributes:
+        assert attributes[key] == headers['ce-' + key]
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
 def test_empty_data_structured_event(specversion):
     # Testing if cloudevent breaks when no structured data field present
-    data = {
+    attributes = {
         "specversion": specversion,
         "datacontenttype": "application/json",
         "type": "word.found.name",
         "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
         "time": "2018-10-23T12:28:22.4579346Z",
         "source": "<source-url>",
-        "data": {"message": "Hello World!"}
     }
-    _ = CloudEvent(data)
+
+    _ = CloudEvent.from_http(json.dumps(attributes), {
+                            "content-type": "application/cloudevents+json"})
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
 def test_empty_data_binary_event(specversion):
     # Testing if cloudevent breaks when no structured data field present
     headers = {
-        "Content-Type": "application/cloudevents+json",         
+        "Content-Type": "application/octet-stream",
         "ce-specversion": specversion,
         "ce-type": "word.found.name",
         "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
         "ce-time": "2018-10-23T12:28:22.4579346Z",
         "ce-source": "<source-url>",
     }
-    _ = CloudEvent(None, headers=headers)
+    _ = CloudEvent.from_http('', headers)
 
 
 @pytest.mark.parametrize("specversion", ['1.0', '0.3'])
@@ -283,21 +312,18 @@ def test_valid_structured_events(specversion):
     headers = {}
     num_cloudevents = 30
     for i in range(num_cloudevents):
-        data = {
+        event = {
             "id": f"id{i}",
             "source": f"source{i}.com.test",
             "type": f"cloudevent.test.type",
             "specversion": specversion,
-            "data": {
-                'payload': f"payload-{i}"
-            }
+            "data": {'payload': f"payload-{i}"}
         }
-        events_queue.append(CloudEvent(data))
+        events_queue.append(CloudEvent.from_http(json.dumps(event),
+                                                {"content-type": "application/cloudevents+json"}))
 
     for i, event in enumerate(events_queue):
-        headers = event.headers
-        data = event.data
-        assert headers['ce-id'] == f"id{i}"
-        assert headers['ce-source'] == f"source{i}.com.test"
-        assert headers['ce-specversion'] == specversion
-        assert data['payload'] == f"payload-{i}"
+        assert event['id'] == f"id{i}"
+        assert event['source'] == f"source{i}.com.test"
+        assert event['specversion'] == specversion
+        assert event.data['payload'] == f"payload-{i}"
