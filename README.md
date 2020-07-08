@@ -19,26 +19,25 @@ Sending CloudEvents:
 ### Binary HTTP CloudEvent
 
 ```python
+from cloudevents.sdk import converters
 from cloudevents.sdk.http_events import CloudEvent
 import requests
 
 
 # This data defines a binary cloudevent
-headers = {
+attributes = {
     "Content-Type": "application/json",
-    "ce-specversion": "1.0",
-    "ce-type": "README.sample.binary",
-    "ce-id": "binary-event",
-    "ce-time": "2018-10-23T12:28:22.4579346Z",
-    "ce-source": "README",
+    "type": "README.sample.binary",
+    "id": "binary-event",
+    "source": "README",
 }
 data = {"message": "Hello World!"}
 
-event = CloudEvent(data, headers=headers)
-headers, body = event.to_request()
+event = CloudEvent(attributes, data)
+headers, body = event.to_http(converters.TypeBinary)
 
 # POST
-requests.post("<some-url>", json=body, headers=headers)
+requests.post("<some-url>", data=body, headers=headers)
 ```
 
 ### Structured HTTP CloudEvent
@@ -49,18 +48,17 @@ import requests
 
 
 # This data defines a structured cloudevent
-data = {
-    "specversion": "1.0",
+attributes = {
     "type": "README.sample.structured",
     "id": "structured-event",
     "source": "README",
-    "data": {"message": "Hello World!"}
 }
-event = CloudEvent(data)
-headers, body = event.to_request()
+data = {"message": "Hello World!"}
+event = CloudEvent(attributes, data)
+headers, body = event.to_http()
 
 # POST
-requests.post("<some-url>", json=body, headers=headers)
+requests.post("<some-url>", data=body, headers=headers)
 ```
 
 ### Event base classes usage
@@ -78,19 +76,16 @@ m = marshaller.NewDefaultHTTPMarshaller()
 event = m.FromRequest(
     v1.Event(),
     {"content-type": "application/cloudevents+json"},
-    io.StringIO(
-        """
-        {
-            "specversion": "1.0",
-            "datacontenttype": "application/json",
-            "type": "word.found.name",
-            "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
-            "time": "2018-10-23T12:28:22.4579346Z",
-            "source": "<source-url>"
-        }
-        """
-    ),
-    lambda x: x.read(),
+    """
+    {
+        "specversion": "1.0",
+        "datacontenttype": "application/json",
+        "type": "word.found.name",
+        "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "time": "2018-10-23T12:28:22.4579346Z",
+        "source": "<source-url>"
+    }
+    """,
 )
 ```
 
@@ -108,14 +103,14 @@ event = m.FromRequest(
     v1.Event(),
     {
         "ce-specversion": "1.0",
-        "content-type": "application/json",
+        "content-type": "application/octet-stream",
         "ce-type": "word.found.name",
         "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
         "ce-time": "2018-10-23T12:28:22.4579346Z",
         "ce-source": "<source-url>",
     },
-    io.BytesIO(b"this is where your CloudEvent data"),
-    lambda x: x.read(),
+    b"this is where your CloudEvent data is, including image/jpeg",
+    lambda x: x,  # Do not decode body as JSON
 )
 ```
 
@@ -137,7 +132,7 @@ event = (
     .SetEventType("cloudevent.greet.you")
 )
 
-m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
+m = marshaller.NewDefaultHTTPMarshaller()
 
 headers, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
 ```
@@ -155,30 +150,33 @@ One of popular framework is [`requests`](http://docs.python-requests.org/en/mast
 The code below shows how integrate both libraries in order to convert a CloudEvent into an HTTP request:
 
 ```python
-def run_binary(event, url):
-    binary_headers, binary_data = http_marshaller.ToRequest(
-        event, converters.TypeBinary, json.dumps)
+from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.types import converters
+
+def run_binary(event: CloudEvent, url):
+    # If event.data is a custom type, set data_marshaller as well
+    headers, data = event.to_http(converters.TypeBinary)
 
     print("binary CloudEvent")
-    for k, v in binary_headers.items():
+    for k, v in headers.items():
         print("{0}: {1}\r\n".format(k, v))
-    print(binary_data.getvalue())
+    print(data)
     response = requests.post(url,
-                             headers=binary_headers,
-                             data=binary_data.getvalue())
+                             headers=headers,
+                             data=data)
     response.raise_for_status()
 
 
-def run_structured(event, url):
-    structured_headers, structured_data = http_marshaller.ToRequest(
-        event, converters.TypeStructured, json.dumps
-    )
+def run_structured(event: CloudEvent, url):
+    # If event.data is a custom type, set data_marshaller as well
+    headers, data = event.to_http(converters.TypeStructured)
+
     print("structured CloudEvent")
-    print(structured_data.getvalue())
+    print(data)
 
     response = requests.post(url,
-                             headers=structured_headers,
-                             data=structured_data.getvalue())
+                             headers=headers,
+                             data=data)
     response.raise_for_status()
 
 ```
@@ -187,18 +185,13 @@ Complete example of turning a CloudEvent into a request you can find [here](samp
 
 #### Request to CloudEvent
 
-The code below shows how integrate both libraries in order to create a CloudEvent from an HTTP request:
+The code below shows how integrate both libraries in order to create a CloudEvent from an HTTP response:
 
 ```python
     response = requests.get(url)
     response.raise_for_status()
-    headers = response.headers
-    data = io.BytesIO(response.content)
-    event = v1.Event()
-    http_marshaller = marshaller.NewDefaultHTTPMarshaller()
-    event = http_marshaller.FromRequest(
-        event, headers, data, json.load)
 
+    event = CloudEvent.from_http(response.content, response.headers)
 ```
 
 Complete example of turning a CloudEvent into a request you can find [here](samples/python-requests/request_to_cloudevent.py).
