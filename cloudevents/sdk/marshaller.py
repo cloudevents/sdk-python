@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import typing
 
-from cloudevents.sdk import exceptions
+from cloudevents.sdk import exceptions, types
 
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.converters import binary
@@ -42,8 +43,8 @@ class HTTPMarshaller(object):
         self,
         event: event_base.BaseEvent,
         headers: dict,
-        body: typing.IO,
-        data_unmarshaller: typing.Callable,
+        body: typing.Union[str, bytes],
+        data_unmarshaller: types.UnmarshallerType = json.loads,
     ) -> event_base.BaseEvent:
         """
         Reads a CloudEvent from an HTTP headers and request body
@@ -51,8 +52,8 @@ class HTTPMarshaller(object):
         :type event: cloudevents.sdk.event.base.BaseEvent
         :param headers: a dict-like HTTP headers
         :type headers: dict
-        :param body: a stream-like HTTP request body
-        :type body: typing.IO
+        :param body: an HTTP request body as a string or bytes
+        :type body: typing.Union[str, bytes]
         :param data_unmarshaller: a callable-like
                                   unmarshaller the CloudEvent data
         :return: a CloudEvent
@@ -78,9 +79,9 @@ class HTTPMarshaller(object):
     def ToRequest(
         self,
         event: event_base.BaseEvent,
-        converter_type: str,
-        data_marshaller: typing.Callable,
-    ) -> (dict, typing.IO):
+        converter_type: str = None,
+        data_marshaller: types.MarshallerType = None,
+    ) -> (dict, bytes):
         """
         Writes a CloudEvent into a HTTP-ready form of headers and request body
         :param event: CloudEvent
@@ -92,8 +93,12 @@ class HTTPMarshaller(object):
         :return: dict of HTTP headers and stream of HTTP request body
         :rtype: tuple
         """
-        if not isinstance(data_marshaller, typing.Callable):
+        if (data_marshaller is not None
+                and not isinstance(data_marshaller, typing.Callable)):
             raise exceptions.InvalidDataMarshaller()
+
+        if converter_type is None:
+            converter_type = self.__converters[0].TYPE
 
         if converter_type in self.__converters_by_type:
             cnvrtr = self.__converters_by_type[converter_type]
