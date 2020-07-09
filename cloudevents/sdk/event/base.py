@@ -206,7 +206,7 @@ class BaseEvent(EventGetterSetter):
     def UnmarshalJSON(
         self,
         b: typing.Union[str, bytes],
-        data_unmarshaller: types.UnmarshallerType
+        data_unmarshaller: types.UnmarshallerType,
     ):
         raw_ce = json.loads(b)
 
@@ -228,9 +228,9 @@ class BaseEvent(EventGetterSetter):
         self,
         headers: dict,
         body: typing.Union[bytes, str],
-        data_unmarshaller: types.UnmarshallerType
+        data_unmarshaller: types.UnmarshallerType,
     ):
-        if 'ce-specversion' not in headers:
+        if "ce-specversion" not in headers:
             raise ValueError("Missing required attribute: 'specversion'")
         for header, value in headers.items():
             header = header.lower()
@@ -244,8 +244,7 @@ class BaseEvent(EventGetterSetter):
             raise ValueError(f"Missing required attributes: {missing_attrs}")
 
     def MarshalBinary(
-            self,
-            data_marshaller: types.MarshallerType
+        self, data_marshaller: types.MarshallerType
     ) -> (dict, bytes):
         if data_marshaller is None:
             data_marshaller = json.dumps

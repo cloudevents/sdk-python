@@ -18,7 +18,8 @@ import typing
 # both JSON and Binary format.
 
 MarshallerType = typing.Optional[
-    typing.Callable[[typing.Any], typing.Union[bytes, str]]]
+    typing.Callable[[typing.Any], typing.Union[bytes, str]]
+]
 UnmarshallerType = typing.Optional[
-    typing.Callable[
-        [typing.Union[bytes, str]], typing.Any]]
+    typing.Callable[[typing.Union[bytes, str]], typing.Any]
+]

@@ -12,21 +12,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import io
-import requests
+import json
 import sys
 
+import requests
+
 from cloudevents.sdk import marshaller
-
 from cloudevents.sdk.event import v1
-
 
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
-        sys.exit("Usage: python with_requests.py "
-                 "<CloudEvent source URL>")
+        sys.exit("Usage: python with_requests.py " "<CloudEvent source URL>")
 
     url = sys.argv[1]
     response = requests.get(url)
@@ -35,7 +33,6 @@ if __name__ == "__main__":
     data = io.BytesIO(response.content)
     event = v1.Event()
     http_marshaller = marshaller.NewDefaultHTTPMarshaller()
-    event = http_marshaller.FromRequest(
-        event, headers, data, json.load)
+    event = http_marshaller.FromRequest(event, headers, data, json.load)
 
     print(json.dumps(event.Properties()))
