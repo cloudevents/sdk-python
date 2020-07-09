@@ -12,31 +12,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-import pytest
 import io
+import json
 
-from cloudevents.sdk import exceptions
-from cloudevents.sdk import marshaller
-
-from cloudevents.sdk.event import v03
-from cloudevents.sdk.event import v1
-
-from cloudevents.sdk.converters import binary
-from cloudevents.sdk.converters import structured
-
+import pytest
+from cloudevents.sdk import exceptions, marshaller
+from cloudevents.sdk.converters import binary, structured
+from cloudevents.sdk.event import v1, v03
 from cloudevents.tests import data
 
 
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
 def test_binary_converter_upstream(event_class):
     m = marshaller.NewHTTPMarshaller(
-        [binary.NewBinaryHTTPCloudEventConverter()])
+        [binary.NewBinaryHTTPCloudEventConverter()]
+    )
     event = m.FromRequest(
-        event_class(),
-        data.headers[event_class],
-        None,
-        lambda x: x
+        event_class(), data.headers[event_class], None, lambda x: x
     )
     assert event is not None
     assert event.EventType() == data.ce_type
@@ -47,7 +39,8 @@ def test_binary_converter_upstream(event_class):
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
 def test_structured_converter_upstream(event_class):
     m = marshaller.NewHTTPMarshaller(
-        [structured.NewJSONHTTPCloudEventConverter()])
+        [structured.NewJSONHTTPCloudEventConverter()]
+    )
     event = m.FromRequest(
         event_class(),
         {"Content-Type": "application/cloudevents+json"},
@@ -82,9 +75,10 @@ def test_default_http_marshaller_with_binary(event_class):
     m = marshaller.NewDefaultHTTPMarshaller()
 
     event = m.FromRequest(
-        event_class(), data.headers[event_class],
+        event_class(),
+        data.headers[event_class],
         json.dumps(data.body),
-        json.loads
+        json.loads,
     )
     assert event is not None
     assert event.EventType() == data.ce_type

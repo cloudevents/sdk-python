@@ -16,11 +16,7 @@ import json
 import typing
 
 from cloudevents.sdk import exceptions, types
-
-from cloudevents.sdk.converters import base
-from cloudevents.sdk.converters import binary
-from cloudevents.sdk.converters import structured
-
+from cloudevents.sdk.converters import base, binary, structured
 from cloudevents.sdk.event import base as event_base
 
 
@@ -93,8 +89,9 @@ class HTTPMarshaller(object):
         :return: dict of HTTP headers and stream of HTTP request body
         :rtype: tuple
         """
-        if (data_marshaller is not None
-                and not isinstance(data_marshaller, typing.Callable)):
+        if data_marshaller is not None and not isinstance(
+            data_marshaller, typing.Callable
+        ):
             raise exceptions.InvalidDataMarshaller()
 
         if converter_type is None:
@@ -123,7 +120,7 @@ def NewDefaultHTTPMarshaller() -> HTTPMarshaller:
 
 
 def NewHTTPMarshaller(
-        converters: typing.List[base.Converter]
+    converters: typing.List[base.Converter],
 ) -> HTTPMarshaller:
     """
     Creates the default HTTP marshaller with both

@@ -26,7 +26,7 @@ class Converter(object):
         event,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: typing.Callable
+        data_unmarshaller: typing.Callable,
     ) -> base.BaseEvent:
         raise Exception("not implemented")
 
@@ -37,8 +37,6 @@ class Converter(object):
         raise Exception("not implemented")
 
     def write(
-        self,
-        event: base.BaseEvent,
-        data_marshaller: typing.Callable
+        self, event: base.BaseEvent, data_marshaller: typing.Callable
     ) -> (dict, object):
         raise Exception("not implemented")

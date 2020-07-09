@@ -14,14 +14,11 @@
 
 import io
 import json
+
 import pytest
-
-from cloudevents.sdk.event import v03, v1
-
-from cloudevents.sdk import converters
-from cloudevents.sdk import marshaller
+from cloudevents.sdk import converters, marshaller
 from cloudevents.sdk.converters import structured
-
+from cloudevents.sdk.event import v1, v03
 from cloudevents.tests import data
 
 
@@ -51,11 +48,8 @@ def test_event_pipeline_upstream(event_class):
 
 
 def test_extensions_are_set_upstream():
-    extensions = {'extension-key': 'extension-value'}
-    event = (
-        v1.Event()
-        .SetExtensions(extensions)
-    )
+    extensions = {"extension-key": "extension-value"}
+    event = v1.Event().SetExtensions(extensions)
 
     m = marshaller.NewDefaultHTTPMarshaller()
     new_headers, _ = m.ToRequest(event, converters.TypeBinary, lambda x: x)
@@ -68,9 +62,11 @@ def test_binary_event_v1():
     event = (
         v1.Event()
         .SetContentType("application/octet-stream")
-        .SetData(b'\x00\x01')
+        .SetData(b"\x00\x01")
     )
-    m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
+    m = marshaller.NewHTTPMarshaller(
+        [structured.NewJSONHTTPCloudEventConverter()]
+    )
 
     _, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
     assert isinstance(body, bytes)
@@ -78,11 +74,10 @@ def test_binary_event_v1():
     assert "data" not in content
     assert content["data_base64"] == "AAE=", f"Content is: {content}"
 
+
 def test_object_event_v1():
     event = (
-        v1.Event()
-        .SetContentType("application/json")
-        .SetData({"name": "john"})
+        v1.Event().SetContentType("application/json").SetData({"name": "john"})
     )
 
     m = marshaller.NewDefaultHTTPMarshaller()

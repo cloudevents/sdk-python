@@ -12,24 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.sdk.event import base
-from cloudevents.sdk.event import opt
+from cloudevents.sdk.event import base, opt
 
 
 class Event(base.BaseEvent):
-    _ce_required_fields = {
-        'id',
-        'source',
-        'type',
-        'specversion'
-    }
+    _ce_required_fields = {"id", "source", "type", "specversion"}
 
     _ce_optional_fields = {
-        'datacontentencoding',
-        'datacontenttype',
-        'schemaurl',
-        'subject',
-        'time'
+        "datacontentencoding",
+        "datacontenttype",
+        "schemaurl",
+        "subject",
+        "time",
     }
 
     def __init__(self):
@@ -40,9 +34,7 @@ class Event(base.BaseEvent):
 
         self.ce__datacontenttype = opt.Option("datacontenttype", None, False)
         self.ce__datacontentencoding = opt.Option(
-            "datacontentencoding",
-            None,
-            False
+            "datacontentencoding", None, False
         )
         self.ce__subject = opt.Option("subject", None, False)
         self.ce__time = opt.Option("time", None, False)

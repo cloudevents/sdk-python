@@ -13,11 +13,12 @@
 #    under the License.
 from cloudevents.sdk.http_events import CloudEvent
 from flask import Flask, request
+
 app = Flask(__name__)
 
 
 # create an endpoint at http://localhost:/3000/
-@app.route('/', methods=['POST'])
+@app.route("/", methods=["POST"])
 def home():
     # convert headers to dict
     print(request.get_data())
@@ -27,8 +28,8 @@ def home():
 
     # print the received CloudEvent
     print(f"Received CloudEvent {event}")
-    return '', 204
+    return "", 204
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(port=3000)

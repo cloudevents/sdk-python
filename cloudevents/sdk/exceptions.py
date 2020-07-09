@@ -15,9 +15,7 @@
 
 class UnsupportedEvent(Exception):
     def __init__(self, event_class):
-        super().__init__(
-            "Invalid CloudEvent class: '{0}'".format(event_class)
-        )
+        super().__init__("Invalid CloudEvent class: '{0}'".format(event_class))
 
 
 class InvalidDataUnmarshaller(Exception):
@@ -27,16 +25,12 @@ class InvalidDataUnmarshaller(Exception):
 
 class InvalidDataMarshaller(Exception):
     def __init__(self):
-        super().__init__(
-            "Invalid data marshaller, is not a callable"
-        )
+        super().__init__("Invalid data marshaller, is not a callable")
 
 
 class NoSuchConverter(Exception):
     def __init__(self, converter_type):
-        super().__init__(
-            "No such converter {0}".format(converter_type)
-        )
+        super().__init__("No such converter {0}".format(converter_type))
 
 
 class UnsupportedEventConverter(Exception):

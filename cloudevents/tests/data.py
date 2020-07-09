@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.sdk.event import v03, v1
+from cloudevents.sdk.event import v1, v03
 
 contentType = "application/json"
 ce_type = "word.found.exclamation"

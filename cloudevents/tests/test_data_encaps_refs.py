@@ -12,20 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
 import io
 import json
-import copy
-import pytest
-
 from uuid import uuid4
 
-from cloudevents.sdk import converters
-from cloudevents.sdk import marshaller
-
+import pytest
+from cloudevents.sdk import converters, marshaller
 from cloudevents.sdk.converters import structured
-from cloudevents.sdk.event import v03, v1
-
-
+from cloudevents.sdk.event import v1, v03
 from cloudevents.tests import data
 
 
@@ -56,7 +51,7 @@ def test_general_binary_properties(event_class):
     new_content_type = str(uuid4())
     new_source = str(uuid4())
 
-    event.extensions = {'test': str(uuid4)}
+    event.extensions = {"test": str(uuid4)}
     event.type = new_type
     event.id = new_id
     event.content_type = new_content_type
@@ -66,10 +61,11 @@ def test_general_binary_properties(event_class):
     assert (event.type == new_type) and (event.type == event.EventType())
     assert (event.id == new_id) and (event.id == event.EventID())
     assert (event.content_type == new_content_type) and (
-        event.content_type == event.ContentType())
+        event.content_type == event.ContentType()
+    )
     assert (event.source == new_source) and (event.source == event.Source())
-    assert event.extensions['test'] == event.Extensions()['test']
-    assert (event.specversion == event.CloudEventVersion())
+    assert event.extensions["test"] == event.Extensions()["test"]
+    assert event.specversion == event.CloudEventVersion()
 
 
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
@@ -78,8 +74,10 @@ def test_general_structured_properties(event_class):
     m = marshaller.NewDefaultHTTPMarshaller()
     http_headers = {"content-type": "application/cloudevents+json"}
     event = m.FromRequest(
-        event_class(), http_headers, json.dumps(
-            data.json_ce[event_class]), lambda x: x
+        event_class(),
+        http_headers,
+        json.dumps(data.json_ce[event_class]),
+        lambda x: x,
     )
     # Test python properties
     assert event is not None
@@ -101,7 +99,7 @@ def test_general_structured_properties(event_class):
     new_content_type = str(uuid4())
     new_source = str(uuid4())
 
-    event.extensions = {'test': str(uuid4)}
+    event.extensions = {"test": str(uuid4)}
     event.type = new_type
     event.id = new_id
     event.content_type = new_content_type
@@ -111,7 +109,8 @@ def test_general_structured_properties(event_class):
     assert (event.type == new_type) and (event.type == event.EventType())
     assert (event.id == new_id) and (event.id == event.EventID())
     assert (event.content_type == new_content_type) and (
-        event.content_type == event.ContentType())
+        event.content_type == event.ContentType()
+    )
     assert (event.source == new_source) and (event.source == event.Source())
-    assert event.extensions['test'] == event.Extensions()['test']
-    assert (event.specversion == event.CloudEventVersion())
+    assert event.extensions["test"] == event.Extensions()["test"]
+    assert event.specversion == event.CloudEventVersion()

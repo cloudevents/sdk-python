@@ -13,25 +13,23 @@
 #    under the License.
 
 import json
-import requests
 import sys
 
-from cloudevents.sdk import converters
-from cloudevents.sdk import marshaller
-
+import requests
+from cloudevents.sdk import converters, marshaller
 from cloudevents.sdk.event import v1
 
 
 def run_binary(event, url):
     binary_headers, binary_data = http_marshaller.ToRequest(
-        event, converters.TypeBinary, json.dumps)
+        event, converters.TypeBinary, json.dumps
+    )
 
     print("binary CloudEvent")
     for k, v in binary_headers.items():
         print("{0}: {1}\r\n".format(k, v))
     print(binary_data)
-    response = requests.post(
-        url, headers=binary_headers, data=binary_data)
+    response = requests.post(url, headers=binary_headers, data=binary_data)
     response.raise_for_status()
 
 
@@ -42,30 +40,32 @@ def run_structured(event, url):
     print("structured CloudEvent")
     print(structured_data.getvalue())
 
-    response = requests.post(url,
-                             headers=structured_headers,
-                             data=structured_data.getvalue())
+    response = requests.post(
+        url, headers=structured_headers, data=structured_data.getvalue()
+    )
     response.raise_for_status()
 
 
 if __name__ == "__main__":
 
     if len(sys.argv) < 3:
-        sys.exit("Usage: python with_requests.py "
-                 "[binary | structured] "
-                 "<CloudEvents controller URL>")
+        sys.exit(
+            "Usage: python with_requests.py "
+            "[binary | structured] "
+            "<CloudEvents controller URL>"
+        )
 
     fmt = sys.argv[1]
     url = sys.argv[2]
 
     http_marshaller = marshaller.NewDefaultHTTPMarshaller()
     event = (
-        v1.Event().
-        SetContentType("application/json").
-        SetData({"name": "denis"}).
-        SetEventID("my-id").
-        SetSource("<event-source").
-        SetEventType("cloudevent.event.type")
+        v1.Event()
+        .SetContentType("application/json")
+        .SetData({"name": "denis"})
+        .SetEventID("my-id")
+        .SetSource("<event-source")
+        .SetEventType("cloudevent.event.type")
     )
     if "structured" == fmt:
         run_structured(event, url)
