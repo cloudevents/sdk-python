@@ -11,12 +11,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import sys
 import io
-from cloudevents.sdk.http_events import CloudEvent
-from cloudevents.sdk import converters
+import sys
 
 import requests
+
+from cloudevents.sdk import converters
+from cloudevents.sdk.http_events import CloudEvent
 
 
 def send_binary_cloud_event(url):
@@ -27,20 +28,17 @@ def send_binary_cloud_event(url):
         "type": "template.http.binary",
         "dataontenttype": "application/json",
         # Time will be filled in automatically if not set
-        "time": "2018-10-23T12:28:23.3464579Z"
+        "time": "2018-10-23T12:28:23.3464579Z",
     }
     data = {"payload-content": "Hello World!"}
 
-    # create a CloudEvent 
+    # create a CloudEvent
     event = CloudEvent(attributes, data)
     headers, body = event.to_http(converters.TypeBinary)
 
     # send and print event
     requests.post(url, headers=headers, json=body)
-    print(
-        f"Sent {event['id']} from {event['source']} with "
-        f"{event.data}"
-    )
+    print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
 
 
 def send_structured_cloud_event(url):
@@ -55,24 +53,22 @@ def send_structured_cloud_event(url):
     }
     data = {"payload-content": "Hello World!"}
 
-    # create a CloudEvent 
+    # create a CloudEvent
     event = CloudEvent(attributes, data)
     headers, body = event.to_request()
 
     # send and print event
     requests.post(url, headers=headers, json=body)
-    print(
-        f"Sent {event['id']} from {event['source']} with "
-        f"{event.data}"
-    )
+    print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
 
 
 if __name__ == "__main__":
     # expects a url from command line.
     # e.g. python3 client.py http://localhost:3000/
     if len(sys.argv) < 2:
-        sys.exit("Usage: python with_requests.py "
-                 "<CloudEvents controller URL>")
+        sys.exit(
+            "Usage: python with_requests.py " "<CloudEvents controller URL>"
+        )
 
     url = sys.argv[1]
     send_binary_cloud_event(url)

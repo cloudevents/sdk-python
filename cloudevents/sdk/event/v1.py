@@ -12,24 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.sdk.event import base
-from cloudevents.sdk.event import opt
+from cloudevents.sdk.event import base, opt
 
 
 class Event(base.BaseEvent):
-    _ce_required_fields = {
-        'id',
-        'source',
-        'type',
-        'specversion'
-    }
+    _ce_required_fields = {"id", "source", "type", "specversion"}
 
-    _ce_optional_fields = {
-        'datacontenttype',
-        'dataschema',
-        'subject',
-        'time'
-    }
+    _ce_optional_fields = {"datacontenttype", "dataschema", "subject", "time"}
 
     def __init__(self):
         self.ce__specversion = opt.Option("specversion", "1.0", True)

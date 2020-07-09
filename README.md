@@ -217,3 +217,14 @@ the same API. It will use semantic versioning with following rules:
   [CNCF's Slack workspace](https://slack.cncf.io/).
 - Email: https://lists.cncf.io/g/cncf-cloudevents-sdk
 - Contact for additional information: Denis Makogon (`@denysmakogon` on slack).
+
+## Maintenance
+
+We use black and isort for autoformatting. We setup a tox environment to reformat
+the codebase. 
+
+e.g.
+```python
+pip install tox
+tox -e reformat
+```

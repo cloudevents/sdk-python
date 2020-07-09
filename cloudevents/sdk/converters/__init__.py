@@ -12,8 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.sdk.converters import binary
-from cloudevents.sdk.converters import structured
+from cloudevents.sdk.converters import binary, structured
 
 TypeBinary = binary.BinaryHTTPCloudEventConverter.TYPE
 TypeStructured = structured.JSONHTTPCloudEventConverter.TYPE

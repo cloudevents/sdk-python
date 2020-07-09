@@ -12,15 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.sdk import marshaller
-from cloudevents.sdk import converters
+from sanic import Sanic, response
+
+from cloudevents.sdk import converters, marshaller
 from cloudevents.sdk.event import v1
-
-from sanic import Sanic
-from sanic import response
-
 from cloudevents.tests import data as test_data
-
 
 m = marshaller.NewDefaultHTTPMarshaller()
 app = Sanic(__name__)
@@ -28,22 +24,14 @@ app = Sanic(__name__)
 
 @app.route("/is-ok", ["POST"])
 async def is_ok(request):
-    m.FromRequest(
-        v1.Event(),
-        dict(request.headers),
-        request.body,
-        lambda x: x
-    )
+    m.FromRequest(v1.Event(), dict(request.headers), request.body, lambda x: x)
     return response.text("OK")
 
 
 @app.route("/echo", ["POST"])
 async def echo(request):
     event = m.FromRequest(
-        v1.Event(),
-        dict(request.headers),
-        request.body,
-        lambda x: x
+        v1.Event(), dict(request.headers), request.body, lambda x: x
     )
     hs, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
     return response.text(body, headers=hs)
@@ -66,7 +54,8 @@ def test_web_app_integration():
 
 def test_web_app_echo():
     _, r = app.test_client.post(
-        "/echo", headers=test_data.headers[v1.Event], data=test_data.body)
+        "/echo", headers=test_data.headers[v1.Event], data=test_data.body
+    )
     assert r.status == 200
     event = m.FromRequest(v1.Event(), dict(r.headers), r.body, lambda x: x)
     assert event is not None
