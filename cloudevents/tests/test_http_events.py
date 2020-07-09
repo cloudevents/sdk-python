@@ -18,9 +18,10 @@ import io
 import json
 
 import pytest
+from sanic import Sanic, response
+
 from cloudevents.sdk import converters
 from cloudevents.sdk.http_events import CloudEvent
-from sanic import Sanic, response
 
 invalid_test_headers = [
     {

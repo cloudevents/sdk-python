@@ -16,6 +16,7 @@ import json
 import sys
 
 import requests
+
 from cloudevents.sdk import converters, marshaller
 from cloudevents.sdk.event import v1
 

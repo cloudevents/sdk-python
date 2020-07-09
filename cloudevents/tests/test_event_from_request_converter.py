@@ -16,6 +16,7 @@ import io
 import json
 
 import pytest
+
 from cloudevents.sdk import exceptions, marshaller
 from cloudevents.sdk.converters import binary, structured
 from cloudevents.sdk.event import v1, v03

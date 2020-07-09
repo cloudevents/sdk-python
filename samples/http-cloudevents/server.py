@@ -11,8 +11,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from cloudevents.sdk.http_events import CloudEvent
 from flask import Flask, request
+
+from cloudevents.sdk.http_events import CloudEvent
 
 app = Flask(__name__)
 

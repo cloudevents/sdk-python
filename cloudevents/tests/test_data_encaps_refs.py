@@ -18,6 +18,7 @@ import json
 from uuid import uuid4
 
 import pytest
+
 from cloudevents.sdk import converters, marshaller
 from cloudevents.sdk.converters import structured
 from cloudevents.sdk.event import v1, v03
