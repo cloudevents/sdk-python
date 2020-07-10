@@ -21,44 +21,38 @@ from cloudevents.sdk.http_events import CloudEvent
 
 
 def send_binary_cloud_event(url):
-    # define cloudevents data
+    # This data defines a binary cloudevent
     attributes = {
-        "id": "binary-event-id",
-        "source": "localhost",
-        "type": "template.http.binary",
-        "dataontenttype": "application/json",
-        # Time will be filled in automatically if not set
-        "time": "2018-10-23T12:28:23.3464579Z",
+        "Content-Type": "application/json",
+        "type": "com.readme.binary",
+        "id": "A234-1234-1234",
+        "source": "/client.py",
     }
-    data = {"payload-content": "Hello World!"}
+    data = {"message": "Hello World!"}
 
-    # create a CloudEvent
     event = CloudEvent(attributes, data)
     headers, body = event.to_http(converters.TypeBinary)
 
     # send and print event
-    requests.post(url, headers=headers, json=body)
+    requests.post(url, data=body, headers=headers)
     print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
 
 
 def send_structured_cloud_event(url):
-    # define cloudevents data
+    # This data defines a structured cloudevent
     attributes = {
-        "id": "structured-event-id",
-        "source": "localhost",
-        "type": "template.http.structured",
-        "datacontenttype": "application/json",
+        "type": "com.readme.structured",
+        "id": "B234-1234-1234",
+        "source": "/client.py",
         # Time will be filled in automatically if not set
         "time": "2018-10-23T12:28:23.3464579Z",
     }
-    data = {"payload-content": "Hello World!"}
-
-    # create a CloudEvent
+    data = {"message": "Hello World!"}
     event = CloudEvent(attributes, data)
-    headers, body = event.to_request()
+    headers, body = event.to_http()
 
-    # send and print event
-    requests.post(url, headers=headers, json=body)
+    # POST
+    requests.post(url, data=body, headers=headers)
     print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
 
 

@@ -21,14 +21,20 @@ app = Flask(__name__)
 # create an endpoint at http://localhost:/3000/
 @app.route("/", methods=["POST"])
 def home():
-    # convert headers to dict
-    print(request.get_data())
-    print(request.headers)
     # create a CloudEvent
     event = CloudEvent.from_http(request.get_data(), request.headers)
+    print(event)
 
-    # print the received CloudEvent
-    print(f"Received CloudEvent {event}")
+    # you can access cloudevent fields as seen below
+    assert event["specversion"] == "1.0"
+    print(f"Found CloudEvent from {event['source']}")
+
+    if event["type"] == "com.readme.binary":
+        print(f"CloudEvent {event['id']} is binary")
+
+    elif event["type"] == "com.readme.structured":
+        print(f"CloudEvent {event['id']} is structured")
+
     return "", 204
 
 
