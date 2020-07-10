@@ -102,7 +102,7 @@ if __name__ == "__main__":
     app.run(port=3000)
 ```
 
-Complete example of turning a CloudEvent into a request you can find [here](samples/http-cloudevents/server.py).
+You can find a complete example of turning a CloudEvent into a request [here](samples/http-cloudevents/server.py).
 
 ## SDK versioning
 
