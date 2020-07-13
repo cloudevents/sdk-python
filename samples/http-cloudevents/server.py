@@ -26,7 +26,9 @@ def home():
     print(event)
 
     # you can access cloudevent fields as seen below
-    print(f"Found CloudEvent from {event['source']} with specversion {event['specversion']}")
+    print(
+        f"Found CloudEvent from {event['source']} with specversion {event['specversion']}"
+    )
 
     if event["type"] == "com.example.sampletype1":
         print(f"CloudEvent {event['id']} is binary")
