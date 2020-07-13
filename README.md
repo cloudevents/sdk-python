@@ -14,10 +14,10 @@ This SDK current supports the following versions of CloudEvents:
 
 Package **cloudevents** provides primitives to work with CloudEvents specification: https://github.com/cloudevents/spec.
 
-## Sending CloudEvents:
+## Sending CloudEvents
 
 Below we will provide samples on how to send cloudevents using the popular
-[`requests`](http://docs.python-requests.org/en/master/) library.
+[`requests`](http://docs.python-requests.org) library.
 
 ### Binary HTTP CloudEvent
 
@@ -29,9 +29,7 @@ import requests
 
 # This data defines a binary cloudevent
 attributes = {
-    "Content-Type": "application/json",
-    "type": "com.readme.binary",
-    "id": "A234-1234-1234",
+    "type": "com.example.sampletype1",
     "source": "/mycontext",
 }
 data = {"message": "Hello World!"}
@@ -52,8 +50,7 @@ import requests
 
 # This data defines a structured cloudevent
 attributes = {
-    "type": "com.readme.structured",
-    "id": "B234-1234-1234",
+    "type": "com.example.sampletype2",
     "source": "/mycontext",
 }
 data = {"message": "Hello World!"}
@@ -86,13 +83,12 @@ def home():
     event = CloudEvent.from_http(request.get_data(), request.headers)
 
     # you can access cloudevent fields as seen below
-    assert event['specversion'] == "1.0"
-    print(f"Found CloudEvent from {event['source']}")
+    print(f"Found CloudEvent from {event['source']} with specversion {event['specversion']}")
 
-    if event['type'] == 'com.readme.binary':
+    if event['type'] == 'com.example.sampletype1':
         print(f"CloudEvent {event['id']} is binary")
 
-    elif event['type'] == 'com.readme.structured':
+    elif event['type'] == 'com.example.sampletype2':
         print(f"CloudEvent {event['id']} is structured")
 
     return "", 204

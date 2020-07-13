@@ -26,13 +26,12 @@ def home():
     print(event)
 
     # you can access cloudevent fields as seen below
-    assert event["specversion"] == "1.0"
-    print(f"Found CloudEvent from {event['source']}")
+    print(f"Found CloudEvent from {event['source']} with specversion {event['specversion']}")
 
-    if event["type"] == "com.readme.binary":
+    if event["type"] == "com.example.sampletype1":
         print(f"CloudEvent {event['id']} is binary")
 
-    elif event["type"] == "com.readme.structured":
+    elif event["type"] == "com.example.sampletype2":
         print(f"CloudEvent {event['id']} is structured")
 
     return "", 204

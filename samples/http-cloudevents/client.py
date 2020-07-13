@@ -23,10 +23,8 @@ from cloudevents.sdk.http_events import CloudEvent
 def send_binary_cloud_event(url):
     # This data defines a binary cloudevent
     attributes = {
-        "Content-Type": "application/json",
-        "type": "com.readme.binary",
-        "id": "A234-1234-1234",
-        "source": "/client.py",
+        "type": "com.example.sampletype1",
+        "source": "/mycontext",
     }
     data = {"message": "Hello World!"}
 
@@ -39,17 +37,15 @@ def send_binary_cloud_event(url):
 
 
 def send_structured_cloud_event(url):
-    # This data defines a structured cloudevent
+    # This data defines a binary cloudevent
     attributes = {
-        "type": "com.readme.structured",
-        "id": "B234-1234-1234",
-        "source": "/client.py",
-        # Time will be filled in automatically if not set
-        "time": "2018-10-23T12:28:23.3464579Z",
+        "type": "com.example.sampletype2",
+        "source": "/mycontext",
     }
     data = {"message": "Hello World!"}
+
     event = CloudEvent(attributes, data)
-    headers, body = event.to_http()
+    headers, body = event.to_http(converters.TypeBinary)
 
     # POST
     requests.post(url, data=body, headers=headers)
