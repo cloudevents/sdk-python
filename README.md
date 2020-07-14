@@ -20,7 +20,7 @@ Sending CloudEvents:
 
 ```python
 from cloudevents.sdk import converters
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import CloudEvent, to_binary_http
 import requests
 
 
@@ -34,7 +34,7 @@ attributes = {
 data = {"message": "Hello World!"}
 
 event = CloudEvent(attributes, data)
-headers, body = event.to_http(converters.TypeBinary)
+headers, body = to_binary_http(event)
 
 # POST
 requests.post("<some-url>", data=body, headers=headers)
@@ -43,7 +43,7 @@ requests.post("<some-url>", data=body, headers=headers)
 ### Structured HTTP CloudEvent
 
 ```python
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import CloudEvent, to_structured_http
 import requests
 
 
@@ -55,14 +55,14 @@ attributes = {
 }
 data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
-headers, body = event.to_http()
+headers, body = to_structured_http(event)
 
 # POST
 requests.post("<some-url>", data=body, headers=headers)
 ```
 
 ### Event base classes usage
- 
+
 Parsing upstream structured Event from HTTP request:
 
 ```python
@@ -150,12 +150,12 @@ One of popular framework is [`requests`](http://docs.python-requests.org/en/mast
 The code below shows how integrate both libraries in order to convert a CloudEvent into an HTTP request:
 
 ```python
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import CloudEvent, to_binary_http, to_structured_http
 from cloudevents.sdk.types import converters
 
 def run_binary(event: CloudEvent, url):
     # If event.data is a custom type, set data_marshaller as well
-    headers, data = event.to_http(converters.TypeBinary)
+    headers, data = to_binary_http(event)
 
     print("binary CloudEvent")
     for k, v in headers.items():
@@ -169,7 +169,7 @@ def run_binary(event: CloudEvent, url):
 
 def run_structured(event: CloudEvent, url):
     # If event.data is a custom type, set data_marshaller as well
-    headers, data = event.to_http(converters.TypeStructured)
+    headers, data = to_structured_http(event)
 
     print("structured CloudEvent")
     print(data)
@@ -221,9 +221,10 @@ the same API. It will use semantic versioning with following rules:
 ## Maintenance
 
 We use black and isort for autoformatting. We setup a tox environment to reformat
-the codebase. 
+the codebase.
 
 e.g.
+
 ```python
 pip install tox
 tox -e reformat
