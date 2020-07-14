@@ -100,7 +100,6 @@ class EventClass:
         return key in self._attributes
 
 
-
 def _to_http(
     event: EventClass,
     format: str = converters.TypeStructured,
