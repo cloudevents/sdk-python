@@ -20,19 +20,82 @@ import uuid
 from cloudevents.sdk import converters, marshaller, types
 from cloudevents.sdk.event import v1, v03
 
+_marshaller_by_format = {
+    converters.TypeStructured: lambda x: x,
+    converters.TypeBinary: json.dumps,
+}
+
+_obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
+
 _required_by_version = {
     "1.0": v1.Event._ce_required_fields,
     "0.3": v03.Event._ce_required_fields,
 }
 
 
-def _json_or_string(content: typing.Union[str, bytes]):
-    if len(content) == 0:
-        return None
-    try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        return content
+def _to_http(
+    event,
+    format: str = converters.TypeStructured,
+    data_marshaller: types.MarshallerType = None,
+) -> (dict, typing.Union[bytes, str]):
+    """
+    Returns a tuple of HTTP headers/body dicts representing this cloudevent
+
+    :param format: constant specifying an encoding format
+    :type format: str
+    :param data_unmarshaller: Function used to read the data to string.
+    :type data_unmarshaller: types.UnmarshallerType
+    :returns: (http_headers: dict, http_body: bytes or str)
+    """
+    if data_marshaller is None:
+        data_marshaller = _marshaller_by_format[format]
+    if event._attributes["specversion"] not in _obj_by_version:
+        raise ValueError(
+            f"Unsupported specversion: {event._attributes['specversion']}"
+        )
+
+    event_handler = _obj_by_version[event._attributes["specversion"]]()
+    for k, v in event._attributes.items():
+        event_handler.Set(k, v)
+    event_handler.data = event.data
+
+    return marshaller.NewDefaultHTTPMarshaller().ToRequest(
+        event_handler, format, data_marshaller
+    )
+
+
+def to_structured_http(
+    event, data_marshaller: types.MarshallerType = None,
+) -> (dict, typing.Union[bytes, str]):
+    """
+    Returns a tuple of HTTP headers/body dicts representing this cloudevent
+
+    :param event: CloudEvent to cast into http data
+    :type event: CloudEvent
+    :param data_unmarshaller: Function used to read the data to string.
+    :type data_unmarshaller: types.UnmarshallerType
+    :returns: (http_headers: dict, http_body: bytes or str)
+    """
+    return _to_http(event=event, data_marshaller=data_marshaller)
+
+
+def to_binary_http(
+    event, data_marshaller: types.MarshallerType = None,
+) -> (dict, typing.Union[bytes, str]):
+    """
+    Returns a tuple of HTTP headers/body dicts representing this cloudevent
+
+    :param event: CloudEvent to cast into http data
+    :type event: CloudEvent
+    :param data_unmarshaller: Function used to read the data to string.
+    :type data_unmarshaller: types.UnmarshallerType
+    :returns: (http_headers: dict, http_body: bytes or str)
+    """
+    return _to_http(
+        event=event,
+        format=converters.TypeBinary,
+        data_marshaller=data_marshaller,
+    )
 
 
 class CloudEvent:
@@ -102,4 +165,8 @@ class CloudEvent:
         return key in self._attributes
 
     def __repr__(self):
-        return self.to_http()[1].decode()
+        return structured.to_http(self)[1].decode()
+
+
+def to_json():
+    raise NotImplementedError

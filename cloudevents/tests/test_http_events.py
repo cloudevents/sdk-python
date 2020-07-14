@@ -21,7 +21,7 @@ import pytest
 from sanic import Sanic, response
 
 from cloudevents.sdk import converters
-from cloudevents.sdk.http import CloudEvent, binary, from_http, structured
+from cloudevents.sdk.http import CloudEvent, to_binary_http, from_http, to_structured_http
 
 invalid_test_headers = [
     {
@@ -169,9 +169,9 @@ def test_roundtrip_non_json_event(converter, specversion):
     event = CloudEvent(attrs, compressed_data)
 
     if converter == converters.TypeStructured:
-        headers, data = structured.to_http(event, data_marshaller=lambda x: x)
+        headers, data = to_structured_http(event, data_marshaller=lambda x: x)
     elif converter == converters.TypeBinary:
-        headers, data = binary.to_http(event, data_marshaller=lambda x: x)
+        headers, data = to_binary_http(event, data_marshaller=lambda x: x)
 
     headers["binary-payload"] = "true"  # Decoding hint for server
     _, r = app.test_client.post("/event", headers=headers, data=data)
@@ -239,7 +239,7 @@ def test_structured_to_request(specversion):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body_bytes = structured.to_http(event)
+    headers, body_bytes = to_structured_http(event)
     assert isinstance(body_bytes, bytes)
     body = json.loads(body_bytes)
 
@@ -259,7 +259,7 @@ def test_binary_to_request(specversion):
     }
     data = {"message": "Hello World!"}
     event = CloudEvent(attributes, data)
-    headers, body_bytes = binary.to_http(event)
+    headers, body_bytes = to_binary_http(event)
     body = json.loads(body_bytes)
 
     for key in data:
