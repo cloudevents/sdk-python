@@ -82,8 +82,9 @@ class CloudEvent:
                 else:
                     raise NotImplementedError
 
-        event_handlr = _obj_by_version[specversion]
-        event = marshaller.NewDefaultHTTPMarshaller().FromRequest(
+        # Should this throw if given invalid event?
+        event_handlr = _obj_by_version.get(specversion, "1.0")
+        event = marshall.FromRequest(
             event_handlr(), headers, data, data_unmarshaller
         )
         attrs = event.Properties()
