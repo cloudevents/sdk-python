@@ -17,10 +17,15 @@ import typing
 from cloudevents.sdk import converters, marshaller, types
 from cloudevents.sdk.event import v1, v03
 from cloudevents.sdk.http.event import (
-    CloudEvent,
+    EventClass,
     to_binary_http,
     to_structured_http,
 )
+
+
+class CloudEvent(EventClass):
+    def __repr__(self):
+        return to_structured_http(self)[1].decode()
 
 
 def _json_or_string(content: typing.Union[str, bytes]):
