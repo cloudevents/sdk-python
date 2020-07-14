@@ -167,3 +167,7 @@ def to_binary_http(
 
 def to_json():
     raise NotImplementedError
+
+
+def from_json():
+    raise NotImplementedError
