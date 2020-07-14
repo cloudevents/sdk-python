@@ -18,6 +18,7 @@ import typing
 import uuid
 
 from cloudevents.sdk import converters, marshaller, types
+from cloudevents.sdk.converters import binary, structured
 from cloudevents.sdk.event import v1, v03
 
 _marshaller_by_format = {
@@ -64,8 +65,26 @@ class CloudEvent:
         if data_unmarshaller is None:
             data_unmarshaller = _json_or_string
 
+        headers = {key.lower(): value for key, value in headers.items()}
+
+        content_type = headers.get("content-type", None)
+
+        specversion = "1.0"
+        marshall = marshaller.NewDefaultHTTPMarshaller()
+
+        for cnvrtr in marshall.http_converters:
+            if cnvrtr.can_read(content_type):
+                if isinstance(cnvrtr, binary.BinaryHTTPCloudEventConverter):
+                    specversion = headers.get("ce-specversion", "1.0")
+                elif isinstance(cnvrtr, structured.JSONHTTPCloudEventConverter):
+                    raw_ce = json.loads(data)
+                    specversion = raw_ce.get("specversion", "1.0")
+                else:
+                    raise NotImplementedError
+
+        event_handlr = _obj_by_version[specversion]
         event = marshaller.NewDefaultHTTPMarshaller().FromRequest(
-            v1.Event(), headers, data, data_unmarshaller
+            event_handlr(), headers, data, data_unmarshaller
         )
         attrs = event.Properties()
         attrs.pop("data", None)

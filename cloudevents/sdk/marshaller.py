@@ -32,8 +32,8 @@ class HTTPMarshaller(object):
         :param converters: a list of HTTP-to-CloudEvent-to-HTTP constructors
         :type converters: typing.List[base.Converter]
         """
-        self.__converters = [c for c in converters]
-        self.__converters_by_type = {c.TYPE: c for c in converters}
+        self.http_converters = [c for c in converters]
+        self.http_converters_by_type = {c.TYPE: c for c in converters}
 
     def FromRequest(
         self,
@@ -62,13 +62,13 @@ class HTTPMarshaller(object):
         headers = {key.lower(): value for key, value in headers.items()}
         content_type = headers.get("content-type", None)
 
-        for cnvrtr in self.__converters:
+        for cnvrtr in self.http_converters:
             if cnvrtr.can_read(content_type) and cnvrtr.event_supported(event):
                 return cnvrtr.read(event, headers, body, data_unmarshaller)
 
         raise exceptions.UnsupportedEventConverter(
             "No registered marshaller for {0} in {1}".format(
-                content_type, self.__converters
+                content_type, self.http_converters
             )
         )
 
@@ -95,10 +95,10 @@ class HTTPMarshaller(object):
             raise exceptions.InvalidDataMarshaller()
 
         if converter_type is None:
-            converter_type = self.__converters[0].TYPE
+            converter_type = self.http_converters[0].TYPE
 
-        if converter_type in self.__converters_by_type:
-            cnvrtr = self.__converters_by_type[converter_type]
+        if converter_type in self.http_converters_by_type:
+            cnvrtr = self.http_converters_by_type[converter_type]
             return cnvrtr.write(event, data_marshaller)
 
         raise exceptions.NoSuchConverter(converter_type)
