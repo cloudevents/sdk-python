@@ -46,34 +46,6 @@ class CloudEvent:
     Supports both binary and structured mode CloudEvents
     """
 
-    @classmethod
-    def from_http(
-        cls,
-        data: typing.Union[str, bytes],
-        headers: typing.Dict[str, str],
-        data_unmarshaller: types.UnmarshallerType = None,
-    ):
-        """Unwrap a CloudEvent (binary or structured) from an HTTP request.
-        :param data: the HTTP request body
-        :type data: typing.IO
-        :param headers: the HTTP headers
-        :type headers: typing.Dict[str, str]
-        :param data_unmarshaller: Function to decode data into a python object.
-        :type data_unmarshaller: types.UnmarshallerType
-        """
-        if data_unmarshaller is None:
-            data_unmarshaller = _json_or_string
-
-        event = marshaller.NewDefaultHTTPMarshaller().FromRequest(
-            v1.Event(), headers, data, data_unmarshaller
-        )
-        attrs = event.Properties()
-        attrs.pop("data", None)
-        attrs.pop("extensions", None)
-        attrs.update(**event.extensions)
-
-        return cls(attrs, event.data)
-
     def __init__(
         self, attributes: typing.Dict[str, str], data: typing.Any = None
     ):
