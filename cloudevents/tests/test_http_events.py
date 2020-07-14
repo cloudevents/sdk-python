@@ -21,7 +21,7 @@ import pytest
 from sanic import Sanic, response
 
 from cloudevents.sdk import converters
-from cloudevents.sdk.http import CloudEvent, from_http
+from cloudevents.sdk.http import CloudEvent, binary, from_http, structured
 
 invalid_test_headers = [
     {
@@ -155,7 +155,7 @@ def test_emit_structured_event(specversion):
 
 
 @pytest.mark.parametrize(
-    "converter", [converters.TypeStructured, converters.TypeStructured]
+    "converter", [converters.TypeBinary, converters.TypeStructured]
 )
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
 def test_roundtrip_non_json_event(converter, specversion):
@@ -167,7 +167,12 @@ def test_roundtrip_non_json_event(converter, specversion):
     attrs = {"source": "test", "type": "t"}
 
     event = CloudEvent(attrs, compressed_data)
-    headers, data = event.to_http(converter, data_marshaller=lambda x: x)
+
+    if converter == converters.TypeStructured:
+        headers, data = structured.to_http(event, data_marshaller=lambda x: x)
+    elif converter == converters.TypeBinary:
+        headers, data = binary.to_http(event, data_marshaller=lambda x: x)
+
     headers["binary-payload"] = "true"  # Decoding hint for server
     _, r = app.test_client.post("/event", headers=headers, data=data)
 
@@ -213,9 +218,7 @@ def test_valid_binary_events(specversion):
             "ce-specversion": specversion,
         }
         data = {"payload": f"payload-{i}"}
-        events_queue.append(
-            from_http(json.dumps(data), headers=headers)
-        )
+        events_queue.append(from_http(json.dumps(data), headers=headers))
 
     for i, event in enumerate(events_queue):
         data = event.data
@@ -236,7 +239,7 @@ def test_structured_to_request(specversion):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body_bytes = event.to_http()
+    headers, body_bytes = structured.to_http(event)
     assert isinstance(body_bytes, bytes)
     body = json.loads(body_bytes)
 
@@ -256,7 +259,7 @@ def test_binary_to_request(specversion):
     }
     data = {"message": "Hello World!"}
     event = CloudEvent(attributes, data)
-    headers, body_bytes = event.to_http(converters.TypeBinary)
+    headers, body_bytes = binary.to_http(event)
     body = json.loads(body_bytes)
 
     for key in data:

@@ -16,9 +16,14 @@ import typing
 
 from cloudevents.sdk import converters, marshaller, types
 from cloudevents.sdk.event import v1, v03
-from cloudevents.sdk.http import binary as binary
-from cloudevents.sdk.http import structured as structured
 from cloudevents.sdk.http.event import CloudEvent
+
+_marshaller_by_format = {
+    converters.TypeStructured: lambda x: x,
+    converters.TypeBinary: json.dumps,
+}
+
+_obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
 
 
 def _json_or_string(content: typing.Union[str, bytes]):
@@ -56,6 +61,37 @@ def from_http(
     attrs.update(**event.extensions)
 
     return CloudEvent(attrs, event.data)
+
+
+def _to_http(
+    event: CloudEvent,
+    format: str = converters.TypeStructured,
+    data_marshaller: types.MarshallerType = None,
+) -> (dict, typing.Union[bytes, str]):
+    """
+    Returns a tuple of HTTP headers/body dicts representing this cloudevent
+
+    :param format: constant specifying an encoding format
+    :type format: str
+    :param data_unmarshaller: Function used to read the data to string.
+    :type data_unmarshaller: types.UnmarshallerType
+    :returns: (http_headers: dict, http_body: bytes or str)
+    """
+    if data_marshaller is None:
+        data_marshaller = _marshaller_by_format[format]
+    if event._attributes["specversion"] not in _obj_by_version:
+        raise ValueError(
+            f"Unsupported specversion: {event._attributes['specversion']}"
+        )
+
+    event_handler = _obj_by_version[event._attributes["specversion"]]()
+    for k, v in event._attributes.items():
+        event_handler.Set(k, v)
+    event_handler.data = event.data
+
+    return marshaller.NewDefaultHTTPMarshaller().ToRequest(
+        event_handler, format, data_marshaller
+    )
 
 
 def from_json():

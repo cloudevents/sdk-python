@@ -20,15 +20,10 @@ import uuid
 from cloudevents.sdk import converters, marshaller, types
 from cloudevents.sdk.event import v1, v03
 
-_marshaller_by_format = {
-    converters.TypeStructured: lambda x: x,
-    converters.TypeBinary: json.dumps,
-}
 _required_by_version = {
     "1.0": v1.Event._ce_required_fields,
     "0.3": v03.Event._ce_required_fields,
 }
-_obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
 
 
 def _json_or_string(content: typing.Union[str, bytes]):
@@ -85,36 +80,6 @@ class CloudEvent:
             raise ValueError(
                 f"Missing required keys: {required_set - attributes.keys()}"
             )
-
-    def to_http(
-        self,
-        format: str = converters.TypeStructured,
-        data_marshaller: types.MarshallerType = None,
-    ) -> (dict, typing.Union[bytes, str]):
-        """
-        Returns a tuple of HTTP headers/body dicts representing this cloudevent
-
-        :param format: constant specifying an encoding format
-        :type format: str
-        :param data_unmarshaller: Function used to read the data to string.
-        :type data_unmarshaller: types.UnmarshallerType
-        :returns: (http_headers: dict, http_body: bytes or str)
-        """
-        if data_marshaller is None:
-            data_marshaller = _marshaller_by_format[format]
-        if self._attributes["specversion"] not in _obj_by_version:
-            raise ValueError(
-                f"Unsupported specversion: {self._attributes['specversion']}"
-            )
-
-        event = _obj_by_version[self._attributes["specversion"]]()
-        for k, v in self._attributes.items():
-            event.Set(k, v)
-        event.data = self.data
-
-        return marshaller.NewDefaultHTTPMarshaller().ToRequest(
-            event, format, data_marshaller
-        )
 
     # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type
