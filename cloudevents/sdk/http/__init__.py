@@ -14,9 +14,20 @@
 import json
 import typing
 
+from cloudevents.sdk import converters, marshaller, types
+from cloudevents.sdk.event import v1, v03
 from cloudevents.sdk.http import binary as binary
 from cloudevents.sdk.http import structured as structured
 from cloudevents.sdk.http.event import CloudEvent
+
+
+def _json_or_string(content: typing.Union[str, bytes]):
+    if len(content) == 0:
+        return None
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        return content
 
 
 def from_http(
@@ -44,7 +55,7 @@ def from_http(
     attrs.pop("extensions", None)
     attrs.update(**event.extensions)
 
-    return cls(attrs, event.data)
+    return CloudEvent(attrs, event.data)
 
 
 def from_json():
