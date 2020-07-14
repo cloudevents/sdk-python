@@ -13,7 +13,7 @@
 #    under the License.
 from flask import Flask, request
 
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import from_http
 
 app = Flask(__name__)
 
@@ -25,7 +25,7 @@ def home():
     print(request.get_data())
     print(request.headers)
     # create a CloudEvent
-    event = CloudEvent.from_http(request.get_data(), request.headers)
+    event = from_http(request.get_data(), request.headers)
 
     # print the received CloudEvent
     print(f"Received CloudEvent {event}")

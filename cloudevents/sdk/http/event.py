@@ -165,7 +165,7 @@ class CloudEvent:
         return key in self._attributes
 
     def __repr__(self):
-        return structured.to_http(self)[1].decode()
+        return to_structured_http(self)[1].decode()
 
 
 def to_json():

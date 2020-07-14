@@ -21,7 +21,12 @@ import pytest
 from sanic import Sanic, response
 
 from cloudevents.sdk import converters
-from cloudevents.sdk.http import CloudEvent, to_binary_http, from_http, to_structured_http
+from cloudevents.sdk.http import (
+    CloudEvent,
+    from_http,
+    to_binary_http,
+    to_structured_http,
+)
 
 invalid_test_headers = [
     {
@@ -325,3 +330,20 @@ def test_valid_structured_events(specversion):
         assert event["source"] == f"source{i}.com.test"
         assert event["specversion"] == specversion
         assert event.data["payload"] == f"payload-{i}"
+
+
+@pytest.mark.parametrize("specversion", ["1.0", "0.3"])
+def test_cloudevent_repr(specversion):
+    headers = {
+        "Content-Type": "application/octet-stream",
+        "ce-specversion": specversion,
+        "ce-type": "word.found.name",
+        "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "ce-time": "2018-10-23T12:28:22.4579346Z",
+        "ce-source": "<source-url>",
+    }
+    event = from_http("", headers)
+    # Testing to make sure event is printable. I could runevent. __repr__() but
+    # we had issues in the past where event.__repr__() could run but
+    # print(event) would fail.
+    print(event)
