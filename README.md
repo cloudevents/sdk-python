@@ -30,7 +30,7 @@ import requests
 # This data defines a binary cloudevent
 attributes = {
     "type": "com.example.sampletype1",
-    "source": "/mycontext",
+    "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
 
@@ -51,7 +51,7 @@ import requests
 # This data defines a structured cloudevent
 attributes = {
     "type": "com.example.sampletype2",
-    "source": "/mycontext",
+    "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
@@ -125,9 +125,10 @@ the same API. It will use semantic versioning with following rules:
 ## Maintenance
 
 We use black and isort for autoformatting. We setup a tox environment to reformat
-the codebase. 
+the codebase.
 
 e.g.
+
 ```python
 pip install tox
 tox -e reformat
