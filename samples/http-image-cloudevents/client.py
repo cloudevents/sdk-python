@@ -34,24 +34,26 @@ def create_byte_image(size: typing.Tuple[int, int]) -> str:
     return b
 
 
-def send_binary_cloud_event(url):
+def send_binary_cloud_event(url: str):
     size = (8, 8)
     attributes = {
         "type": "com.example.string",
         "source": "https://example.com/event-producer",
         "size": json.dumps(size),
     }
-    data = create_byte_image(size).decode()
+    data = create_byte_image(size)
 
     event = CloudEvent(attributes, data)
-    headers, body = event.to_http(converters.TypeBinary)
+    headers, body = event.to_http(
+        converters.TypeBinary, data_marshaller=lambda x: x.decode()
+    )
 
     # send and print event
     requests.post(url, data=body, headers=headers)
     print(f"Sent {event['id']} of type {event['type']}")
 
 
-def send_structured_cloud_event(url):
+def send_structured_cloud_event(url: str):
     size = (8, 8)
     attributes = {
         "type": "com.example.base64",
@@ -59,6 +61,8 @@ def send_structured_cloud_event(url):
         "size": json.dumps(size),
     }
     data = create_byte_image(size)
+
+    # passing data as a bytes object will
     event = CloudEvent(attributes, data)
     headers, body = event.to_http()
 

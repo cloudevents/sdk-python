@@ -27,15 +27,7 @@ def home():
     # create a CloudEvent
     event = CloudEvent.from_http(request.get_data(), request.headers)
     size = json.loads(event["size"])
-
-    if event["type"] == "com.example.base64":
-        image = Image.frombytes("RGB", size, event.data)
-    elif event["type"] == "com.example.string":
-        image = Image.frombytes("RGB", size, event.data.encode())
-    else:
-        raise NotImplementedError(
-            f"Endpoint does not support event type {event['type']}"
-        )
+    image = Image.frombytes("RGB", size, event.data)
 
     print(f"Found image {event['id']} with size {image.size}")
 
