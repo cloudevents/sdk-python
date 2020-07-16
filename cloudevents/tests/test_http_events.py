@@ -18,6 +18,7 @@ import io
 import json
 
 import pytest
+from PIL import Image
 from sanic import Sanic, response
 
 from cloudevents.sdk import converters
@@ -322,3 +323,32 @@ def test_valid_structured_events(specversion):
         assert event["source"] == f"source{i}.com.test"
         assert event["specversion"] == specversion
         assert event.data["payload"] == f"payload-{i}"
+
+
+@pytest.mark.parametrize("specversion", ["1.0", "0.3"])
+def test_create_binary_image(specversion):
+    size = (8, 8)
+
+    attributes = {
+        "type": "com.example.string",
+        "source": "https://example.com/event-producer",
+        "size": json.dumps(size),
+        "specversion": specversion,
+    }
+
+    image = Image.new("RGB", size)
+    bytestr = image.tobytes().decode()
+
+    event = CloudEvent(attributes, bytestr)
+
+    event_image_size = json.loads(event["size"])
+    assert event_image_size[0] == size[0] and event_image_size[1] == size[1]
+
+    restore_image = Image.frombytes(
+        "RGB", event_image_size, event.data.encode()
+    )
+    assert restore_image.size[0] == size[0], restore_image.size[1] == size[1]
+
+    headers, body = event.to_http(converters.TypeBinary)
+    assert headers["ce-size"] == attributes["size"]
+    assert json.loads(body.decode()) == bytestr
