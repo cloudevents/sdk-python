@@ -69,23 +69,42 @@ class CloudEvent:
 
         content_type = headers.get("content-type", None)
 
-        specversion = "1.0"
+        specversion = None
         marshall = marshaller.NewDefaultHTTPMarshaller()
 
-        for cnvrtr in marshall.http_converters:
-            if cnvrtr.can_read(content_type):
-                if isinstance(cnvrtr, binary.BinaryHTTPCloudEventConverter):
-                    specversion = headers.get("ce-specversion", "1.0")
-                elif isinstance(cnvrtr, structured.JSONHTTPCloudEventConverter):
+        for converter in marshall.http_converters:
+            # marshall atm has two converters, one for binary and another for
+            # structured. Binary converter will always return True, but the
+            # structured converter is the first converter we iterate through.
+            # structured returns true if and only if
+            # content-type = application/cloudevents+json.
+            if converter.can_read(content_type):
+                if isinstance(converter, binary.BinaryHTTPCloudEventConverter):
+                    specversion = headers.get("ce-specversion", None)
+                    break
+                elif isinstance(
+                    converter, structured.JSONHTTPCloudEventConverter
+                ):
                     raw_ce = json.loads(data)
-                    specversion = raw_ce.get("specversion", "1.0")
+                    specversion = raw_ce.get("specversion", None)
+                    # Breaking because while structured may or may not return
+                    # true on can_read, binary will always return true. Without
+                    # a break specversion for structured events will always be
+                    # set to None causing an error to be thrown.
+                    break
                 else:
                     raise NotImplementedError
 
-        # Should this throw if given invalid event?
-        event_handlr = _obj_by_version.get(specversion, "1.0")
+        if specversion is None:
+            raise ValueError("could not find specversion in HTTP request")
+
+        event_handler = _obj_by_version.get(specversion, None)
+
+        if event_handler is None:
+            raise ValueError(f"found invalid specversion {specversion}")
+
         event = marshall.FromRequest(
-            event_handlr(), headers, data, data_unmarshaller
+            event_handler(), headers, data, data_unmarshaller
         )
         attrs = event.Properties()
         attrs.pop("data", None)
