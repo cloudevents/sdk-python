@@ -24,8 +24,14 @@ class JSONHTTPCloudEventConverter(base.Converter):
     TYPE = "structured"
     MIME_TYPE = "application/cloudevents+json"
 
-    def can_read(self, content_type: str) -> bool:
-        return content_type and content_type.startswith(self.MIME_TYPE)
+    def can_read(
+        self,
+        content_type: str,
+        headers: typing.Dict[str, str] = {"ce-specversion": None},
+    ) -> bool:
+        return (content_type and content_type.startswith(self.MIME_TYPE)) or (
+            "ce-specversion" not in headers
+        )
 
     def event_supported(self, event: object) -> bool:
         # structured format supported by both spec 0.1 and 0.2

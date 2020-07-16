@@ -78,7 +78,7 @@ class CloudEvent:
             # structured converter is the first converter we iterate through.
             # structured returns true if and only if
             # content-type = application/cloudevents+json.
-            if converter.can_read(content_type):
+            if converter.can_read(content_type, headers=headers):
                 if isinstance(converter, binary.BinaryHTTPCloudEventConverter):
                     specversion = headers.get("ce-specversion", None)
                     break
@@ -86,6 +86,7 @@ class CloudEvent:
                     converter, structured.JSONHTTPCloudEventConverter
                 ):
                     raw_ce = json.loads(data)
+                    print("README: ", raw_ce)
                     specversion = raw_ce.get("specversion", None)
                     # Breaking because while structured may or may not return
                     # true on can_read, binary will always return true. Without

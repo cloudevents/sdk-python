@@ -196,7 +196,9 @@ def test_missing_ce_prefix_binary_event(specversion):
             # and NotImplementedError because structured calls aren't
             # implemented. In this instance one of the required keys should have
             # prefix e-id instead of ce-id therefore it should throw
-            _ = CloudEvent.from_http(test_data, headers=prefixed_headers)
+            _ = CloudEvent.from_http(
+                json.dumps(test_data), headers=prefixed_headers
+            )
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
