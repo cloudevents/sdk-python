@@ -11,11 +11,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import json
+
 from flask import Flask, request
+from PIL import Image
 
 from cloudevents.sdk.http_events import CloudEvent
-from PIL import Image 
-import json
+
 app = Flask(__name__)
 
 
@@ -24,17 +26,19 @@ app = Flask(__name__)
 def home():
     # create a CloudEvent
     event = CloudEvent.from_http(request.get_data(), request.headers)
-    size = json.loads(event['size'])
+    size = json.loads(event["size"])
 
-    if event['type'] == 'com.example.base64':
+    if event["type"] == "com.example.base64":
         image = Image.frombytes("RGB", size, event.data)
-    elif event['type'] == 'com.example.string':
+    elif event["type"] == "com.example.string":
         image = Image.frombytes("RGB", size, event.data.encode())
     else:
-        raise NotImplementedError(f"Endpoint does not support event type {event['type']}")
+        raise NotImplementedError(
+            f"Endpoint does not support event type {event['type']}"
+        )
 
     print(f"Found image {event['id']} with size {image.size}")
-        
+
     return "", 204
 
 

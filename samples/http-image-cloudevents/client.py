@@ -11,42 +11,43 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import base64
 import io
-import sys
-
 import json
-
-import requests
+import sys
 import typing
 
+import requests
 from PIL import Image
-import base64
 
 from cloudevents.sdk import converters
 from cloudevents.sdk.http_events import CloudEvent
 
+
 def create_byte_image(size: typing.Tuple[int, int]) -> str:
     # Create image
-    image = Image.new('RGB', size)
+    image = Image.new("RGB", size)
 
-    # Turn image into bytes 
+    # Turn image into bytes
     b = image.tobytes()
 
     return b
 
-def create_image_event(size: typing.Tuple[int, int], binary=False) -> CloudEvent:
+
+def create_image_event(
+    size: typing.Tuple[int, int], binary=False
+) -> CloudEvent:
     # This data defines a binary cloudevent
 
-
     return CloudEvent(attributes, data)
-    
+
 
 def send_binary_cloud_event(url):
-    size = (8,8)
+    size = (8, 8)
     attributes = {
         "type": "com.example.string",
         "source": "https://example.com/event-producer",
-        "size": json.dumps(size)
+        "size": json.dumps(size),
     }
     data = create_byte_image(size).decode()
 
@@ -59,11 +60,11 @@ def send_binary_cloud_event(url):
 
 
 def send_structured_cloud_event(url):
-    size = (8,8)
+    size = (8, 8)
     attributes = {
         "type": "com.example.base64",
         "source": "https://example.com/event-producer",
-        "size": json.dumps(size)
+        "size": json.dumps(size),
     }
     data = create_byte_image(size)
     event = CloudEvent(attributes, data)
