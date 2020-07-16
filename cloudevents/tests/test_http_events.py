@@ -339,10 +339,7 @@ def test_structured_no_content_type(specversion):
         "specversion": specversion,
         "data": test_data,
     }
-    event = CloudEvent.from_http(
-        json.dumps(data),
-        {},
-    )
+    event = CloudEvent.from_http(json.dumps(data), {},)
 
     assert event["id"] == "id"
     assert event["source"] == "source.com.test"
