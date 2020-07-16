@@ -324,3 +324,28 @@ def test_valid_structured_events(specversion):
         assert event["source"] == f"source{i}.com.test"
         assert event["specversion"] == specversion
         assert event.data["payload"] == f"payload-{i}"
+
+
+@pytest.mark.parametrize("specversion", ["1.0", "0.3"])
+def test_structured_no_content_type(specversion):
+    # Test creating multiple cloud events
+    events_queue = []
+    headers = {}
+    num_cloudevents = 30
+    data = {
+        "id": "id",
+        "source": "source.com.test",
+        "type": "cloudevent.test.type",
+        "specversion": specversion,
+        "data": test_data,
+    }
+    event = CloudEvent.from_http(
+        json.dumps(data),
+        {},
+    )
+
+    assert event["id"] == "id"
+    assert event["source"] == "source.com.test"
+    assert event["specversion"] == specversion
+    for key, val in test_data.items():
+        assert event.data[key] == val

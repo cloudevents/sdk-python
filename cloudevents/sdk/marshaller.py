@@ -63,7 +63,7 @@ class HTTPMarshaller(object):
         content_type = headers.get("content-type", None)
 
         for cnvrtr in self.http_converters:
-            if cnvrtr.can_read(content_type) and cnvrtr.event_supported(event):
+            if cnvrtr.can_read(content_type, headers=headers) and cnvrtr.event_supported(event):
                 return cnvrtr.read(event, headers, body, data_unmarshaller)
 
         raise exceptions.UnsupportedEventConverter(

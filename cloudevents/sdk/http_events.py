@@ -80,13 +80,17 @@ class CloudEvent:
             # content-type = application/cloudevents+json.
             if converter.can_read(content_type, headers=headers):
                 if isinstance(converter, binary.BinaryHTTPCloudEventConverter):
+                    print("WHAT HAPPENED")
                     specversion = headers.get("ce-specversion", None)
                     break
                 elif isinstance(
                     converter, structured.JSONHTTPCloudEventConverter
                 ):
                     raw_ce = json.loads(data)
+                    
+
                     specversion = raw_ce.get("specversion", None)
+                    print('REACHED', raw_ce, specversion)
                     # Breaking because while structured may or may not return
                     # true on can_read, binary will always return true. Without
                     # a break specversion for structured events will always be
