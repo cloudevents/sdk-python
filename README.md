@@ -61,7 +61,7 @@ headers, body = event.to_http()
 requests.post("<some-url>", data=body, headers=headers)
 ```
 
-You can find a complete example of turning a CloudEvent into a HTTP request [here](samples/http-cloudevents/client.py).
+You can find a complete example of turning a CloudEvent into a HTTP request [in the samples directory](samples/http-cloudevents/client.py).
 
 #### Request to CloudEvent
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     app.run(port=3000)
 ```
 
-You can find a complete example of turning a CloudEvent into a request [here](samples/http-cloudevents/server.py).
+You can find a complete example of turning a CloudEvent into a HTTP request [in the samples directory](samples/http-cloudevents/server.py).
 
 ## SDK versioning
 
