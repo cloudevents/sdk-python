@@ -17,31 +17,38 @@ import sys
 import json
 
 import requests
+import typing
 
 from PIL import Image
+import base64
 
 from cloudevents.sdk import converters
 from cloudevents.sdk.http_events import CloudEvent
 
-def get_json_image(size):
+def create_byte_image(size: typing.Tuple[int, int]) -> str:
     # Create image
     image = Image.new('RGB', size)
 
-    # Cast image to bytes
+    # Turn image into bytes 
     b = image.tobytes()
 
-    # Turn bytes into json 
-    return json.dumps(b.decode())
+    return b
+
+def create_image_event(size: typing.Tuple[int, int], binary=False) -> CloudEvent:
+    # This data defines a binary cloudevent
+
+
+    return CloudEvent(attributes, data)
+    
 
 def send_binary_cloud_event(url):
-    # This data defines a binary cloudevent
+    size = (8,8)
     attributes = {
-        "type": "com.example.image1",
+        "type": "com.example.string",
         "source": "https://example.com/event-producer",
-        "datacontenttype": "image/jpeg"
+        "size": json.dumps(size)
     }
-    size = (40,30)
-    data = {"image": get_json_image(size=size), "size": size}
+    data = create_byte_image(size).decode()
 
     event = CloudEvent(attributes, data)
     headers, body = event.to_http(converters.TypeBinary)
@@ -52,19 +59,17 @@ def send_binary_cloud_event(url):
 
 
 def send_structured_cloud_event(url):
-    # This data defines a binary cloudevent
+    size = (8,8)
     attributes = {
-        "type": "com.example.image2",
+        "type": "com.example.base64",
         "source": "https://example.com/event-producer",
-        "datacontenttype": "image/jpeg"
+        "size": json.dumps(size)
     }
-    size = (50,40)
-    data = {"image": get_json_image(size=size), "size": size}
-
+    data = create_byte_image(size)
     event = CloudEvent(attributes, data)
     headers, body = event.to_http()
 
-    # POST
+    # # POST
     requests.post(url, data=body, headers=headers)
     print(f"Sent {event['id']} of type {event['type']}")
 
