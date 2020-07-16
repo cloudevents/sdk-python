@@ -34,14 +34,6 @@ def create_byte_image(size: typing.Tuple[int, int]) -> str:
     return b
 
 
-def create_image_event(
-    size: typing.Tuple[int, int], binary=False
-) -> CloudEvent:
-    # This data defines a binary cloudevent
-
-    return CloudEvent(attributes, data)
-
-
 def send_binary_cloud_event(url):
     size = (8, 8)
     attributes = {
