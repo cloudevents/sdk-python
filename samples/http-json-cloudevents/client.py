@@ -45,7 +45,7 @@ def send_structured_cloud_event(url):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body = event.to_http(converters.TypeBinary)
+    headers, body = event.to_http()
 
     # POST
     requests.post(url, data=body, headers=headers)
