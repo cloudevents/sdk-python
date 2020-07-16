@@ -86,7 +86,6 @@ class CloudEvent:
                     converter, structured.JSONHTTPCloudEventConverter
                 ):
                     raw_ce = json.loads(data)
-                    print("README: ", raw_ce)
                     specversion = raw_ce.get("specversion", None)
                     # Breaking because while structured may or may not return
                     # true on can_read, binary will always return true. Without
