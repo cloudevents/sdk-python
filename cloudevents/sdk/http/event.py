@@ -26,71 +26,20 @@ _marshaller_by_format = {
     converters.TypeStructured: lambda x: x,
     converters.TypeBinary: json.dumps,
 }
+
+_obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
+
 _required_by_version = {
     "1.0": v1.Event._ce_required_fields,
     "0.3": v03.Event._ce_required_fields,
 }
-_obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
 
 
-def _json_or_string(content: typing.Union[str, bytes]):
-    if len(content) == 0:
-        return None
-    try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        return content
-
-
-class CloudEvent:
+class EventClass:
     """
     Python-friendly cloudevent class supporting v1 events
     Supports both binary and structured mode CloudEvents
     """
-
-    @classmethod
-    def from_http(
-        cls,
-        data: typing.Union[str, bytes],
-        headers: typing.Dict[str, str],
-        data_unmarshaller: types.UnmarshallerType = None,
-    ):
-        """Unwrap a CloudEvent (binary or structured) from an HTTP request.
-        :param data: the HTTP request body
-        :type data: typing.IO
-        :param headers: the HTTP headers
-        :type headers: typing.Dict[str, str]
-        :param data_unmarshaller: Function to decode data into a python object.
-        :type data_unmarshaller: types.UnmarshallerType
-        """
-        if data_unmarshaller is None:
-            data_unmarshaller = _json_or_string
-
-        marshall = marshaller.NewDefaultHTTPMarshaller()
-
-        if is_binary(headers):
-            specversion = headers.get("ce-specversion", None)
-        else:
-            raw_ce = json.loads(data)
-            specversion = raw_ce.get("specversion", None)
-
-        if specversion is None:
-            raise ValueError("could not find specversion in HTTP request")
-
-        event_handler = _obj_by_version.get(specversion, None)
-
-        if event_handler is None:
-            raise ValueError(f"found invalid specversion {specversion}")
-
-        event = marshall.FromRequest(
-            event_handler(), headers, data, data_unmarshaller
-        )
-        attrs = event.Properties()
-        attrs.pop("data", None)
-        attrs.pop("extensions", None)
-        attrs.update(**event.extensions)
-
-        return cls(attrs, event.data)
 
     def __init__(
         self, attributes: typing.Dict[str, str], data: typing.Any = None
@@ -132,36 +81,6 @@ class CloudEvent:
                 f"Missing required keys: {required_set - attributes.keys()}"
             )
 
-    def to_http(
-        self,
-        format: str = converters.TypeStructured,
-        data_marshaller: types.MarshallerType = None,
-    ) -> (dict, typing.Union[bytes, str]):
-        """
-        Returns a tuple of HTTP headers/body dicts representing this cloudevent
-
-        :param format: constant specifying an encoding format
-        :type format: str
-        :param data_unmarshaller: Function used to read the data to string.
-        :type data_unmarshaller: types.UnmarshallerType
-        :returns: (http_headers: dict, http_body: bytes or str)
-        """
-        if data_marshaller is None:
-            data_marshaller = _marshaller_by_format[format]
-        if self._attributes["specversion"] not in _obj_by_version:
-            raise ValueError(
-                f"Unsupported specversion: {self._attributes['specversion']}"
-            )
-
-        event = _obj_by_version[self._attributes["specversion"]]()
-        for k, v in self._attributes.items():
-            event.Set(k, v)
-        event.data = self.data
-
-        return marshaller.NewDefaultHTTPMarshaller().ToRequest(
-            event, format, data_marshaller
-        )
-
     # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type
     def __getitem__(self, key):
@@ -182,5 +101,75 @@ class CloudEvent:
     def __contains__(self, key):
         return key in self._attributes
 
-    def __repr__(self):
-        return self.to_http()[1].decode()
+
+def _to_http(
+    event: EventClass,
+    format: str = converters.TypeStructured,
+    data_marshaller: types.MarshallerType = None,
+) -> (dict, typing.Union[bytes, str]):
+    """
+    Returns a tuple of HTTP headers/body dicts representing this cloudevent
+
+    :param format: constant specifying an encoding format
+    :type format: str
+    :param data_unmarshaller: Function used to read the data to string.
+    :type data_unmarshaller: types.UnmarshallerType
+    :returns: (http_headers: dict, http_body: bytes or str)
+    """
+    if data_marshaller is None:
+        data_marshaller = _marshaller_by_format[format]
+    if event._attributes["specversion"] not in _obj_by_version:
+        raise ValueError(
+            f"Unsupported specversion: {event._attributes['specversion']}"
+        )
+
+    event_handler = _obj_by_version[event._attributes["specversion"]]()
+    for k, v in event._attributes.items():
+        event_handler.Set(k, v)
+    event_handler.data = event.data
+
+    return marshaller.NewDefaultHTTPMarshaller().ToRequest(
+        event_handler, format, data_marshaller
+    )
+
+
+def to_structured_http(
+    event: EventClass, data_marshaller: types.MarshallerType = None,
+) -> (dict, typing.Union[bytes, str]):
+    """
+    Returns a tuple of HTTP headers/body dicts representing this cloudevent
+
+    :param event: CloudEvent to cast into http data
+    :type event: CloudEvent
+    :param data_unmarshaller: Function used to read the data to string.
+    :type data_unmarshaller: types.UnmarshallerType
+    :returns: (http_headers: dict, http_body: bytes or str)
+    """
+    return _to_http(event=event, data_marshaller=data_marshaller)
+
+
+def to_binary_http(
+    event: EventClass, data_marshaller: types.MarshallerType = None,
+) -> (dict, typing.Union[bytes, str]):
+    """
+    Returns a tuple of HTTP headers/body dicts representing this cloudevent
+
+    :param event: CloudEvent to cast into http data
+    :type event: CloudEvent
+    :param data_unmarshaller: Function used to read the data to string.
+    :type data_unmarshaller: types.UnmarshallerType
+    :returns: (http_headers: dict, http_body: bytes or str)
+    """
+    return _to_http(
+        event=event,
+        format=converters.TypeBinary,
+        data_marshaller=data_marshaller,
+    )
+
+
+def to_json():
+    raise NotImplementedError
+
+
+def from_json():
+    raise NotImplementedError

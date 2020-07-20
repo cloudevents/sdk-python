@@ -21,7 +21,12 @@ import pytest
 from sanic import Sanic, response
 
 from cloudevents.sdk import converters
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import (
+    CloudEvent,
+    from_http,
+    to_binary_http,
+    to_structured_http,
+)
 
 invalid_test_headers = [
     {
@@ -71,7 +76,7 @@ async def echo(request):
     decoder = None
     if "binary-payload" in request.headers:
         decoder = lambda x: x
-    event = CloudEvent.from_http(
+    event = from_http(
         request.body, headers=dict(request.headers), data_unmarshaller=decoder
     )
     data = (
@@ -89,7 +94,7 @@ def test_missing_required_fields_structured(body):
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
         # prefix e-id instead of ce-id therefore it should throw
-        _ = CloudEvent.from_http(
+        _ = from_http(
             json.dumps(body), attributes={"Content-Type": "application/json"}
         )
 
@@ -101,7 +106,7 @@ def test_missing_required_fields_binary(headers):
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
         # prefix e-id instead of ce-id therefore it should throw
-        _ = CloudEvent.from_http(json.dumps(test_data), headers=headers)
+        _ = from_http(json.dumps(test_data), headers=headers)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -155,7 +160,7 @@ def test_emit_structured_event(specversion):
 
 
 @pytest.mark.parametrize(
-    "converter", [converters.TypeStructured, converters.TypeStructured]
+    "converter", [converters.TypeBinary, converters.TypeStructured]
 )
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
 def test_roundtrip_non_json_event(converter, specversion):
@@ -167,7 +172,12 @@ def test_roundtrip_non_json_event(converter, specversion):
     attrs = {"source": "test", "type": "t"}
 
     event = CloudEvent(attrs, compressed_data)
-    headers, data = event.to_http(converter, data_marshaller=lambda x: x)
+
+    if converter == converters.TypeStructured:
+        headers, data = to_structured_http(event, data_marshaller=lambda x: x)
+    elif converter == converters.TypeBinary:
+        headers, data = to_binary_http(event, data_marshaller=lambda x: x)
+
     headers["binary-payload"] = "true"  # Decoding hint for server
     _, r = app.test_client.post("/event", headers=headers, data=data)
 
@@ -196,9 +206,7 @@ def test_missing_ce_prefix_binary_event(specversion):
             # and NotImplementedError because structured calls aren't
             # implemented. In this instance one of the required keys should have
             # prefix e-id instead of ce-id therefore it should throw
-            _ = CloudEvent.from_http(
-                json.dumps(test_data), headers=prefixed_headers
-            )
+            _ = from_http(json.dumps(test_data), headers=prefixed_headers)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -215,9 +223,7 @@ def test_valid_binary_events(specversion):
             "ce-specversion": specversion,
         }
         data = {"payload": f"payload-{i}"}
-        events_queue.append(
-            CloudEvent.from_http(json.dumps(data), headers=headers)
-        )
+        events_queue.append(from_http(json.dumps(data), headers=headers))
 
     for i, event in enumerate(events_queue):
         data = event.data
@@ -238,7 +244,7 @@ def test_structured_to_request(specversion):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body_bytes = event.to_http()
+    headers, body_bytes = to_structured_http(event)
     assert isinstance(body_bytes, bytes)
     body = json.loads(body_bytes)
 
@@ -258,7 +264,7 @@ def test_binary_to_request(specversion):
     }
     data = {"message": "Hello World!"}
     event = CloudEvent(attributes, data)
-    headers, body_bytes = event.to_http(converters.TypeBinary)
+    headers, body_bytes = to_binary_http(event)
     body = json.loads(body_bytes)
 
     for key in data:
@@ -279,7 +285,7 @@ def test_empty_data_structured_event(specversion):
         "source": "<source-url>",
     }
 
-    _ = CloudEvent.from_http(
+    _ = from_http(
         json.dumps(attributes), {"content-type": "application/cloudevents+json"}
     )
 
@@ -295,7 +301,7 @@ def test_empty_data_binary_event(specversion):
         "ce-time": "2018-10-23T12:28:22.4579346Z",
         "ce-source": "<source-url>",
     }
-    _ = CloudEvent.from_http("", headers)
+    _ = from_http("", headers)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -313,7 +319,7 @@ def test_valid_structured_events(specversion):
             "data": {"payload": f"payload-{i}"},
         }
         events_queue.append(
-            CloudEvent.from_http(
+            from_http(
                 json.dumps(event),
                 {"content-type": "application/cloudevents+json"},
             )
@@ -339,7 +345,7 @@ def test_structured_no_content_type(specversion):
         "specversion": specversion,
         "data": test_data,
     }
-    event = CloudEvent.from_http(json.dumps(data), {},)
+    event = from_http(json.dumps(data), {},)
 
     assert event["id"] == "id"
     assert event["source"] == "source.com.test"
@@ -378,3 +384,20 @@ def test_is_structured():
 
     headers = {"ce-specversion": "1.0"}
     assert not converters.is_structured(headers)
+
+
+@pytest.mark.parametrize("specversion", ["1.0", "0.3"])
+def test_cloudevent_repr(specversion):
+    headers = {
+        "Content-Type": "application/octet-stream",
+        "ce-specversion": specversion,
+        "ce-type": "word.found.name",
+        "ce-id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "ce-time": "2018-10-23T12:28:22.4579346Z",
+        "ce-source": "<source-url>",
+    }
+    event = from_http("", headers)
+    # Testing to make sure event is printable. I could runevent. __repr__() but
+    # we had issues in the past where event.__repr__() could run but
+    # print(event) would fail.
+    print(event)
