@@ -206,7 +206,7 @@ def test_missing_ce_prefix_binary_event(specversion):
             # and NotImplementedError because structured calls aren't
             # implemented. In this instance one of the required keys should have
             # prefix e-id instead of ce-id therefore it should throw
-            _ = from_http(test_data, headers=prefixed_headers)
+            _ = from_http(json.dumps(test_data), headers=prefixed_headers)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -330,6 +330,60 @@ def test_valid_structured_events(specversion):
         assert event["source"] == f"source{i}.com.test"
         assert event["specversion"] == specversion
         assert event.data["payload"] == f"payload-{i}"
+
+
+@pytest.mark.parametrize("specversion", ["1.0", "0.3"])
+def test_structured_no_content_type(specversion):
+    # Test creating multiple cloud events
+    events_queue = []
+    headers = {}
+    num_cloudevents = 30
+    data = {
+        "id": "id",
+        "source": "source.com.test",
+        "type": "cloudevent.test.type",
+        "specversion": specversion,
+        "data": test_data,
+    }
+    event = from_http(json.dumps(data), {},)
+
+    assert event["id"] == "id"
+    assert event["source"] == "source.com.test"
+    assert event["specversion"] == specversion
+    for key, val in test_data.items():
+        assert event.data[key] == val
+
+
+def test_is_binary():
+    headers = {
+        "ce-id": "my-id",
+        "ce-source": "<event-source>",
+        "ce-type": "cloudevent.event.type",
+        "ce-specversion": "1.0",
+        "Content-Type": "text/plain",
+    }
+    assert converters.is_binary(headers)
+
+    headers = {
+        "Content-Type": "application/cloudevents+json",
+    }
+    assert not converters.is_binary(headers)
+
+    headers = {}
+    assert not converters.is_binary(headers)
+
+
+def test_is_structured():
+    headers = {
+        "Content-Type": "application/cloudevents+json",
+    }
+    assert converters.is_structured(headers)
+
+    headers = {}
+    assert converters.is_structured(headers)
+
+    headers = {"ce-specversion": "1.0"}
+    assert not converters.is_structured(headers)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])

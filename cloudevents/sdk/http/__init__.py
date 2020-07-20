@@ -18,6 +18,7 @@ from cloudevents.sdk import converters, marshaller, types
 from cloudevents.sdk.event import v1, v03
 from cloudevents.sdk.http.event import (
     EventClass,
+    _obj_by_version,
     to_binary_http,
     to_structured_http,
 )
@@ -41,21 +42,36 @@ def from_http(
     data: typing.Union[str, bytes],
     headers: typing.Dict[str, str],
     data_unmarshaller: types.UnmarshallerType = None,
-) -> CloudEvent:
-
+):
     """Unwrap a CloudEvent (binary or structured) from an HTTP request.
-        :param data: the HTTP request body
-        :type data: typing.IO
-        :param headers: the HTTP headers
-        :type headers: typing.Dict[str, str]
-        :param data_unmarshaller: Function to decode data into a python object.
-        :type data_unmarshaller: types.UnmarshallerType
-        """
+    :param data: the HTTP request body
+    :type data: typing.IO
+    :param headers: the HTTP headers
+    :type headers: typing.Dict[str, str]
+    :param data_unmarshaller: Function to decode data into a python object.
+    :type data_unmarshaller: types.UnmarshallerType
+    """
     if data_unmarshaller is None:
         data_unmarshaller = _json_or_string
 
-    event = marshaller.NewDefaultHTTPMarshaller().FromRequest(
-        v1.Event(), headers, data, data_unmarshaller
+    marshall = marshaller.NewDefaultHTTPMarshaller()
+
+    if converters.is_binary(headers):
+        specversion = headers.get("ce-specversion", None)
+    else:
+        raw_ce = json.loads(data)
+        specversion = raw_ce.get("specversion", None)
+
+    if specversion is None:
+        raise ValueError("could not find specversion in HTTP request")
+
+    event_handler = _obj_by_version.get(specversion, None)
+
+    if event_handler is None:
+        raise ValueError(f"found invalid specversion {specversion}")
+
+    event = marshall.FromRequest(
+        event_handler(), headers, data, data_unmarshaller
     )
     attrs = event.Properties()
     attrs.pop("data", None)
