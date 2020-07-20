@@ -18,7 +18,9 @@ import typing
 import uuid
 
 from cloudevents.sdk import converters, marshaller, types
+from cloudevents.sdk.converters import is_binary
 from cloudevents.sdk.event import v1, v03
+from cloudevents.sdk.marshaller import HTTPMarshaller
 
 _marshaller_by_format = {
     converters.TypeStructured: lambda x: x,
