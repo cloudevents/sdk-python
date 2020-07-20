@@ -29,9 +29,10 @@ class JSONHTTPCloudEventConverter(base.Converter):
         content_type: str,
         headers: typing.Dict[str, str] = {"ce-specversion": None},
     ) -> bool:
-        return (isinstance(content_type, str) and content_type.startswith(self.MIME_TYPE)) or (
-            "ce-specversion" not in headers
-        )
+        return (
+            isinstance(content_type, str)
+            and content_type.startswith(self.MIME_TYPE)
+        ) or ("ce-specversion" not in headers)
 
     def event_supported(self, event: object) -> bool:
         # structured format supported by both spec 0.1 and 0.2

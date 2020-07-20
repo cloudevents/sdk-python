@@ -346,3 +346,35 @@ def test_structured_no_content_type(specversion):
     assert event["specversion"] == specversion
     for key, val in test_data.items():
         assert event.data[key] == val
+
+
+def test_is_binary():
+    headers = {
+        "ce-id": "my-id",
+        "ce-source": "<event-source>",
+        "ce-type": "cloudevent.event.type",
+        "ce-specversion": "1.0",
+        "Content-Type": "text/plain",
+    }
+    assert converters.is_binary(headers)
+
+    headers = {
+        "Content-Type": "application/cloudevents+json",
+    }
+    assert not converters.is_binary(headers)
+
+    headers = {}
+    assert not converters.is_binary(headers)
+
+
+def test_is_structured():
+    headers = {
+        "Content-Type": "application/cloudevents+json",
+    }
+    assert converters.is_structured(headers)
+
+    headers = {}
+    assert converters.is_structured(headers)
+
+    headers = {"ce-specversion": "1.0"}
+    assert not converters.is_structured(headers)
