@@ -20,6 +20,7 @@ import uuid
 from cloudevents.sdk import converters, marshaller, types
 from cloudevents.sdk.converters import binary, structured
 from cloudevents.sdk.event import v1, v03
+from cloudevents.sdk.marshaller import HTTPMarshaller
 
 _marshaller_by_format = {
     converters.TypeStructured: lambda x: x,
@@ -41,6 +42,20 @@ def _json_or_string(content: typing.Union[str, bytes]):
         return content
 
 
+def is_binary(
+    headers: typing.Dict[str, str]
+) -> bool:
+    """Uses internal marshallers to determine whether this event is binary
+    :param headers: the HTTP headers
+    :type headers: typing.Dict[str, str]
+    :returns bool: returns a bool indicating whether the headers indicate a binary event type
+    """
+    headers = {key.lower(): value for key, value in headers.items()}
+    content_type = headers.get("content-type", "")
+    binary_parser = binary.BinaryHTTPCloudEventConverter()
+    return binary_parser.can_read(content_type=content_type, headers=headers)
+
+    
 class CloudEvent:
     """
     Python-friendly cloudevent class supporting v1 events
@@ -65,36 +80,13 @@ class CloudEvent:
         if data_unmarshaller is None:
             data_unmarshaller = _json_or_string
 
-        headers = {key.lower(): value for key, value in headers.items()}
-
-        content_type = headers.get("content-type", None)
-
-        specversion = None
         marshall = marshaller.NewDefaultHTTPMarshaller()
 
-        for converter in marshall.http_converters:
-            # marshall atm has two converters, one for binary and another for
-            # structured. Binary converter will always return True, but the
-            # structured converter is the first converter we iterate through.
-            # structured returns true if and only if
-            # content-type = application/cloudevents+json.
-            if converter.can_read(content_type, headers=headers):
-                if isinstance(converter, binary.BinaryHTTPCloudEventConverter):
-                    specversion = headers.get("ce-specversion", None)
-                    break
-                elif isinstance(
-                    converter, structured.JSONHTTPCloudEventConverter
-                ):
-                    raw_ce = json.loads(data)
-
-                    specversion = raw_ce.get("specversion", None)
-                    # Breaking because while structured may or may not return
-                    # true on can_read, binary will always return true. Without
-                    # a break specversion for structured events will always be
-                    # set to None causing an error to be thrown.
-                    break
-                else:
-                    raise NotImplementedError
+        if is_binary(headers):
+            specversion = headers.get("ce-specversion", None)
+        else:
+            raw_ce = json.loads(data)
+            specversion = raw_ce.get("specversion", None)
 
         if specversion is None:
             raise ValueError("could not find specversion in HTTP request")

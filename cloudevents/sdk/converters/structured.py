@@ -29,7 +29,7 @@ class JSONHTTPCloudEventConverter(base.Converter):
         content_type: str,
         headers: typing.Dict[str, str] = {"ce-specversion": None},
     ) -> bool:
-        return (content_type and content_type.startswith(self.MIME_TYPE)) or (
+        return (isinstance(content_type, str) and content_type.startswith(self.MIME_TYPE)) or (
             "ce-specversion" not in headers
         )
 
