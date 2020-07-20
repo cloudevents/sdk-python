@@ -16,8 +16,7 @@ import sys
 
 import requests
 
-from cloudevents.sdk import converters
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import CloudEvent, to_binary_http, to_structured_http
 
 
 def send_binary_cloud_event(url):
@@ -29,10 +28,10 @@ def send_binary_cloud_event(url):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body = event.to_http(converters.TypeBinary)
+    headers, body = to_binary_http(event)
 
     # send and print event
-    requests.post(url, data=body, headers=headers)
+    requests.post(url, headers=headers, data=body)
     print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
 
 
@@ -45,10 +44,10 @@ def send_structured_cloud_event(url):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body = event.to_http(converters.TypeBinary)
+    headers, body = to_structured_http(event)
 
-    # POST
-    requests.post(url, data=body, headers=headers)
+    # send and print event
+    requests.post(url, headers=headers, data=body)
     print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
 
 

@@ -13,7 +13,7 @@
 #    under the License.
 from flask import Flask, request
 
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import from_http
 
 app = Flask(__name__)
 
@@ -22,19 +22,13 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def home():
     # create a CloudEvent
-    event = CloudEvent.from_http(request.get_data(), request.headers)
-    print(event)
+    event = from_http(request.get_data(), request.headers)
 
     # you can access cloudevent fields as seen below
     print(
-        f"Found CloudEvent from {event['source']} with specversion {event['specversion']}"
+        f"Found {event['id']} from {event['source']} with type "
+        f"{event['type']} and specversion {event['specversion']}"
     )
-
-    if event["type"] == "com.example.sampletype1":
-        print(f"CloudEvent {event['id']} is binary")
-
-    elif event["type"] == "com.example.sampletype2":
-        print(f"CloudEvent {event['id']} is structured")
 
     return "", 204
 
