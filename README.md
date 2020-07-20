@@ -22,8 +22,7 @@ Below we will provide samples on how to send cloudevents using the popular
 ### Binary HTTP CloudEvent
 
 ```python
-from cloudevents.sdk import converters
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import CloudEvent, to_binary_http
 import requests
 
 
@@ -35,7 +34,7 @@ attributes = {
 data = {"message": "Hello World!"}
 
 event = CloudEvent(attributes, data)
-headers, body = event.to_http(converters.TypeBinary)
+headers, body = to_binary_http(event)
 
 # POST
 requests.post("<some-url>", data=body, headers=headers)
@@ -44,7 +43,7 @@ requests.post("<some-url>", data=body, headers=headers)
 ### Structured HTTP CloudEvent
 
 ```python
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import CloudEvent, to_structured_http
 import requests
 
 
@@ -55,7 +54,7 @@ attributes = {
 }
 data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
-headers, body = event.to_http()
+headers, body = to_structured_http(event)
 
 # POST
 requests.post("<some-url>", data=body, headers=headers)
@@ -71,7 +70,7 @@ The code below shows how to consume a cloudevent using the popular python web fr
 ```python
 from flask import Flask, request
 
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import from_http
 
 app = Flask(__name__)
 
@@ -80,16 +79,13 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def home():
     # create a CloudEvent
-    event = CloudEvent.from_http(request.get_data(), request.headers)
+    event = from_http(request.get_data(), request.headers)
 
     # you can access cloudevent fields as seen below
-    print(f"Found CloudEvent from {event['source']} with specversion {event['specversion']}")
-
-    if event['type'] == 'com.example.sampletype1':
-        print(f"CloudEvent {event['id']} is binary")
-
-    elif event['type'] == 'com.example.sampletype2':
-        print(f"CloudEvent {event['id']} is structured")
+    print(
+        f"Found {event['id']} from {event['source']} with type "
+        f"{event['type']} and specversion {event['specversion']}"
+    )
 
     return "", 204
 
