@@ -21,53 +21,40 @@ import requests
 from PIL import Image
 
 from cloudevents.sdk import converters
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import CloudEvent, to_binary_http, to_structured_http
 
-
-def create_byte_image(size: typing.Tuple[int, int]) -> str:
-    # Create image
-    image = Image.new("RGB", size)
-
-    # Turn image into bytes
-    b = image.tobytes()
-
-    return b
+resp = requests.get(
+    "https://raw.githubusercontent.com/cncf/artwork/master/projects/cloudevents/horizontal/color/cloudevents-horizontal-color.png"
+)
+image_bytes = resp.content
 
 
 def send_binary_cloud_event(url: str):
-    size = (8, 8)
     attributes = {
         "type": "com.example.string",
         "source": "https://example.com/event-producer",
-        "size": json.dumps(size),
     }
-    data = create_byte_image(size)
 
-    event = CloudEvent(attributes, data)
-    headers, body = event.to_http(
-        converters.TypeBinary, data_marshaller=lambda x: x.decode()
-    )
+    event = CloudEvent(attributes, image_bytes)
+    headers, body = to_binary_http(event, data_marshaller=lambda x: x)
 
     # send and print event
-    requests.post(url, data=body, headers=headers)
+    requests.post(url, headers=headers, data=body)
     print(f"Sent {event['id']} of type {event['type']}")
 
 
 def send_structured_cloud_event(url: str):
-    size = (8, 8)
     attributes = {
         "type": "com.example.base64",
         "source": "https://example.com/event-producer",
-        "size": json.dumps(size),
     }
-    data = create_byte_image(size)
 
     # passing data as a bytes object will
-    event = CloudEvent(attributes, data)
-    headers, body = event.to_http()
+    event = CloudEvent(attributes, image_bytes)
+    headers, body = to_structured_http(event)
 
     # # POST
-    requests.post(url, data=body, headers=headers)
+    requests.post(url, headers=headers, data=body)
     print(f"Sent {event['id']} of type {event['type']}")
 
 

@@ -1,7 +1,9 @@
 import base64
+import io
 import json
 import typing
 
+import requests
 from PIL import Image
 
 from cloudevents.sdk import converters
@@ -81,3 +83,14 @@ def test_create_structured_image():
 
     restored_event = from_http(body, headers)
     assert restored_event.data == bytesarr
+
+
+def test_image_content():
+    # Get image and check size
+    resp = requests.get(
+        "https://raw.githubusercontent.com/cncf/artwork/master/projects/cloudevents/horizontal/color/cloudevents-horizontal-color.png"
+    )
+    image_bytes_fileobj = io.BytesIO(resp.content)
+    im = Image.open(image_bytes_fileobj)
+    # size of this image
+    assert im.size == (1880, 363)

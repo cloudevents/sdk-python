@@ -11,12 +11,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import io
 import json
 
 from flask import Flask, request
 from PIL import Image
 
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import from_http
 
 app = Flask(__name__)
 
@@ -25,11 +26,12 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def home():
     # create a CloudEvent
-    event = CloudEvent.from_http(request.get_data(), request.headers)
-    size = json.loads(event["size"])
-    image = Image.frombytes("RGB", size, event.data)
-
-    print(f"Found image {event['id']} with size {image.size}")
+    event = from_http(
+        request.get_data(), request.headers, data_unmarshaller=lambda x: x
+    )
+    image_bytes_fileobj = io.BytesIO(event.data)
+    image = Image.open(image_bytes_fileobj)
+    print(f"Found event {event['id']} with image of size {image.size}")
 
     return "", 204
 
