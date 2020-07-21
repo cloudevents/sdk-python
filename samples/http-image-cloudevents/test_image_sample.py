@@ -5,7 +5,12 @@ import typing
 from PIL import Image
 
 from cloudevents.sdk import converters
-from cloudevents.sdk.http_events import CloudEvent
+from cloudevents.sdk.http import (
+    CloudEvent,
+    from_http,
+    to_binary_http,
+    to_structured_http,
+)
 
 
 def test_create_binary_image():
@@ -32,9 +37,7 @@ def test_create_binary_image():
     assert restore_image.size[0] == size[0], restore_image.size[1] == size[1]
 
     # Create http headers/body content
-    headers, body = event.to_http(
-        converters.TypeBinary, data_marshaller=lambda x: x.decode()
-    )
+    headers, body = to_binary_http(event, data_marshaller=lambda x: x)
 
     # Test cloudevent extension from http fields and data
     assert headers["ce-size"] == attributes["size"]
@@ -67,7 +70,7 @@ def test_create_structured_image():
     assert restore_image.size[0] == size[0], restore_image.size[1] == size[1]
 
     # Create http headers/body content
-    headers, body = event.to_http()
+    headers, body = to_structured_http(event)
     data = json.loads(body.decode())
 
     # TODO: Extensions need to be top level in structured request
@@ -76,5 +79,5 @@ def test_create_structured_image():
     assert data["extensions"]["size"] == attributes["size"]
     assert base64.b64decode(data["data_base64"]) == bytesarr
 
-    restored_event = CloudEvent.from_http(body, headers)
+    restored_event = from_http(body, headers)
     assert restored_event.data == bytesarr

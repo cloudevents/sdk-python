@@ -2,4 +2,3 @@ flask
 requests
 Pillow
 pytest
-base64
