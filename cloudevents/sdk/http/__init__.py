@@ -83,7 +83,9 @@ def from_http(
     return CloudEvent(attrs, event.data)
 
 
-def to_json(event: EventClass, data_marshaller: types.MarshallerType = None) -> typing.Union[str, bytes]:
+def to_json(
+    event: EventClass, data_marshaller: types.MarshallerType = None
+) -> typing.Union[str, bytes]:
     """
     Cast an EventClass into a json object
     :param event: EventClass which will be converted into a json object
