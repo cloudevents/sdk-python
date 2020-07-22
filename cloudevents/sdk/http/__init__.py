@@ -82,9 +82,12 @@ def from_http(
     return CloudEvent(attrs, event.data)
 
 
-def to_json(event: EventClass):
+def to_json(event: EventClass) -> typing.Union[str, bytes]:
     return to_structured_http(event)[1]
 
 
-def from_json():
-    raise NotImplementedError
+def from_json(
+    data: typing.Union[str, bytes],
+    data_unmarshaller: types.UnmarshallerType = None,
+) -> EventClass:
+    return from_http(data=data, headers={}, data_unmarshaller=data_unmarshaller)

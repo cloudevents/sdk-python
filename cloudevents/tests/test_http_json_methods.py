@@ -16,12 +16,7 @@ import json
 
 import pytest
 
-from cloudevents.sdk.http import (
-    CloudEvent,
-    to_json, 
-    from_json
-)
-
+from cloudevents.sdk.http import CloudEvent, from_json, to_json
 
 test_data = json.dumps({"data-key": "val"})
 test_attributes = {
@@ -38,23 +33,70 @@ def test_to_json(specversion):
     print(event_dict)
     for key, val in test_attributes.items():
         assert event_dict[key] == val
-    
-    assert event_dict['data'] == test_data
+
+    assert event_dict["data"] == test_data
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
 def test_to_json_base64(specversion):
-    data = b'test123'
+    data = b"test123"
 
     event = CloudEvent(test_attributes, data)
     event_json = to_json(event)
     event_dict = json.loads(event_json)
-    
+
     for key, val in test_attributes.items():
         assert event_dict[key] == val
 
     # test data was properly marshalled into data_base64
-    data_base64 = event_dict['data_base64'].encode()
+    data_base64 = event_dict["data_base64"].encode()
     test_data_base64 = base64.b64encode(data)
 
     assert data_base64 == test_data_base64
+
+
+@pytest.mark.parametrize("specversion", ["0.3", "1.0"])
+def test_from_json(specversion):
+    payload = {
+        "type": "com.example.string",
+        "source": "https://example.com/event-producer",
+        "id": "1234",
+        "specversion": specversion,
+        "data": {"data-key": "val"},
+    }
+    event = from_json(json.dumps(payload))
+
+    for key, val in payload.items():
+        if key == 'data':
+            assert event.data == payload['data']
+        else:
+            assert event[key] == val
+
+
+@pytest.mark.parametrize("specversion", ["0.3", "1.0"])
+def test_from_json_base64(specversion):
+    # Create base64 encoded data
+    raw_data = {"data-key": "val"}
+    data = json.dumps(raw_data).encode()
+    data_base64_str = base64.b64encode(data).decode()
+
+    # Create json payload
+    payload = {
+        "type": "com.example.string",
+        "source": "https://example.com/event-producer",
+        "id": "1234",
+        "specversion": specversion,
+        "data_base64": data_base64_str,
+    }
+    payload_json = json.dumps(payload)
+
+    # Create event
+    event = from_json(payload_json)
+
+    # Test fields were marshalled properly
+    for key, val in payload.items():
+        if key == 'data_base64':
+            # Check data_base64 was unmarshalled properly
+            assert event.data == raw_data
+        else:
+            assert event[key] == val
