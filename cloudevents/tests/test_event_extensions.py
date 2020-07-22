@@ -22,32 +22,27 @@ from cloudevents.sdk.http import (
     to_structured_http,
 )
 
+test_data = json.dumps({"data-key": "val"})
+test_attributes = {
+    "type": "com.example.string",
+    "source": "https://example.com/event-producer",
+    "ext1": "testval",
+}
+
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
 def test_cloudevent_access_extensions(specversion):
-    attributes = {
-        "type": "com.example.string",
-        "source": "https://example.com/event-producer",
-        "ext1": "testval",
-    }
-    data = {"data-key": "val"}
-    event = CloudEvent(attributes, data)
+    event = CloudEvent(test_attributes, test_data)
     assert event["ext1"] == "testval"
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
 def test_to_binary_extensions(specversion):
-    attributes = {
-        "type": "com.example.string",
-        "source": "https://example.com/event-producer",
-        "ext1": "testval",
-    }
-    data = json.dumps({"data-key": "val"})
-    event = CloudEvent(attributes, data)
-
+    event = CloudEvent(test_attributes, test_data)
     headers, body = to_binary_http(event)
+
     assert "ce-ext1" in headers
-    assert headers.get("ce-ext1") == attributes["ext1"]
+    assert headers.get("ce-ext1") == test_attributes["ext1"]
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
@@ -69,16 +64,11 @@ def test_from_binary_extensions(specversion):
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
 def test_to_structured_extensions(specversion):
-    attributes = {
-        "type": "com.example.string",
-        "source": "https://example.com/event-producer",
-        "ext1": "testval",
-    }
-    data = json.dumps({"data-key": "val"})
-    event = CloudEvent(attributes, data)
-
+    event = CloudEvent(test_attributes, test_data)
     headers, body = to_structured_http(event)
+
     body = json.loads(body)
+
     assert "ext1" in body
     assert "extensions" not in body
 
@@ -94,6 +84,7 @@ def test_from_structured_extensions(specversion):
         "ext1": "test1",
         "ext2": "test2",
     }
+
     data = json.dumps(body)
     event = from_http(data, headers)
 
