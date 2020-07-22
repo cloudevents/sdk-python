@@ -24,9 +24,9 @@ app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def home():
-    # Create a CloudEvent. 
+    # Create a CloudEvent.
     # We want the data field in our event not to change to
-    # make casting event.data into a PIL Image easier, hence 
+    # make casting event.data into a PIL Image easier, hence
     # data_unmarshaller=lambda x: x
     event = from_http(
         request.get_data(), request.headers, data_unmarshaller=lambda x: x
@@ -36,7 +36,7 @@ def home():
     image_bytes_fileobj = io.BytesIO(event.data)
     image = Image.open(image_bytes_fileobj)
 
-    # Print 
+    # Print
     print(f"Found event {event['id']} with image of size {image.size}")
     return "", 204
 

@@ -56,9 +56,9 @@ def send_structured_cloud_event(url: str):
     event = CloudEvent(attributes, image_bytes)
 
     # Create cloudevent HTTP headers and content
-    # Note that to_structured_http will create a data_base64 data field in 
+    # Note that to_structured_http will create a data_base64 data field in
     # specversion 1.0 (default specversion) if given
-    # an event whose data field is of type bytes. 
+    # an event whose data field is of type bytes.
     headers, body = to_structured_http(event)
 
     # Send cloudevent

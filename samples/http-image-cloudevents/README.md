@@ -1,4 +1,4 @@
-## Quickstart
+## Sending cloudevents with image payloads to a server
 
 Install dependencies:
 
@@ -17,4 +17,10 @@ cloudevent to your local server:
 
 ```sh
 python3 client.py http://localhost:3000/
+```
+
+## Test
+
+```sh
+pytest
 ```
