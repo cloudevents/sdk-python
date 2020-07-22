@@ -34,7 +34,7 @@ def _json_or_string(content: typing.Union[str, bytes]):
         return None
     try:
         return json.loads(content)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, TypeError) as e:
         return content
 
 
@@ -48,7 +48,8 @@ def from_http(
     :type data: typing.IO
     :param headers: the HTTP headers
     :type headers: typing.Dict[str, str]
-    :param data_unmarshaller: Function to decode data into a python object.
+    :param data_unmarshaller: Callable function to map data arg to python object
+        e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
     if data_unmarshaller is None:
@@ -71,7 +72,7 @@ def from_http(
         raise ValueError(f"found invalid specversion {specversion}")
 
     event = marshall.FromRequest(
-        event_handler(), headers, data, data_unmarshaller
+        event_handler(), headers, data, data_unmarshaller=data_unmarshaller
     )
     attrs = event.Properties()
     attrs.pop("data", None)
