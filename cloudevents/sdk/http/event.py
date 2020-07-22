@@ -22,9 +22,19 @@ from cloudevents.sdk.converters import is_binary
 from cloudevents.sdk.event import v1, v03
 from cloudevents.sdk.marshaller import HTTPMarshaller
 
+
+def default_marshaller(content: any):
+    if len(content) == 0:
+        return None
+    try:
+        return json.dumps(content)
+    except TypeError:
+        return content
+
+
 _marshaller_by_format = {
     converters.TypeStructured: lambda x: x,
-    converters.TypeBinary: json.dumps,
+    converters.TypeBinary: default_marshaller,
 }
 
 _obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
@@ -118,6 +128,7 @@ def _to_http(
     """
     if data_marshaller is None:
         data_marshaller = _marshaller_by_format[format]
+
     if event._attributes["specversion"] not in _obj_by_version:
         raise ValueError(
             f"Unsupported specversion: {event._attributes['specversion']}"
@@ -129,7 +140,7 @@ def _to_http(
     event_handler.data = event.data
 
     return marshaller.NewDefaultHTTPMarshaller().ToRequest(
-        event_handler, format, data_marshaller
+        event_handler, format, data_marshaller=data_marshaller
     )
 
 
