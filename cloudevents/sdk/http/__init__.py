@@ -82,8 +82,8 @@ def from_http(
     return CloudEvent(attrs, event.data)
 
 
-def to_json():
-    raise NotImplementedError
+def to_json(event: EventClass):
+    return to_structured_http(event)[1]
 
 
 def from_json():
