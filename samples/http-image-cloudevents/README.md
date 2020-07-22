@@ -1,4 +1,4 @@
-## Sending cloudevents with image payloads to a server
+## Image Payloads Quickstart
 
 Install dependencies:
 

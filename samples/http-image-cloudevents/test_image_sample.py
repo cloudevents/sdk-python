@@ -49,7 +49,6 @@ def test_create_binary_image():
 
 
 def test_create_structured_image():
-
     # Create image and turn image into bytes
     attributes = {
         "type": "com.example.string",
@@ -82,7 +81,6 @@ def test_create_structured_image():
 
 
 def test_image_content():
-
     # Get image and check size
     im = Image.open(image_fileobj)
     # size of this image
