@@ -43,7 +43,8 @@ def from_http(
     headers: typing.Dict[str, str],
     data_unmarshaller: types.UnmarshallerType = None,
 ):
-    """Unwrap a CloudEvent (binary or structured) from an HTTP request.
+    """
+    Unwrap a CloudEvent (binary or structured) from an HTTP request.
     :param data: the HTTP request body
     :type data: typing.IO
     :param headers: the HTTP headers
@@ -82,12 +83,30 @@ def from_http(
     return CloudEvent(attrs, event.data)
 
 
-def to_json(event: EventClass) -> typing.Union[str, bytes]:
-    return to_structured_http(event)[1]
+def to_json(event: EventClass, data_marshaller: types.MarshallerType = None) -> typing.Union[str, bytes]:
+    """
+    Cast an EventClass into a json object
+    :param event: EventClass which will be converted into a json object
+    :type event: EventClass
+    :param data_marshaller: Callable function which will cast event.data
+        into a json object
+    :type data_marshaller: typing.Callable
+    :returns: json object representing the given event
+    """
+    return to_structured_http(event, data_marshaller=data_marshaller)[1]
 
 
 def from_json(
     data: typing.Union[str, bytes],
     data_unmarshaller: types.UnmarshallerType = None,
 ) -> EventClass:
+    """
+    Cast json encoded data into an EventClass object
+    :param data: json encoded cloudevent data
+    :type event: typing.Union[str, bytes]
+    :param data_unmarshaller: Callable function which will cast json encoded 
+        data into a python object retrievable from returned EventClass.data
+    :type data_marshaller: typing.Callable
+    :returns: EventClass representing given cloudevent json object
+    """
     return from_http(data=data, headers={}, data_unmarshaller=data_unmarshaller)
