@@ -176,11 +176,3 @@ def to_binary_http(
         format=converters.TypeBinary,
         data_marshaller=data_marshaller,
     )
-
-
-def to_json():
-    raise NotImplementedError
-
-
-def from_json():
-    raise NotImplementedError

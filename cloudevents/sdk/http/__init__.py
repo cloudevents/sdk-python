@@ -82,5 +82,9 @@ def from_http(
     return CloudEvent(attrs, event.data)
 
 
+def to_json():
+    raise NotImplementedError
+
+
 def from_json():
     raise NotImplementedError
