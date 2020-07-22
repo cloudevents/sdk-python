@@ -67,8 +67,8 @@ def test_from_json(specversion):
     event = from_json(json.dumps(payload))
 
     for key, val in payload.items():
-        if key == 'data':
-            assert event.data == payload['data']
+        if key == "data":
+            assert event.data == payload["data"]
         else:
             assert event[key] == val
 
@@ -95,7 +95,7 @@ def test_from_json_base64(specversion):
 
     # Test fields were marshalled properly
     for key, val in payload.items():
-        if key == 'data_base64':
+        if key == "data_base64":
             # Check data_base64 was unmarshalled properly
             assert event.data == raw_data
         else:
@@ -120,7 +120,7 @@ def test_json_can_talk_to_itself_base64(specversion):
 
     event = CloudEvent(test_attributes, data)
     event_json = to_json(event)
-    
+
     event = from_json(event_json)
 
     for key, val in test_attributes.items():
