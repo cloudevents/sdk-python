@@ -30,37 +30,44 @@ image_bytes = resp.content
 
 
 def send_binary_cloud_event(url: str):
+    # Create cloudevent
     attributes = {
         "type": "com.example.string",
         "source": "https://example.com/event-producer",
     }
 
     event = CloudEvent(attributes, image_bytes)
-    headers, body = to_binary_http(event, data_marshaller=lambda x: x)
 
-    # send and print event
+    # Create cloudevent HTTP headers and content
+    headers, body = to_binary_http(event)
+
+    # Send cloudevent
     requests.post(url, headers=headers, data=body)
     print(f"Sent {event['id']} of type {event['type']}")
 
 
 def send_structured_cloud_event(url: str):
+    # Create cloudevent
     attributes = {
         "type": "com.example.base64",
         "source": "https://example.com/event-producer",
     }
 
-    # passing data as a bytes object will
     event = CloudEvent(attributes, image_bytes)
+
+    # Create cloudevent HTTP headers and content
+    # Note that to_structured_http will create a data_base64 data field in 
+    # specversion 1.0 (default specversion) if given
+    # an event whose data field is of type bytes. 
     headers, body = to_structured_http(event)
 
-    # # POST
+    # Send cloudevent
     requests.post(url, headers=headers, data=body)
     print(f"Sent {event['id']} of type {event['type']}")
 
 
 if __name__ == "__main__":
-    # expects a url from command line.
-    # e.g. python3 client.py http://localhost:3000/
+    # Run client.py via: 'python3 client.py http://localhost:3000/'
     if len(sys.argv) < 2:
         sys.exit(
             "Usage: python with_requests.py " "<CloudEvents controller URL>"

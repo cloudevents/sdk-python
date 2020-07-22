@@ -48,7 +48,8 @@ def from_http(
     :type data: typing.IO
     :param headers: the HTTP headers
     :type headers: typing.Dict[str, str]
-    :param data_unmarshaller: Function to decode data into a python object.
+    :param data_unmarshaller: Callable function to map data arg to python object
+        e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
     if data_unmarshaller is None:

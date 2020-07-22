@@ -22,17 +22,22 @@ from cloudevents.sdk.http import from_http
 app = Flask(__name__)
 
 
-# create an endpoint at http://localhost:/3000/
 @app.route("/", methods=["POST"])
 def home():
-    # create a CloudEvent
+    # Create a CloudEvent. 
+    # We want the data field in our event not to change to
+    # make casting event.data into a PIL Image easier, hence 
+    # data_unmarshaller=lambda x: x
     event = from_http(
         request.get_data(), request.headers, data_unmarshaller=lambda x: x
     )
+
+    # Create image from cloudevent data
     image_bytes_fileobj = io.BytesIO(event.data)
     image = Image.open(image_bytes_fileobj)
-    print(f"Found event {event['id']} with image of size {image.size}")
 
+    # Print 
+    print(f"Found event {event['id']} with image of size {image.size}")
     return "", 204
 
 
