@@ -14,6 +14,7 @@
 import json
 
 import pytest
+
 from cloudevents.sdk.http import (
     CloudEvent,
     from_http,
@@ -27,11 +28,11 @@ def test_cloudevent_access_extensions(specversion):
     attributes = {
         "type": "com.example.string",
         "source": "https://example.com/event-producer",
-        "ext1": "testval"
+        "ext1": "testval",
     }
     data = {"data-key": "val"}
     event = CloudEvent(attributes, data)
-    assert event['ext1'] == 'testval'
+    assert event["ext1"] == "testval"
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
@@ -39,14 +40,14 @@ def test_to_binary_extensions(specversion):
     attributes = {
         "type": "com.example.string",
         "source": "https://example.com/event-producer",
-        "ext1": "testval"
+        "ext1": "testval",
     }
     data = json.dumps({"data-key": "val"})
     event = CloudEvent(attributes, data)
 
     headers, body = to_binary_http(event)
-    assert 'ce-ext1' in headers
-    assert headers.get('ce-ext1') == attributes['ext1']
+    assert "ce-ext1" in headers
+    assert headers.get("ce-ext1") == attributes["ext1"]
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
@@ -57,13 +58,13 @@ def test_from_binary_extensions(specversion):
         "ce-type": "sample",
         "ce-specversion": specversion,
         "ce-ext1": "test1",
-        "ce-ext2": "test2"
+        "ce-ext2": "test2",
     }
     body = json.dumps({"data-key": "val"})
     event = from_http(body, headers)
 
-    assert headers['ce-ext1'] == event['ext1']
-    assert headers['ce-ext2'] == event['ext2']
+    assert headers["ce-ext1"] == event["ext1"]
+    assert headers["ce-ext2"] == event["ext2"]
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
@@ -71,32 +72,30 @@ def test_to_structured_extensions(specversion):
     attributes = {
         "type": "com.example.string",
         "source": "https://example.com/event-producer",
-        "ext1": "testval"
+        "ext1": "testval",
     }
     data = json.dumps({"data-key": "val"})
     event = CloudEvent(attributes, data)
 
     headers, body = to_structured_http(event)
     body = json.loads(body)
-    assert 'ext1' in body
-    assert 'extensions' not in body
+    assert "ext1" in body
+    assert "extensions" not in body
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
 def test_from_structured_extensions(specversion):
-    headers = {
-        "Content-Type": "application/cloudevents+json"
-    }
-    body = {        
+    headers = {"Content-Type": "application/cloudevents+json"}
+    body = {
         "id": "1234",
         "source": "<my url>",
         "type": "sample",
         "specversion": specversion,
         "ext1": "test1",
-        "ext2": "test2"
+        "ext2": "test2",
     }
     data = json.dumps(body)
     event = from_http(data, headers)
 
-    assert body['ext1'] == event['ext1']
-    assert body['ext2'] == event['ext2']
+    assert body["ext1"] == event["ext1"]
+    assert body["ext2"] == event["ext2"]
