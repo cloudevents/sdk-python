@@ -11,16 +11,10 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import base64
-import io
-import json
 import sys
-import typing
 
 import requests
-from PIL import Image
 
-from cloudevents.sdk import converters
 from cloudevents.sdk.http import CloudEvent, to_binary_http, to_structured_http
 
 resp = requests.get(

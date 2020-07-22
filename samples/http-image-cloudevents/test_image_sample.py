@@ -1,12 +1,10 @@
 import base64
 import io
 import json
-import typing
 
 import requests
 from PIL import Image
 
-from cloudevents.sdk import converters
 from cloudevents.sdk.http import (
     CloudEvent,
     from_http,
