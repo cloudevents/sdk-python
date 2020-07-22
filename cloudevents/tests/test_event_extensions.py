@@ -99,4 +99,3 @@ def test_from_structured_extensions(specversion):
 
     assert body["ext1"] == event["ext1"]
     assert body["ext2"] == event["ext2"]
-
