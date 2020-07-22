@@ -37,7 +37,9 @@ def test_create_binary_image():
     headers, body = to_binary_http(event)
 
     # Unmarshall CloudEvent and re-create image
-    reconstruct_event = from_http(body, headers, data_unmarshaller=lambda x: io.BytesIO(x))
+    reconstruct_event = from_http(
+        body, headers, data_unmarshaller=lambda x: io.BytesIO(x)
+    )
 
     # reconstruct_event.data is an io.BytesIO object due to data_unmarshaller
     restore_image = Image.open(reconstruct_event.data)
@@ -62,8 +64,6 @@ def test_create_structured_image():
     # Create http headers/body content
     headers, body = to_structured_http(event)
 
-
-
     # Structured has cloudevent attributes marshalled inside the body. For this
     # reason we must load the byte object to create the python dict containing
     # the cloudevent attributes
@@ -74,7 +74,9 @@ def test_create_structured_image():
     assert base64.b64decode(data["data_base64"]) == image_bytes
 
     # Unmarshall CloudEvent and re-create image
-    reconstruct_event = from_http(body, headers, data_unmarshaller=lambda x: io.BytesIO(x))
+    reconstruct_event = from_http(
+        body, headers, data_unmarshaller=lambda x: io.BytesIO(x)
+    )
 
     # reconstruct_event.data is an io.BytesIO object due to data_unmarshaller
     restore_image = Image.open(reconstruct_event.data)

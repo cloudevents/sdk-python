@@ -27,7 +27,9 @@ def home():
     # Create a CloudEvent.
     # data_unmarshaller will cast event.data into an io.BytesIO object
     event = from_http(
-        request.get_data(), request.headers, data_unmarshaller=lambda x: io.BytesIO(x)
+        request.get_data(),
+        request.headers,
+        data_unmarshaller=lambda x: io.BytesIO(x),
     )
 
     # Create image from cloudevent data
