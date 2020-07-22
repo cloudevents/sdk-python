@@ -201,6 +201,9 @@ class BaseEvent(EventGetterSetter):
                 props["data_base64"] = base64.b64encode(data).decode("ascii")
             else:
                 props["data"] = data
+        if "extensions" in props:
+            extensions = props.pop("extensions")
+            props.update(extensions)
         return json.dumps(props)
 
     def UnmarshalJSON(
