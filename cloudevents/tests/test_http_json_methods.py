@@ -30,7 +30,7 @@ def test_to_json(specversion):
     event = CloudEvent(test_attributes, test_data)
     event_json = to_json(event)
     event_dict = json.loads(event_json)
-    print(event_dict)
+
     for key, val in test_attributes.items():
         assert event_dict[key] == val
 
@@ -100,3 +100,29 @@ def test_from_json_base64(specversion):
             assert event.data == raw_data
         else:
             assert event[key] == val
+
+
+@pytest.mark.parametrize("specversion", ["0.3", "1.0"])
+def test_json_can_talk_to_itself(specversion):
+    event = CloudEvent(test_attributes, test_data)
+    event_json = to_json(event)
+
+    event = from_json(event_json)
+
+    for key, val in test_attributes.items():
+        assert event[key] == val
+    assert event.data == test_data
+
+
+@pytest.mark.parametrize("specversion", ["0.3", "1.0"])
+def test_json_can_talk_to_itself_base64(specversion):
+    data = b"test123"
+
+    event = CloudEvent(test_attributes, data)
+    event_json = to_json(event)
+    
+    event = from_json(event_json)
+
+    for key, val in test_attributes.items():
+        assert event[key] == val
+    assert event.data == data
