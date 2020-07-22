@@ -103,7 +103,7 @@ def from_json(
     data_unmarshaller: types.UnmarshallerType = None,
 ) -> EventClass:
     """
-    Cast json encoded data into an EventClass object
+    Cast json encoded data into an EventClass
     :param data: json encoded cloudevent data
     :type event: typing.Union[str, bytes]
     :param data_unmarshaller: Callable function which will cast json encoded 
