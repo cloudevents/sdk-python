@@ -9,3 +9,5 @@ pytest-cov==2.4.0
 sanic
 aiohttp
 Pillow
+requests
+
