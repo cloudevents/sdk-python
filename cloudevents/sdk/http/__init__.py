@@ -106,9 +106,9 @@ def from_json(
     Cast json encoded data into an EventClass
     :param data: json encoded cloudevent data
     :type event: typing.Union[str, bytes]
-    :param data_unmarshaller: Callable function which will cast json encoded 
-        data into a python object retrievable from returned EventClass.data
-    :type data_marshaller: typing.Callable
+    :param data_unmarshaller: Callable function which will cast data to a
+        python object
+    :type data_unmarshaller: typing.Callable
     :returns: EventClass representing given cloudevent json object
     """
     return from_http(data=data, headers={}, data_unmarshaller=data_unmarshaller)
