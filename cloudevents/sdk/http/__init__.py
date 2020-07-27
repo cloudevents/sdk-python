@@ -49,7 +49,7 @@ def from_http(
     :type data: typing.IO
     :param headers: the HTTP headers
     :type headers: typing.Dict[str, str]
-    :param data_unmarshaller: Callable function to map data arg to python object
+    :param data_unmarshaller: Callable function to map data to a python object
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
@@ -106,9 +106,9 @@ def from_json(
     Cast json encoded data into an EventClass
     :param data: json encoded cloudevent data
     :type event: typing.Union[str, bytes]
-    :param data_unmarshaller: Callable function which will cast json encoded 
-        data into a python object retrievable from returned EventClass.data
-    :type data_marshaller: typing.Callable
+    :param data_unmarshaller: Callable function which will cast data to a
+        python object
+    :type data_unmarshaller: typing.Callable
     :returns: EventClass representing given cloudevent json object
     """
     return from_http(data=data, headers={}, data_unmarshaller=data_unmarshaller)
