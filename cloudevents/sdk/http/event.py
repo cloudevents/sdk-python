@@ -56,7 +56,10 @@ class EventClass:
     ):
         """
         Event Constructor
-        :param attributes: a dict with HTTP headers
+        :param attributes: a dict with cloudevent attributes. Minimally
+            expects the attributes 'type' and 'source'. If not given the
+            attributes 'specversion', 'id' or 'time', this will create
+            those attributes with default values.
             e.g. {
                 "content-type": "application/cloudevents+json",
                 "id": "16fb5f0b-211e-1102-3dfe-ea6e2806f124",
@@ -122,8 +125,9 @@ def _to_http(
 
     :param format: constant specifying an encoding format
     :type format: str
-    :param data_unmarshaller: Function used to read the data to string.
-    :type data_unmarshaller: types.UnmarshallerType
+    :param data_marshaller: Callable function to cast event.data into
+        either a string or bytes
+    :type data_marshaller: types.MarshallerType
     :returns: (http_headers: dict, http_body: bytes or str)
     """
     if data_marshaller is None:
@@ -152,8 +156,9 @@ def to_structured_http(
 
     :param event: CloudEvent to cast into http data
     :type event: CloudEvent
-    :param data_unmarshaller: Function used to read the data to string.
-    :type data_unmarshaller: types.UnmarshallerType
+    :param data_marshaller: Callable function to cast event.data into
+        either a string or bytes
+    :type data_marshaller: types.MarshallerType
     :returns: (http_headers: dict, http_body: bytes or str)
     """
     return _to_http(event=event, data_marshaller=data_marshaller)
@@ -167,8 +172,9 @@ def to_binary_http(
 
     :param event: CloudEvent to cast into http data
     :type event: CloudEvent
-    :param data_unmarshaller: Function used to read the data to string.
-    :type data_unmarshaller: types.UnmarshallerType
+    :param data_marshaller: Callable function to cast event.data into
+        either a string or bytes
+    :type data_marshaller: types.UnmarshallerType
     :returns: (http_headers: dict, http_body: bytes or str)
     """
     return _to_http(
