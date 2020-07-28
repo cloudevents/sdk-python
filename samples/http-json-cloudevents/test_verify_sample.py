@@ -1,6 +1,7 @@
-from cloudevents.sdk.http import CloudEvent, to_binary_http, to_structured_http
-from server import app
 import pytest
+from server import app
+
+from cloudevents.sdk.http import CloudEvent, to_binary_http, to_structured_http
 
 
 @pytest.fixture
