@@ -24,7 +24,7 @@ from cloudevents.sdk.marshaller import HTTPMarshaller
 
 
 def default_marshaller(content: any):
-    if len(content) == 0:
+    if content is None or len(content) == 0:
         return None
     try:
         return json.dumps(content)

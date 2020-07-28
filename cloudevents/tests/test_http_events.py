@@ -401,3 +401,16 @@ def test_cloudevent_repr(specversion):
     # we had issues in the past where event.__repr__() could run but
     # print(event) would fail.
     print(event)
+
+
+@pytest.mark.parametrize("specversion", ["1.0", "0.3"])
+def test_none_data_cloudevent(specversion):
+    event = CloudEvent(
+        {
+            "source": "<my-url>",
+            "type": "issue.example",
+            "specversion": specversion,
+        }
+    )
+    to_binary_http(event)
+    to_structured_http(event)
