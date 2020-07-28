@@ -18,3 +18,9 @@ cloudevent to your local server:
 ```sh
 python3 client.py http://localhost:3000/
 ```
+
+## Test
+
+```sh
+pytest
+```
