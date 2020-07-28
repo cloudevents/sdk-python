@@ -3,7 +3,6 @@ import io
 import json
 
 import pytest
-import requests
 from client import image_bytes
 from PIL import Image
 from server import app
