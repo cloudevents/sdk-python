@@ -10,4 +10,4 @@ sanic
 aiohttp
 Pillow
 requests
-
+flask
