@@ -405,7 +405,12 @@ def test_cloudevent_repr(specversion):
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
 def test_none_data_cloudevent(specversion):
-    event = CloudEvent({"source": "<my-url>", "type": "issue.example", "specversion": specversion})
+    event = CloudEvent(
+        {
+            "source": "<my-url>",
+            "type": "issue.example",
+            "specversion": specversion,
+        }
+    )
     to_binary_http(event)
     to_structured_http(event)
-
