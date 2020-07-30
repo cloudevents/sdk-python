@@ -1,9 +1,10 @@
-from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
-from cloudevents.http.event import CloudEvent
-from cloudevents.sdk import types, converters, marshaller
-from cloudevents.http.util import _json_or_string
-import typing
 import json
+import typing
+
+from cloudevents.http.event import CloudEvent
+from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
+from cloudevents.http.util import _json_or_string
+from cloudevents.sdk import converters, marshaller, types
 
 
 def from_http(

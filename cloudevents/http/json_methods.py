@@ -1,7 +1,9 @@
-from cloudevents.http.event import CloudEvent
-from cloudevents.sdk import types
-from cloudevents.http.requests import to_structured_http, from_http
 import typing
+
+from cloudevents.http.event import CloudEvent
+from cloudevents.http.http_methods import from_http, to_structured_http
+from cloudevents.sdk import types
+
 
 def to_json(
     event: CloudEvent, data_marshaller: types.MarshallerType = None

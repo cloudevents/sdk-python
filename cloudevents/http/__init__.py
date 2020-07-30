@@ -14,17 +14,10 @@
 import json
 import typing
 
-from cloudevents.http.event import (
-    CloudEvent
+from cloudevents.http.event import CloudEvent
+from cloudevents.http.http_methods import (
+    from_http,
+    to_binary_http,
+    to_structured_http,
 )
-from cloudevents.http.json_methods import to_json, from_json
-from cloudevents.http.requests import from_http, to_binary_http, to_structured_http
-
-
-
-
-
-
-
-
-
+from cloudevents.http.json_methods import from_json, to_json

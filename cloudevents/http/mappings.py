@@ -1,6 +1,6 @@
-from cloudevents.sdk.event import v1, v03
-from cloudevents.sdk import converters
 from cloudevents.http.util import default_marshaller
+from cloudevents.sdk import converters
+from cloudevents.sdk.event import v1, v03
 
 _marshaller_by_format = {
     converters.TypeStructured: lambda x: x,
