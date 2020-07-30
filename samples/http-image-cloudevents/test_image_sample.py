@@ -83,7 +83,7 @@ def test_create_structured_image():
     assert restore_image.size == image_expected_shape
 
 
-def test_server_structured(client):
+def test_send_structured_request(client):
     attributes = {
         "type": "com.example.base64",
         "source": "https://example.com/event-producer",
@@ -103,7 +103,7 @@ def test_server_structured(client):
     assert r.data.decode() == f"Found image of size {image_expected_shape}"
 
 
-def test_server_binary(client):
+def test_send_binary_request(client):
     # Create cloudevent
     attributes = {
         "type": "com.example.string",
