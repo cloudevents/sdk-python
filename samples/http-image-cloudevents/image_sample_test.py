@@ -4,8 +4,8 @@ import json
 
 import pytest
 from client import image_bytes
+from image_sample_server import app
 from PIL import Image
-from image_sample_server import app 
 
 from cloudevents.http import (
     CloudEvent,
