@@ -15,7 +15,7 @@ import sys
 
 import requests
 
-from cloudevents.sdk.http import CloudEvent, to_binary_http, to_structured_http
+from cloudevents.http import CloudEvent, to_binary_http, to_structured_http
 
 resp = requests.get(
     "https://raw.githubusercontent.com/cncf/artwork/master/projects/cloudevents/horizontal/color/cloudevents-horizontal-color.png"

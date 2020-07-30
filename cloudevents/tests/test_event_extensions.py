@@ -15,7 +15,7 @@ import json
 
 import pytest
 
-from cloudevents.sdk.http import (
+from cloudevents.http import (
     CloudEvent,
     from_http,
     to_binary_http,

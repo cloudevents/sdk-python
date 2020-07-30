@@ -7,7 +7,7 @@ from client import image_bytes
 from PIL import Image
 from server import app
 
-from cloudevents.sdk.http import (
+from cloudevents.http import (
     CloudEvent,
     from_http,
     to_binary_http,

@@ -16,7 +16,7 @@ import json
 
 import pytest
 
-from cloudevents.sdk.http import CloudEvent, from_json, to_json
+from cloudevents.http import CloudEvent, from_json, to_json
 
 test_data = json.dumps({"data-key": "val"})
 test_attributes = {
