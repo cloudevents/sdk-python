@@ -22,7 +22,7 @@ Below we will provide samples on how to send cloudevents using the popular
 ### Binary HTTP CloudEvent
 
 ```python
-from cloudevents.sdk.http import CloudEvent, to_binary_http
+from cloudevents.http import CloudEvent, to_binary_http
 import requests
 
 
@@ -43,7 +43,7 @@ requests.post("<some-url>", data=body, headers=headers)
 ### Structured HTTP CloudEvent
 
 ```python
-from cloudevents.sdk.http import CloudEvent, to_structured_http
+from cloudevents.http import CloudEvent, to_structured_http
 import requests
 
 
@@ -70,7 +70,7 @@ The code below shows how to consume a cloudevent using the popular python web fr
 ```python
 from flask import Flask, request
 
-from cloudevents.sdk.http import from_http
+from cloudevents.http import from_http
 
 app = Flask(__name__)
 

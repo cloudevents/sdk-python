@@ -20,13 +20,13 @@ import json
 import pytest
 from sanic import Sanic, response
 
-from cloudevents.sdk import converters
-from cloudevents.sdk.http import (
+from cloudevents.http import (
     CloudEvent,
     from_http,
     to_binary_http,
     to_structured_http,
 )
+from cloudevents.sdk import converters
 
 invalid_test_headers = [
     {

@@ -2,23 +2,26 @@ import base64
 import io
 import json
 
-import requests
+import pytest
+from client import image_bytes
 from PIL import Image
+from image_sample_server import app 
 
-from cloudevents.sdk.http import (
+from cloudevents.http import (
     CloudEvent,
     from_http,
     to_binary_http,
     to_structured_http,
 )
 
-resp = requests.get(
-    "https://raw.githubusercontent.com/cncf/artwork/master/projects/cloudevents/horizontal/color/cloudevents-horizontal-color.png"
-)
-image_bytes = resp.content
-
 image_fileobj = io.BytesIO(image_bytes)
 image_expected_shape = (1880, 363)
+
+
+@pytest.fixture
+def client():
+    app.testing = True
+    return app.test_client()
 
 
 def test_create_binary_image():
@@ -78,6 +81,44 @@ def test_create_structured_image():
     # reconstruct_event.data is an io.BytesIO object due to data_unmarshaller
     restore_image = Image.open(reconstruct_event.data)
     assert restore_image.size == image_expected_shape
+
+
+def test_server_structured(client):
+    attributes = {
+        "type": "com.example.base64",
+        "source": "https://example.com/event-producer",
+    }
+
+    event = CloudEvent(attributes, image_bytes)
+
+    # Create cloudevent HTTP headers and content
+    # Note that to_structured_http will create a data_base64 data field in
+    # specversion 1.0 (default specversion) if given
+    # an event whose data field is of type bytes.
+    headers, body = to_structured_http(event)
+
+    # Send cloudevent
+    r = client.post("/", headers=headers, data=body)
+    assert r.status_code == 200
+    assert r.data.decode() == f"Found image of size {image_expected_shape}"
+
+
+def test_server_binary(client):
+    # Create cloudevent
+    attributes = {
+        "type": "com.example.string",
+        "source": "https://example.com/event-producer",
+    }
+
+    event = CloudEvent(attributes, image_bytes)
+
+    # Create cloudevent HTTP headers and content
+    headers, body = to_binary_http(event)
+
+    # Send cloudevent
+    r = client.post("/", headers=headers, data=body)
+    assert r.status_code == 200
+    assert r.data.decode() == f"Found image of size {image_expected_shape}"
 
 
 def test_image_content():
