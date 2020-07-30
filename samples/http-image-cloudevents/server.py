@@ -13,7 +13,7 @@
 #    under the License.
 import io
 
-from flask import Flask, request
+from flask import Flask, Response, request
 from PIL import Image
 
 from cloudevents.sdk.http import from_http
@@ -36,7 +36,7 @@ def home():
 
     # Print
     print(f"Found event {event['id']} with image of size {image.size}")
-    return "", 204
+    return f"Found image of size {image.size}", 200
 
 
 if __name__ == "__main__":
