@@ -9,7 +9,7 @@ pip3 install -r requirements.txt
 Start server:
 
 ```sh
-python3 server.py
+python3 image_sample_server.py
 ```
 
 In a new shell, run the client code which sends a structured and binary
