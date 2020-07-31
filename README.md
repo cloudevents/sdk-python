@@ -1,5 +1,7 @@
 # Python SDK for [CloudEvents](https://github.com/cloudevents/spec)
 
+[![PyPI version](https://badge.fury.io/py/cloudevents.svg)](https://badge.fury.io/py/cloudevents)
+
 ## Status
 
 This SDK is still considered a work in progress, therefore things might (and
