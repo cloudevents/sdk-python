@@ -132,4 +132,4 @@ pip install tox
 tox -e reformat
 ```
 
-For information in releasing see [RELEASING.md](RELEASING.md)
+For information on releasing version bumps see [RELEASING.md](RELEASING.md)
