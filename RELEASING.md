@@ -10,8 +10,8 @@ automatically build and deploy onto pypi using
 action gets called on pushes to master (such as version branch's being merged
 into master).
 
-After a major version branch is merged into master, contributors are expected to
-manually create a tag/release for the version they'd just merged into master.
+After a version update is merged, maintainers are expected to manually create a
+corresponding tag/release.
 
 Feel free to view [pypi-release.yml](.github/workflows/pypi-release.yml) for
 more information.
