@@ -1,7 +1,7 @@
 # Releasing CloudEvents SDK for Python
 
-To properly release a new cloudevents version, we setup github actions for updating
-repo's [PyPi package.](https://pypi.org/project/cloudevents/)
+This repository is configured to automatically publish the corresponding [PyPI
+package](https://pypi.org/project/cloudevents/) via GitHub Actions.
 
 This git action assumes contributors have updated the proper modules
 (e.g. [setup.py](setup.py)) to reflect the pypi version changes. It will
