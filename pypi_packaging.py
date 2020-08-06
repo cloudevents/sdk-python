@@ -1,7 +1,6 @@
-from importlib.metadata import version
+import pkg_resources
 from git import Repo
 import os
-
 
 # FORMAT: 1.x.x
 _LOCAL_PYPI_VERSION="1.0.0"
@@ -9,7 +8,7 @@ _LOCAL_PYPI_VERSION="1.0.0"
 def createTag():
     # metadata.version only works on python3.8
     # Make sure to install most updated version of package 
-    published_pypi_version = version('cloudevents')
+    published_pypi_version = pkg_resources.get_distribution("cloudevents").version
 
     # Check pypi and local package version match
     if _LOCAL_PYPI_VERSION == published_pypi_version:
