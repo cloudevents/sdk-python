@@ -131,3 +131,5 @@ e.g.
 pip install tox
 tox -e reformat
 ```
+
+For information on releasing version bumps see [RELEASING.md](RELEASING.md)
