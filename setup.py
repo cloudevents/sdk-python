@@ -14,12 +14,11 @@
 
 import setuptools
 
-
 import pathlib
 
-here = pathlib.Path(__file__).parent.resolve()
-long_description = (here / 'README.md').read_text(encoding='utf-8')
 
+here = pathlib.Path(__file__).parent.resolve()
+long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setuptools.setup(
     name="cloudevents",
