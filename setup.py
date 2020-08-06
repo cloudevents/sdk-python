@@ -15,4 +15,29 @@
 import setuptools
 
 
-setuptools.setup(version="v1.0.0")
+with open("./README.md", "r") as file:
+    long_description = file.read()
+
+
+setuptools.setup(
+    name="cloudevents",
+    summary="CloudEvents SDK Python",
+    long_description_content_type="text/markdown",
+    long_description=long_description,
+    author="The Cloud Events Contributors",
+    author_email="cncfcloudevents@gmail.com",
+    home_page="https://cloudevents.io",
+    classifiers=[
+        "Intended Audience :: Information Technology",
+        "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+    ],
+    package_dir={"": "cloudevents"},
+    packages=["http", "sdk"],
+    version="1.0.0",
+)
