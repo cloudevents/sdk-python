@@ -11,19 +11,18 @@ pypi_config = {
 def createTag():
     from git import Repo
 
-    # metadata.version only works on python3.8
-    # Make sure to install most updated version of package
+    # Get local pypi cloudevents version
     published_pypi_version = pkg_resources.get_distribution(
         pypi_config["package_name"]
     ).version
 
-    # Check pypi and local package version match
+    # Ensure pypi and local package versions match
     if pypi_config["version_target"] == published_pypi_version:
-        # Create tag
+        # Create local git tag
         repo = Repo(os.getcwd())
         repo.create_tag(pypi_config["version_target"])
 
-        # Push tag to origin master
+        # Push git tag to remote master
         origin = repo.remote()
         origin.push(pypi_config["version_target"])
 

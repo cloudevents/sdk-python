@@ -18,8 +18,8 @@ After a version update is merged, the script [pypi_packaging.py](pypi_packaging.
 will create a GitHub tag for the new cloudevents version using `pypi_config['version_target']`.
 The script fails if `pypi_config['version_target']` and the local pypi version for
 cloudevents are out of sync. For this reason, (pypi-release.yml)(.github/workflows/pypi-release.yml)
-first must update pypi, and then download the recently updated pypi version of cloudevents
-for [pypi_packaging.py](pypi_packaging.py) not to fail.
+first must upload the new cloudevents pypi package, and then download the recently updated pypi
+cloudevents package for [pypi_packaging.py](pypi_packaging.py) not to fail.
 
 View the GitHub workflow [pypi-release.yml](.github/workflows/pypi-release.yml) for
 more information.
