@@ -23,6 +23,6 @@ jobs:
         with:
           password: ${{ secrets.pypi_password }}
       - name: Install cloudevents and GitPython
-        run: pip install -U cloudevents 'GitPython==3.1.7'
+        run: pip install -r requirements/publish.txt
       - name: Create Tag
         run: python pypi_packaging.py
