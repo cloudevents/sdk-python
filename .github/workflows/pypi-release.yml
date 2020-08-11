@@ -22,8 +22,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.pypi_password }}
-      - name: Install cloudevents and GitPython
-        run: pip install -r requirements/publish.txt
-        run: pip install cloudevents -U
+      - name: Install GitPython and cloudevents for pypi_packaging
+        run: pip install -U -r requirements/publish.txt
       - name: Create Tag
         run: python pypi_packaging.py

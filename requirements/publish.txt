@@ -1,1 +1,2 @@
 GitPython==3.1.7
+cloudevents

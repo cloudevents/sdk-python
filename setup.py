@@ -13,7 +13,7 @@
 #    under the License.
 from pypi_packaging import pypi_config
 
-import setuptools
+from setuptools import setup, find_packages
 
 import pathlib
 
@@ -21,7 +21,7 @@ import pathlib
 here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
-setuptools.setup(
+setup(
     name=pypi_config["package_name"],
     summary="CloudEvents SDK Python",
     long_description_content_type="text/markdown",
@@ -39,6 +39,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    packages=["cloudevents"],
+    packages=find_packages(exclude=["cloudevents.tests"]),
     version=pypi_config["version_target"],
 )
