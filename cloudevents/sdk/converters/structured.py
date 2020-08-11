@@ -14,6 +14,7 @@
 
 import typing
 
+from cloudevents.sdk import types
 from cloudevents.sdk.converters import base
 from cloudevents.sdk.event import base as event_base
 
@@ -23,8 +24,15 @@ class JSONHTTPCloudEventConverter(base.Converter):
     TYPE = "structured"
     MIME_TYPE = "application/cloudevents+json"
 
-    def can_read(self, content_type: str) -> bool:
-        return content_type and content_type.startswith(self.MIME_TYPE)
+    def can_read(
+        self,
+        content_type: str,
+        headers: typing.Dict[str, str] = {"ce-specversion": None},
+    ) -> bool:
+        return (
+            isinstance(content_type, str)
+            and content_type.startswith(self.MIME_TYPE)
+        ) or ("ce-specversion" not in headers)
 
     def event_supported(self, event: object) -> bool:
         # structured format supported by both spec 0.1 and 0.2
@@ -35,16 +43,16 @@ class JSONHTTPCloudEventConverter(base.Converter):
         event: event_base.BaseEvent,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: typing.Callable,
+        data_unmarshaller: types.UnmarshallerType,
     ) -> event_base.BaseEvent:
         event.UnmarshalJSON(body, data_unmarshaller)
         return event
 
     def write(
-        self, event: event_base.BaseEvent, data_marshaller: typing.Callable
-    ) -> (dict, typing.IO):
+        self, event: event_base.BaseEvent, data_marshaller: types.MarshallerType
+    ) -> (dict, bytes):
         http_headers = {"content-type": self.MIME_TYPE}
-        return http_headers, event.MarshalJSON(data_marshaller)
+        return http_headers, event.MarshalJSON(data_marshaller).encode("utf-8")
 
 
 def NewJSONHTTPCloudEventConverter() -> JSONHTTPCloudEventConverter:

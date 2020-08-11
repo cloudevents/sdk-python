@@ -12,14 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import typing
 
-from cloudevents.sdk import exceptions
-
-from cloudevents.sdk.converters import base
-from cloudevents.sdk.converters import binary
-from cloudevents.sdk.converters import structured
-
+from cloudevents.sdk import exceptions, types
+from cloudevents.sdk.converters import base, binary, structured
 from cloudevents.sdk.event import base as event_base
 
 
@@ -35,15 +32,15 @@ class HTTPMarshaller(object):
         :param converters: a list of HTTP-to-CloudEvent-to-HTTP constructors
         :type converters: typing.List[base.Converter]
         """
-        self.__converters = [c for c in converters]
-        self.__converters_by_type = {c.TYPE: c for c in converters}
+        self.http_converters = [c for c in converters]
+        self.http_converters_by_type = {c.TYPE: c for c in converters}
 
     def FromRequest(
         self,
         event: event_base.BaseEvent,
         headers: dict,
-        body: typing.IO,
-        data_unmarshaller: typing.Callable,
+        body: typing.Union[str, bytes],
+        data_unmarshaller: types.UnmarshallerType = json.loads,
     ) -> event_base.BaseEvent:
         """
         Reads a CloudEvent from an HTTP headers and request body
@@ -51,8 +48,8 @@ class HTTPMarshaller(object):
         :type event: cloudevents.sdk.event.base.BaseEvent
         :param headers: a dict-like HTTP headers
         :type headers: dict
-        :param body: a stream-like HTTP request body
-        :type body: typing.IO
+        :param body: an HTTP request body as a string or bytes
+        :type body: typing.Union[str, bytes]
         :param data_unmarshaller: a callable-like
                                   unmarshaller the CloudEvent data
         :return: a CloudEvent
@@ -65,22 +62,24 @@ class HTTPMarshaller(object):
         headers = {key.lower(): value for key, value in headers.items()}
         content_type = headers.get("content-type", None)
 
-        for cnvrtr in self.__converters:
-            if cnvrtr.can_read(content_type) and cnvrtr.event_supported(event):
+        for cnvrtr in self.http_converters:
+            if cnvrtr.can_read(
+                content_type, headers=headers
+            ) and cnvrtr.event_supported(event):
                 return cnvrtr.read(event, headers, body, data_unmarshaller)
 
         raise exceptions.UnsupportedEventConverter(
             "No registered marshaller for {0} in {1}".format(
-                content_type, self.__converters
+                content_type, self.http_converters
             )
         )
 
     def ToRequest(
         self,
         event: event_base.BaseEvent,
-        converter_type: str,
-        data_marshaller: typing.Callable,
-    ) -> (dict, typing.IO):
+        converter_type: str = None,
+        data_marshaller: types.MarshallerType = None,
+    ) -> (dict, bytes):
         """
         Writes a CloudEvent into a HTTP-ready form of headers and request body
         :param event: CloudEvent
@@ -92,11 +91,16 @@ class HTTPMarshaller(object):
         :return: dict of HTTP headers and stream of HTTP request body
         :rtype: tuple
         """
-        if not isinstance(data_marshaller, typing.Callable):
+        if data_marshaller is not None and not isinstance(
+            data_marshaller, typing.Callable
+        ):
             raise exceptions.InvalidDataMarshaller()
 
-        if converter_type in self.__converters_by_type:
-            cnvrtr = self.__converters_by_type[converter_type]
+        if converter_type is None:
+            converter_type = self.http_converters[0].TYPE
+
+        if converter_type in self.http_converters_by_type:
+            cnvrtr = self.http_converters_by_type[converter_type]
             return cnvrtr.write(event, data_marshaller)
 
         raise exceptions.NoSuchConverter(converter_type)
@@ -118,7 +122,7 @@ def NewDefaultHTTPMarshaller() -> HTTPMarshaller:
 
 
 def NewHTTPMarshaller(
-        converters: typing.List[base.Converter]
+    converters: typing.List[base.Converter],
 ) -> HTTPMarshaller:
     """
     Creates the default HTTP marshaller with both

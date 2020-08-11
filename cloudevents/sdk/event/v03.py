@@ -12,11 +12,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.sdk.event import base
-from cloudevents.sdk.event import opt
+from cloudevents.sdk.event import base, opt
 
 
 class Event(base.BaseEvent):
+    _ce_required_fields = {"id", "source", "type", "specversion"}
+
+    _ce_optional_fields = {
+        "datacontentencoding",
+        "datacontenttype",
+        "schemaurl",
+        "subject",
+        "time",
+    }
+
     def __init__(self):
         self.ce__specversion = opt.Option("specversion", "0.3", True)
         self.ce__id = opt.Option("id", None, True)
@@ -25,9 +34,7 @@ class Event(base.BaseEvent):
 
         self.ce__datacontenttype = opt.Option("datacontenttype", None, False)
         self.ce__datacontentencoding = opt.Option(
-            "datacontentencoding",
-            None,
-            False
+            "datacontentencoding", None, False
         )
         self.ce__subject = opt.Option("subject", None, False)
         self.ce__time = opt.Option("time", None, False)
@@ -68,6 +75,10 @@ class Event(base.BaseEvent):
     def ContentEncoding(self) -> str:
         return self.ce__datacontentencoding.get()
 
+    @property
+    def datacontentencoding(self):
+        return self.ContentEncoding()
+
     def SetEventType(self, eventType: str) -> base.BaseEvent:
         self.Set("type", eventType)
         return self
@@ -107,3 +118,7 @@ class Event(base.BaseEvent):
     def SetContentEncoding(self, contentEncoding: str) -> base.BaseEvent:
         self.Set("datacontentencoding", contentEncoding)
         return self
+
+    @datacontentencoding.setter
+    def datacontentencoding(self, value: str):
+        self.SetContentEncoding(value)

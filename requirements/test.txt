@@ -8,3 +8,6 @@ pytest-cov==2.4.0
 # web app tests
 sanic
 aiohttp
+Pillow
+requests
+flask

@@ -14,10 +14,11 @@
 
 import typing
 
-from cloudevents.sdk import exceptions
+from cloudevents.sdk import exceptions, types
 from cloudevents.sdk.converters import base
+from cloudevents.sdk.converters.structured import JSONHTTPCloudEventConverter
 from cloudevents.sdk.event import base as event_base
-from cloudevents.sdk.event import v03, v1
+from cloudevents.sdk.event import v1, v03
 
 
 class BinaryHTTPCloudEventConverter(base.Converter):
@@ -25,8 +26,15 @@ class BinaryHTTPCloudEventConverter(base.Converter):
     TYPE = "binary"
     SUPPORTED_VERSIONS = [v03.Event, v1.Event]
 
-    def can_read(self, content_type: str) -> bool:
-        return True
+    def can_read(
+        self,
+        content_type: str,
+        headers: typing.Dict[str, str] = {"ce-specversion": None},
+    ) -> bool:
+        return ("ce-specversion" in headers) and not (
+            isinstance(content_type, str)
+            and content_type.startswith(JSONHTTPCloudEventConverter.MIME_TYPE)
+        )
 
     def event_supported(self, event: object) -> bool:
         return type(event) in self.SUPPORTED_VERSIONS
@@ -36,7 +44,7 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         event: event_base.BaseEvent,
         headers: dict,
         body: typing.IO,
-        data_unmarshaller: typing.Callable,
+        data_unmarshaller: types.UnmarshallerType,
     ) -> event_base.BaseEvent:
         if type(event) not in self.SUPPORTED_VERSIONS:
             raise exceptions.UnsupportedEvent(type(event))
@@ -44,8 +52,8 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         return event
 
     def write(
-        self, event: event_base.BaseEvent, data_marshaller: typing.Callable
-    ) -> (dict, typing.IO):
+        self, event: event_base.BaseEvent, data_marshaller: types.MarshallerType
+    ) -> (dict, bytes):
         return event.MarshalBinary(data_marshaller)
 
 

@@ -1,0 +1,28 @@
+name: PyPI-Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.x"
+      - name: Install build dependencies
+        run: pip install -U setuptools wheel build
+      - name: Build
+        run: python -m build .
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.pypi_password }}
+      - name: Install GitPython and cloudevents for pypi_packaging
+        run: pip install -U -r requirements/publish.txt
+      - name: Create Tag
+        run: python pypi_packaging.py
