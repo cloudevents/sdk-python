@@ -11,8 +11,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from pypi_packaging import pypi_config
 
-import setuptools
+from setuptools import setup, find_packages
 
 import pathlib
 
@@ -20,8 +21,8 @@ import pathlib
 here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
-setuptools.setup(
-    name="cloudevents",
+setup(
+    name=pypi_config["package_name"],
     summary="CloudEvents SDK Python",
     long_description_content_type="text/markdown",
     long_description=long_description,
@@ -38,7 +39,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    package_dir={"": "cloudevents"},
-    packages=["http", "sdk"],
-    version="1.0.0",
+    packages=find_packages(exclude=["cloudevents.tests"]),
+    version=pypi_config["version_target"],
 )
