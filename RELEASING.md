@@ -17,7 +17,7 @@ push to master without updating `__version__` in
 After a version update is merged, the script [pypi_packaging.py](pypi_packaging.py)
 will create a GitHub tag for the new cloudevents version using `__version__`.
 The script fails if `__version__` and the local pypi version for
-cloudevents are out of sync. For this reason, (pypi-release.yml)(.github/workflows/pypi-release.yml)
+cloudevents are out of sync. For this reason, [pypi-release.yml](.github/workflows/pypi-release.yml)
 first must upload the new cloudevents pypi package, and then download the recently updated pypi
 cloudevents package for [pypi_packaging.py](pypi_packaging.py) not to fail.
 
