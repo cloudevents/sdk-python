@@ -64,7 +64,7 @@ requests.post("<some-url>", data=body, headers=headers)
 
 You can find a complete example of turning a CloudEvent into a HTTP request [in the samples directory](samples/http-json-cloudevents/client.py).
 
-#### Request to CloudEvent
+## Receiving CloudEvents
 
 The code below shows how to consume a cloudevent using the popular python web framework
 [flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/):
@@ -119,6 +119,17 @@ the same API. It will use semantic versioning with following rules:
   [CNCF's Slack workspace](https://slack.cncf.io/).
 - Email: https://lists.cncf.io/g/cncf-cloudevents-sdk
 - Contact for additional information: Denis Makogon (`@denysmakogon` on slack).
+
+Each SDK may have its own unique processes, tooling and guidelines, common
+governance related material can be found in the
+[CloudEvents `community`](https://github.com/cloudevents/spec/tree/master/community)
+directory. In particular, in there you will find information concerning
+how SDK projects are
+[managed](https://github.com/cloudevents/spec/blob/master/community/SDK-GOVERNANCE.md),
+[guidelines](https://github.com/cloudevents/spec/blob/master/community/SDK-maintainer-guidelines.md)
+for how PR reviews and approval, and our
+[Code of Conduct](https://github.com/cloudevents/spec/blob/master/community/GOVERNANCE.md#additional-information)
+information.
 
 ## Maintenance
 
