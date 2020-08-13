@@ -16,7 +16,6 @@ import typing
 
 from cloudevents.sdk import types
 from cloudevents.sdk.converters import base
-from cloudevents.sdk.converters.binary import BinaryHTTPCloudEventConverter
 from cloudevents.sdk.converters.util import has_binary_headers
 from cloudevents.sdk.event import base as event_base
 

@@ -76,10 +76,7 @@ def post(url, headers, data):
 @app.route("/event", ["POST"])
 async def echo(request):
     if "binary-payload" in request.headers:
-
-        def decoder(x):
-            return x
-
+        def decoder(x): return x
     else:
         decoder = None
     event = from_http(
@@ -293,7 +290,8 @@ def test_empty_data_structured_event(specversion):
     }
 
     _ = from_http(
-        json.dumps(attributes), {"content-type": "application/cloudevents+json"}
+        json.dumps(attributes), {
+            "content-type": "application/cloudevents+json"}
     )
 
 
