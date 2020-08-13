@@ -64,7 +64,7 @@ requests.post("<some-url>", data=body, headers=headers)
 
 You can find a complete example of turning a CloudEvent into a HTTP request [in the samples directory](samples/http-json-cloudevents/client.py).
 
-#### Request to CloudEvent
+## Receiving CloudEvents
 
 The code below shows how to consume a cloudevent using the popular python web framework
 [flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/):
