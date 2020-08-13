@@ -75,13 +75,9 @@ def post(url, headers, data):
 
 @app.route("/event", ["POST"])
 async def echo(request):
+    decoder = None
     if "binary-payload" in request.headers:
-
-        def decoder(x):
-            return x
-
-    else:
-        decoder = None
+        decoder = lambda x: x
     event = from_http(
         request.body, headers=dict(request.headers), data_unmarshaller=decoder
     )
