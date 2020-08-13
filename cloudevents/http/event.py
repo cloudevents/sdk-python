@@ -69,10 +69,7 @@ class CloudEvent:
             )
 
     def __eq__(self, other):
-        return (
-            self.data == other.data
-            and self._attributes == other._attributes
-        )
+        return self.data == other.data and self._attributes == other._attributes
 
     # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type
