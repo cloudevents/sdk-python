@@ -4,20 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.1]
-### Added
-- CloudEvent exceptions and event type checking in http module ([#96])
-
 ## [1.0.0]
 ### Added
-- Update types and handle data_base64 structured ([#34])
 - Added a user friendly CloudEvent class with data validation ([#36])
 - CloudEvent structured cloudevent support ([#47])
-- Separated http methods into cloudevents.http module ([#60])
-- Implemented to_json and from_json in http module ([#72])
-
-### Fixed
-- Fixed top level extensions bug ([#71])
 
 ### Removed
 - Removed support for Cloudevents V0.2 and V0.1 ([#43])
@@ -84,11 +74,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#23]: https://github.com/cloudevents/sdk-python/pull/23
 [#25]: https://github.com/cloudevents/sdk-python/pull/25
 [#27]: https://github.com/cloudevents/sdk-python/pull/27
-[#34]: https://github.com/cloudevents/sdk-python/pull/34
 [#36]: https://github.com/cloudevents/sdk-python/pull/36
 [#43]: https://github.com/cloudevents/sdk-python/pull/43
 [#47]: https://github.com/cloudevents/sdk-python/pull/47
-[#60]: https://github.com/cloudevents/sdk-python/pull/60
-[#71]: https://github.com/cloudevents/sdk-python/pull/71
-[#72]: https://github.com/cloudevents/sdk-python/pull/72
-[#96]: https://github.com/cloudevents/sdk-python/pull/96

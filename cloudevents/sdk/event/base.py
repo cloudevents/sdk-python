@@ -198,10 +198,7 @@ class BaseEvent(EventGetterSetter):
 
     def MarshalJSON(self, data_marshaller: types.MarshallerType) -> str:
         if data_marshaller is None:
-
-            def data_marshaller(x):
-                return x  # noqa: E731
-
+            data_marshaller = lambda x: x  # noqa: E731
         props = self.Properties()
         if "data" in props:
             data = data_marshaller(props.pop("data"))
