@@ -11,7 +11,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from cloudevents.sdk.converters import binary, structured
+class CloudEventMissingRequiredFields(Exception):
+    pass
 
-TypeBinary = binary.BinaryHTTPCloudEventConverter.TYPE
-TypeStructured = structured.JSONHTTPCloudEventConverter.TYPE
+
+class CloudEventTypeErrorRequiredFields(Exception):
+    pass
