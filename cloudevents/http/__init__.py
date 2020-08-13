@@ -15,6 +15,7 @@ import json
 import typing
 
 from cloudevents.http.event import CloudEvent
+from cloudevents.http.event_type import is_binary, is_structured
 from cloudevents.http.http_methods import (
     from_http,
     to_binary_http,

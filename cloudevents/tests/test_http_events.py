@@ -24,6 +24,7 @@ import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http import (
     CloudEvent,
     from_http,
+    is_binary,
     to_binary_http,
     to_structured_http,
 )
@@ -364,15 +365,15 @@ def test_is_binary():
         "ce-specversion": "1.0",
         "Content-Type": "text/plain",
     }
-    assert converters.is_binary(headers)
+    assert is_binary(headers)
 
     headers = {
         "Content-Type": "application/cloudevents+json",
     }
-    assert not converters.is_binary(headers)
+    assert not is_binary(headers)
 
     headers = {}
-    assert not converters.is_binary(headers)
+    assert not is_binary(headers)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])

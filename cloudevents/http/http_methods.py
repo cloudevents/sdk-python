@@ -3,6 +3,7 @@ import typing
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http.event import CloudEvent
+from cloudevents.http.event_type import is_binary, is_structured
 from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
 from cloudevents.http.util import _json_or_string
 from cloudevents.sdk import converters, marshaller, types
@@ -28,7 +29,7 @@ def from_http(
 
     marshall = marshaller.NewDefaultHTTPMarshaller()
 
-    if converters.is_binary(headers):
+    if is_binary(headers):
         specversion = headers.get("ce-specversion", None)
     else:
         raw_ce = json.loads(data)
