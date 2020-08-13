@@ -1,6 +1,7 @@
 import json
 import typing
 
+import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http.event import CloudEvent
 from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
 from cloudevents.http.util import _json_or_string
@@ -34,12 +35,16 @@ def from_http(
         specversion = raw_ce.get("specversion", None)
 
     if specversion is None:
-        raise ValueError("could not find specversion in HTTP request")
+        raise cloud_exceptions.CloudEventMissingRequiredFields(
+            "could not find specversion in HTTP request"
+        )
 
     event_handler = _obj_by_version.get(specversion, None)
 
     if event_handler is None:
-        raise ValueError(f"found invalid specversion {specversion}")
+        raise cloud_exceptions.CloudEventTypeErrorRequiredFields(
+            f"found invalid specversion {specversion}"
+        )
 
     event = marshall.FromRequest(
         event_handler(), headers, data, data_unmarshaller=data_unmarshaller
@@ -71,7 +76,7 @@ def _to_http(
         data_marshaller = _marshaller_by_format[format]
 
     if event._attributes["specversion"] not in _obj_by_version:
-        raise ValueError(
+        raise cloud_exceptions.CloudEventTypeErrorRequiredFields(
             f"Unsupported specversion: {event._attributes['specversion']}"
         )
 

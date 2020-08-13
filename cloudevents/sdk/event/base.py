@@ -16,10 +16,12 @@ import base64
 import json
 import typing
 
+import cloudevents.exceptions as cloud_exceptions
 from cloudevents.sdk import types
 
-
 # TODO(slinkydeveloper) is this really needed?
+
+
 class EventGetterSetter(object):
 
     # ce-specversion
@@ -159,6 +161,9 @@ class EventGetterSetter(object):
 
 
 class BaseEvent(EventGetterSetter):
+    _ce_required_fields = set()
+    _ce_optional_fields = set()
+
     def Properties(self, with_nullable=False) -> dict:
         props = dict()
         for name, value in self.__dict__.items():
@@ -193,7 +198,10 @@ class BaseEvent(EventGetterSetter):
 
     def MarshalJSON(self, data_marshaller: types.MarshallerType) -> str:
         if data_marshaller is None:
-            data_marshaller = lambda x: x  # noqa: E731
+
+            def data_marshaller(x):
+                return x  # noqa: E731
+
         props = self.Properties()
         if "data" in props:
             data = data_marshaller(props.pop("data"))
@@ -215,7 +223,9 @@ class BaseEvent(EventGetterSetter):
 
         missing_fields = self._ce_required_fields - raw_ce.keys()
         if len(missing_fields) > 0:
-            raise ValueError(f"Missing required attributes: {missing_fields}")
+            raise cloud_exceptions.CloudEventMissingRequiredFields(
+                f"Missing required attributes: {missing_fields}"
+            )
 
         for name, value in raw_ce.items():
             if name == "data":
@@ -233,8 +243,16 @@ class BaseEvent(EventGetterSetter):
         body: typing.Union[bytes, str],
         data_unmarshaller: types.UnmarshallerType,
     ):
-        if "ce-specversion" not in headers:
-            raise ValueError("Missing required attribute: 'specversion'")
+        required_binary_fields = {
+            f"ce-{field}" for field in self._ce_required_fields
+        }
+        missing_fields = required_binary_fields - headers.keys()
+
+        if len(missing_fields) > 0:
+            raise cloud_exceptions.CloudEventMissingRequiredFields(
+                f"Missing required attributes: {missing_fields}"
+            )
+
         for header, value in headers.items():
             header = header.lower()
             if header == "content-type":
@@ -242,9 +260,6 @@ class BaseEvent(EventGetterSetter):
             elif header.startswith("ce-"):
                 self.Set(header[3:], value)
         self.Set("data", data_unmarshaller(body))
-        missing_attrs = self._ce_required_fields - self.Properties().keys()
-        if len(missing_attrs) > 0:
-            raise ValueError(f"Missing required attributes: {missing_attrs}")
 
     def MarshalBinary(
         self, data_marshaller: types.MarshallerType

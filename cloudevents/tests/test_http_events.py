@@ -20,6 +20,7 @@ import json
 import pytest
 from sanic import Sanic, response
 
+import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http import (
     CloudEvent,
     from_http,
@@ -47,7 +48,7 @@ invalid_test_headers = [
     },
 ]
 
-invalid_cloudevent_request_bodie = [
+invalid_cloudevent_request_body = [
     {
         "source": "<event-source>",
         "type": "cloudevent.event.type",
@@ -73,9 +74,13 @@ def post(url, headers, data):
 
 @app.route("/event", ["POST"])
 async def echo(request):
-    decoder = None
     if "binary-payload" in request.headers:
-        decoder = lambda x: x
+
+        def decoder(x):
+            return x
+
+    else:
+        decoder = None
     event = from_http(
         request.body, headers=dict(request.headers), data_unmarshaller=decoder
     )
@@ -87,21 +92,22 @@ async def echo(request):
     return response.raw(data, headers={k: event[k] for k in event})
 
 
-@pytest.mark.parametrize("body", invalid_cloudevent_request_bodie)
+@pytest.mark.parametrize("body", invalid_cloudevent_request_body)
 def test_missing_required_fields_structured(body):
-    with pytest.raises((TypeError, NotImplementedError)):
+    with pytest.raises(cloud_exceptions.CloudEventMissingRequiredFields):
         # CloudEvent constructor throws TypeError if missing required field
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
         # prefix e-id instead of ce-id therefore it should throw
         _ = from_http(
-            json.dumps(body), attributes={"Content-Type": "application/json"}
+            json.dumps(body),
+            headers={"Content-Type": "application/cloudevents+json"},
         )
 
 
 @pytest.mark.parametrize("headers", invalid_test_headers)
 def test_missing_required_fields_binary(headers):
-    with pytest.raises((ValueError)):
+    with pytest.raises(cloud_exceptions.CloudEventMissingRequiredFields):
         # CloudEvent constructor throws TypeError if missing required field
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
@@ -165,7 +171,7 @@ def test_emit_structured_event(specversion):
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
 def test_roundtrip_non_json_event(converter, specversion):
     input_data = io.BytesIO()
-    for i in range(100):
+    for _ in range(100):
         for j in range(20):
             assert 1 == input_data.write(j.to_bytes(1, byteorder="big"))
     compressed_data = bz2.compress(input_data.getvalue())
@@ -201,7 +207,7 @@ def test_missing_ce_prefix_binary_event(specversion):
         # breaking prefix e.g. e-id instead of ce-id
         prefixed_headers[key[1:]] = headers[key]
 
-        with pytest.raises(ValueError):
+        with pytest.raises(cloud_exceptions.CloudEventMissingRequiredFields):
             # CloudEvent constructor throws TypeError if missing required field
             # and NotImplementedError because structured calls aren't
             # implemented. In this instance one of the required keys should have
@@ -278,7 +284,7 @@ def test_empty_data_structured_event(specversion):
     # Testing if cloudevent breaks when no structured data field present
     attributes = {
         "specversion": specversion,
-        "datacontenttype": "application/json",
+        "datacontenttype": "application/cloudevents+json",
         "type": "word.found.name",
         "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
         "time": "2018-10-23T12:28:22.4579346Z",
@@ -308,7 +314,6 @@ def test_empty_data_binary_event(specversion):
 def test_valid_structured_events(specversion):
     # Test creating multiple cloud events
     events_queue = []
-    headers = {}
     num_cloudevents = 30
     for i in range(num_cloudevents):
         event = {
@@ -335,9 +340,6 @@ def test_valid_structured_events(specversion):
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
 def test_structured_no_content_type(specversion):
     # Test creating multiple cloud events
-    events_queue = []
-    headers = {}
-    num_cloudevents = 30
     data = {
         "id": "id",
         "source": "source.com.test",
@@ -371,19 +373,6 @@ def test_is_binary():
 
     headers = {}
     assert not converters.is_binary(headers)
-
-
-def test_is_structured():
-    headers = {
-        "Content-Type": "application/cloudevents+json",
-    }
-    assert converters.is_structured(headers)
-
-    headers = {}
-    assert converters.is_structured(headers)
-
-    headers = {"ce-specversion": "1.0"}
-    assert not converters.is_structured(headers)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
