@@ -25,8 +25,8 @@ from cloudevents.http import (
     CloudEvent,
     from_http,
     is_binary,
-    to_binary_http,
-    to_structured_http,
+    to_binary,
+    to_structured,
 )
 from cloudevents.sdk import converters
 
@@ -177,9 +177,9 @@ def test_roundtrip_non_json_event(converter, specversion):
     event = CloudEvent(attrs, compressed_data)
 
     if converter == converters.TypeStructured:
-        headers, data = to_structured_http(event, data_marshaller=lambda x: x)
+        headers, data = to_structured(event, data_marshaller=lambda x: x)
     elif converter == converters.TypeBinary:
-        headers, data = to_binary_http(event, data_marshaller=lambda x: x)
+        headers, data = to_binary(event, data_marshaller=lambda x: x)
 
     headers["binary-payload"] = "true"  # Decoding hint for server
     _, r = app.test_client.post("/event", headers=headers, data=data)
@@ -247,7 +247,7 @@ def test_structured_to_request(specversion):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body_bytes = to_structured_http(event)
+    headers, body_bytes = to_structured(event)
     assert isinstance(body_bytes, bytes)
     body = json.loads(body_bytes)
 
@@ -267,7 +267,7 @@ def test_binary_to_request(specversion):
     }
     data = {"message": "Hello World!"}
     event = CloudEvent(attributes, data)
-    headers, body_bytes = to_binary_http(event)
+    headers, body_bytes = to_binary(event)
     body = json.loads(body_bytes)
 
     for key in data:
@@ -398,5 +398,5 @@ def test_none_data_cloudevent(specversion):
             "specversion": specversion,
         }
     )
-    to_binary_http(event)
-    to_structured_http(event)
+    to_binary(event)
+    to_structured(event)

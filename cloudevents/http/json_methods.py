@@ -1,7 +1,7 @@
 import typing
 
 from cloudevents.http.event import CloudEvent
-from cloudevents.http.http_methods import from_http, to_structured_http
+from cloudevents.http.http_methods import from_http, to_structured
 from cloudevents.sdk import types
 
 
@@ -17,7 +17,7 @@ def to_json(
     :type data_marshaller: typing.Callable
     :returns: json object representing the given event
     """
-    return to_structured_http(event, data_marshaller=data_marshaller)[1]
+    return to_structured(event, data_marshaller=data_marshaller)[1]
 
 
 def from_json(

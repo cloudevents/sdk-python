@@ -91,7 +91,7 @@ def _to_http(
     )
 
 
-def to_structured_http(
+def to_structured(
     event: CloudEvent, data_marshaller: types.MarshallerType = None,
 ) -> (dict, typing.Union[bytes, str]):
     """
@@ -107,7 +107,7 @@ def to_structured_http(
     return _to_http(event=event, data_marshaller=data_marshaller)
 
 
-def to_binary_http(
+def to_binary(
     event: CloudEvent, data_marshaller: types.MarshallerType = None,
 ) -> (dict, typing.Union[bytes, str]):
     """
