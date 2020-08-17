@@ -12,16 +12,16 @@ from cloudevents.sdk import converters, marshaller, types
 
 
 def from_http(
-    data: typing.Union[str, bytes, None],
     headers: typing.Dict[str, str],
+    data: typing.Union[str, bytes, None],
     data_unmarshaller: types.UnmarshallerType = None,
 ):
     """
     Unwrap a CloudEvent (binary or structured) from an HTTP request.
-    :param data: the HTTP request body
-    :type data: typing.IO
     :param headers: the HTTP headers
     :type headers: typing.Dict[str, str]
+    :param data: the HTTP request body
+    :type data: typing.IO
     :param data_unmarshaller: Callable function to map data to a python object
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
