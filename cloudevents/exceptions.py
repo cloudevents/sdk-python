@@ -21,3 +21,7 @@ class CloudEventTypeErrorRequiredFields(Exception):
 
 class InvalidStructuredJSON(Exception):
     pass
+
+
+class InvalidHeadersFormat(Exception):
+    pass

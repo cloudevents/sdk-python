@@ -452,3 +452,20 @@ def test_empty_json_structured():
     with pytest.raises(cloud_exceptions.InvalidStructuredJSON) as e:
         from_http(data, headers)
     assert "Failed to read fields from structured event. " in str(e.value)
+
+
+def test_uppercase_headers_with_none_data_binary():
+    headers = {
+        "Ce-Id": "my-id",
+        "Ce-Source": "<event-source>",
+        "Ce-Type": "cloudevent.event.type",
+        "Ce-Specversion": "1.0",
+    }
+    event = from_http(None, headers)
+
+    for key in headers:
+        assert event[key.lower()[3:]] == headers[key]
+    assert event.data == None
+
+    _, new_data = to_binary_http(event)
+    assert new_data == None

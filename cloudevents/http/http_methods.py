@@ -10,7 +10,7 @@ from cloudevents.sdk import converters, marshaller, types
 
 
 def from_http(
-    data: typing.Union[str, bytes],
+    data: typing.Union[str, bytes, None],
     headers: typing.Dict[str, str],
     data_unmarshaller: types.UnmarshallerType = None,
 ):
@@ -24,11 +24,16 @@ def from_http(
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
+    if data is None:
+        data = ""
+
     if not isinstance(data, (str, bytes, bytearray)):
         raise cloud_exceptions.InvalidStructuredJSON(
             "Expected json of type (str, bytes, bytearray), "
             f"but instead found {type(data)}. "
         )
+
+    headers = {key.lower(): value for key, value in headers.items()}
     if data_unmarshaller is None:
         data_unmarshaller = _json_or_string
 
