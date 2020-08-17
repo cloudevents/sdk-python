@@ -25,7 +25,7 @@ def headers():
         "ce-specversion": "1.0",
         "ce-source": "1.0",
         "ce-type": "com.marshaller.test",
-        "ce-id": "1234-1234-1234"
+        "ce-id": "1234-1234-1234",
     }
 
 

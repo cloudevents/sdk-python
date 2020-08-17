@@ -32,19 +32,25 @@ def from_http(
     if is_binary(headers):
         specversion = headers.get("ce-specversion", None)
     else:
-        raw_ce = json.loads(data)
+        raw_ce = data_unmarshaller(data)
+        if not isinstance(raw_ce, dict):
+            raise cloud_exceptions.CloudEventMissingRequiredFields(
+                "Failed to read fields from structured event. "
+                f"Found {raw_ce} of type {type(raw_ce)}. "
+                f"Was {data, type(data)} before unmarshalling with {data_unmarshaller.__name__}."
+            )
         specversion = raw_ce.get("specversion", None)
 
     if specversion is None:
         raise cloud_exceptions.CloudEventMissingRequiredFields(
-            "could not find specversion in HTTP request"
+            "Specversion was set to None in HTTP request. "
         )
 
     event_handler = _obj_by_version.get(specversion, None)
 
     if event_handler is None:
         raise cloud_exceptions.CloudEventTypeErrorRequiredFields(
-            f"found invalid specversion {specversion}"
+            f"Found invalid specversion {specversion}. "
         )
 
     event = marshall.FromRequest(
