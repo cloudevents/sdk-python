@@ -27,15 +27,16 @@ Below we will provide samples on how to send cloudevents using the popular
 from cloudevents.http import CloudEvent, to_binary
 import requests
 
-
-# This data defines a binary cloudevent
+# "id" attribute defaults to a uniquely generated string
+# "specversion" attribute defaults to "1.0"
 attributes = {
     "type": "com.example.sampletype1",
     "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
-
 event = CloudEvent(attributes, data)
+
+# Create binary cloudevent http headers and data
 headers, body = to_binary(event)
 
 # POST
@@ -48,14 +49,16 @@ requests.post("<some-url>", data=body, headers=headers)
 from cloudevents.http import CloudEvent, to_structured
 import requests
 
-
-# This data defines a structured cloudevent
+# "id" attribute defaults to a uniquely generated string
+# "specversion" attribute defaults to "1.0"
 attributes = {
     "type": "com.example.sampletype2",
     "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
+
+# Create structured cloudevent http headers and data
 headers, body = to_structured(event)
 
 # POST
