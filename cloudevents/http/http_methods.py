@@ -10,7 +10,7 @@ from cloudevents.sdk import converters, marshaller, types
 
 
 def from_http(
-    data: typing.Union[str, bytes],
+    data: typing.Union[str, bytes, None],
     headers: typing.Dict[str, str],
     data_unmarshaller: types.UnmarshallerType = None,
 ):
@@ -24,6 +24,16 @@ def from_http(
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
+    if data is None:
+        data = ""
+
+    if not isinstance(data, (str, bytes, bytearray)):
+        raise cloud_exceptions.InvalidStructuredJSON(
+            "Expected json of type (str, bytes, bytearray), "
+            f"but instead found {type(data)}. "
+        )
+
+    headers = {key.lower(): value for key, value in headers.items()}
     if data_unmarshaller is None:
         data_unmarshaller = _json_or_string
 
@@ -32,19 +42,25 @@ def from_http(
     if is_binary(headers):
         specversion = headers.get("ce-specversion", None)
     else:
-        raw_ce = json.loads(data)
+        try:
+            raw_ce = json.loads(data)
+        except json.decoder.JSONDecodeError:
+            raise cloud_exceptions.InvalidStructuredJSON(
+                "Failed to read fields from structured event. "
+                f"The following can not be parsed as json: {data}. "
+            )
         specversion = raw_ce.get("specversion", None)
 
     if specversion is None:
         raise cloud_exceptions.CloudEventMissingRequiredFields(
-            "could not find specversion in HTTP request"
+            "Specversion was set to None in HTTP request. "
         )
 
     event_handler = _obj_by_version.get(specversion, None)
 
     if event_handler is None:
         raise cloud_exceptions.CloudEventTypeErrorRequiredFields(
-            f"found invalid specversion {specversion}"
+            f"Found invalid specversion {specversion}. "
         )
 
     event = marshall.FromRequest(
@@ -78,7 +94,7 @@ def _to_http(
 
     if event._attributes["specversion"] not in _obj_by_version:
         raise cloud_exceptions.CloudEventTypeErrorRequiredFields(
-            f"Unsupported specversion: {event._attributes['specversion']}"
+            f"Unsupported specversion: {event._attributes['specversion']}. "
         )
 
     event_handler = _obj_by_version[event._attributes["specversion"]]()

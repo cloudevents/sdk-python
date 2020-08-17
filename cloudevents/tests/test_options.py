@@ -11,17 +11,26 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-class CloudEventMissingRequiredFields(Exception):
-    pass
+
+import pytest
+
+from cloudevents.sdk.event.opt import Option
 
 
-class CloudEventTypeErrorRequiredFields(Exception):
-    pass
+def test_set_raise_error():
+    with pytest.raises(ValueError):
+        o = Option("test", "value", True)
+        o.set(None)
 
 
-class InvalidStructuredJSON(Exception):
-    pass
+def test_options_eq_override():
+    o = Option("test", "value", True)
+    assert o.required()
 
+    o2 = Option("test", "value", True)
+    assert o2.required()
 
-class InvalidHeadersFormat(Exception):
-    pass
+    assert o == o2
+    o.set("setting to new value")
+
+    assert o != o2
