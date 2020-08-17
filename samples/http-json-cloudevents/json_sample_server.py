@@ -22,7 +22,7 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def home():
     # create a CloudEvent
-    event = from_http(request.get_data(), request.headers)
+    event = from_http(request.headers, request.get_data())
 
     # you can access cloudevent fields as seen below
     print(

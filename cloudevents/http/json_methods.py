@@ -33,4 +33,4 @@ def from_json(
     :type data_unmarshaller: typing.Callable
     :returns: CloudEvent representing given cloudevent json object
     """
-    return from_http(data=data, headers={}, data_unmarshaller=data_unmarshaller)
+    return from_http(headers={}, data=data, data_unmarshaller=data_unmarshaller)

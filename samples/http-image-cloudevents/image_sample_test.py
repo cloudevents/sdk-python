@@ -39,7 +39,7 @@ def test_create_binary_image():
 
     # Unmarshall CloudEvent and re-create image
     reconstruct_event = from_http(
-        body, headers, data_unmarshaller=lambda x: io.BytesIO(x)
+        headers, body, data_unmarshaller=lambda x: io.BytesIO(x)
     )
 
     # reconstruct_event.data is an io.BytesIO object due to data_unmarshaller
@@ -75,7 +75,7 @@ def test_create_structured_image():
 
     # Unmarshall CloudEvent and re-create image
     reconstruct_event = from_http(
-        body, headers, data_unmarshaller=lambda x: io.BytesIO(x)
+        headers, body, data_unmarshaller=lambda x: io.BytesIO(x)
     )
 
     # reconstruct_event.data is an io.BytesIO object due to data_unmarshaller

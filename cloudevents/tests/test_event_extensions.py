@@ -56,7 +56,7 @@ def test_from_binary_extensions(specversion):
         "ce-ext2": "test2",
     }
     body = json.dumps({"data-key": "val"})
-    event = from_http(body, headers)
+    event = from_http(headers, body)
 
     assert headers["ce-ext1"] == event["ext1"]
     assert headers["ce-ext2"] == event["ext2"]
@@ -86,7 +86,7 @@ def test_from_structured_extensions(specversion):
     }
 
     data = json.dumps(body)
-    event = from_http(data, headers)
+    event = from_http(headers, data)
 
     assert body["ext1"] == event["ext1"]
     assert body["ext2"] == event["ext2"]

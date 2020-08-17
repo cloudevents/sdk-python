@@ -76,7 +76,7 @@ async def echo(request):
     if "binary-payload" in request.headers:
         decoder = lambda x: x
     event = from_http(
-        request.body, headers=dict(request.headers), data_unmarshaller=decoder
+        dict(request.headers), request.body, data_unmarshaller=decoder
     )
     data = (
         event.data
@@ -94,8 +94,7 @@ def test_missing_required_fields_structured(body):
         # implemented. In this instance one of the required keys should have
         # prefix e-id instead of ce-id therefore it should throw
         _ = from_http(
-            json.dumps(body),
-            headers={"Content-Type": "application/cloudevents+json"},
+            {"Content-Type": "application/cloudevents+json"}, json.dumps(body),
         )
 
 
@@ -106,7 +105,7 @@ def test_missing_required_fields_binary(headers):
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
         # prefix e-id instead of ce-id therefore it should throw
-        _ = from_http(json.dumps(test_data), headers=headers)
+        _ = from_http(headers, json.dumps(test_data))
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -206,7 +205,7 @@ def test_missing_ce_prefix_binary_event(specversion):
             # and NotImplementedError because structured calls aren't
             # implemented. In this instance one of the required keys should have
             # prefix e-id instead of ce-id therefore it should throw
-            _ = from_http(json.dumps(test_data), headers=prefixed_headers)
+            _ = from_http(prefixed_headers, json.dumps(test_data))
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -223,7 +222,7 @@ def test_valid_binary_events(specversion):
             "ce-specversion": specversion,
         }
         data = {"payload": f"payload-{i}"}
-        events_queue.append(from_http(json.dumps(data), headers=headers))
+        events_queue.append(from_http(headers, json.dumps(data)))
 
     for i, event in enumerate(events_queue):
         data = event.data
@@ -286,7 +285,7 @@ def test_empty_data_structured_event(specversion):
     }
 
     _ = from_http(
-        json.dumps(attributes), {"content-type": "application/cloudevents+json"}
+        {"content-type": "application/cloudevents+json"}, json.dumps(attributes)
     )
 
 
@@ -301,7 +300,7 @@ def test_empty_data_binary_event(specversion):
         "ce-time": "2018-10-23T12:28:22.4579346Z",
         "ce-source": "<source-url>",
     }
-    _ = from_http("", headers)
+    _ = from_http(headers, "")
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -319,8 +318,8 @@ def test_valid_structured_events(specversion):
         }
         events_queue.append(
             from_http(
-                json.dumps(event),
                 {"content-type": "application/cloudevents+json"},
+                json.dumps(event),
             )
         )
 
@@ -341,7 +340,7 @@ def test_structured_no_content_type(specversion):
         "specversion": specversion,
         "data": test_data,
     }
-    event = from_http(json.dumps(data), {},)
+    event = from_http({}, json.dumps(data))
 
     assert event["id"] == "id"
     assert event["source"] == "source.com.test"
@@ -379,7 +378,7 @@ def test_cloudevent_repr(specversion):
         "ce-time": "2018-10-23T12:28:22.4579346Z",
         "ce-source": "<source-url>",
     }
-    event = from_http("", headers)
+    event = from_http(headers, "")
     # Testing to make sure event is printable. I could runevent. __repr__() but
     # we had issues in the past where event.__repr__() could run but
     # print(event) would fail.
@@ -410,7 +409,7 @@ def test_wrong_specversion():
         }
     )
     with pytest.raises(cloud_exceptions.CloudEventTypeErrorRequiredFields) as e:
-        from_http(data, headers)
+        from_http(headers, data)
     assert "Found invalid specversion 0.2" in str(e.value)
 
 
@@ -418,7 +417,7 @@ def test_invalid_data_format_structured_from_http():
     headers = {"Content-Type": "application/cloudevents+json"}
     data = 20
     with pytest.raises(cloud_exceptions.InvalidStructuredJSON) as e:
-        from_http(data, headers)
+        from_http(headers, data)
     assert "Expected json of type (str, bytes, bytearray)" in str(e.value)
 
 
@@ -450,7 +449,9 @@ def test_empty_json_structured():
     headers = {"Content-Type": "application/cloudevents+json"}
     data = ""
     with pytest.raises(cloud_exceptions.InvalidStructuredJSON) as e:
-        from_http(data, headers)
+        from_http(
+            headers, data,
+        )
     assert "Failed to read fields from structured event. " in str(e.value)
 
 
@@ -461,7 +462,7 @@ def test_uppercase_headers_with_none_data_binary():
         "Ce-Type": "cloudevent.event.type",
         "Ce-Specversion": "1.0",
     }
-    event = from_http(None, headers)
+    event = from_http(headers, None)
 
     for key in headers:
         assert event[key.lower()[3:]] == headers[key]
