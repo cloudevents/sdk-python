@@ -75,7 +75,7 @@ async def echo(request):
     if "binary-payload" in request.headers:
         decoder = lambda x: x
     event = from_http(
-        request.body, headers=dict(request.headers)
+        request.body, headers=dict(request.headers), data_unmarshaller=decoder
     )
     data = (
         event.data
@@ -158,10 +158,9 @@ def test_emit_structured_event(specversion):
     assert r.status_code == 200
 
 
-# @pytest.mark.parametrize(
-#     "converter", [converters.TypeBinary, converters.TypeStructured]
-# )
-@pytest.mark.parametrize("converter", [converters.TypeStructured])
+@pytest.mark.parametrize(
+    "converter", [converters.TypeBinary, converters.TypeStructured]
+)
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
 def test_roundtrip_non_json_event(converter, specversion):
     input_data = io.BytesIO()
@@ -401,13 +400,14 @@ def test_none_data_cloudevent(specversion):
 
 def test_wrong_specversion():
     headers = {"Content-Type": "application/cloudevents+json"}
-    data = {
-        "specversion": "0.2",
-        "type": "word.found.name",
-        "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
-        "source": "<my-source>"
-    }
-    try:
+    data = json.dumps(
+        {
+            "specversion": "0.2",
+            "type": "word.found.name",
+            "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+            "source": "<my-source>",
+        }
+    )
+    with pytest.raises(cloud_exceptions.CloudEventTypeErrorRequiredFields) as e:
         from_http(data, headers)
-    except cloud_exceptions.CloudEventMissingRequiredFields as e:
-        assert "Found invalid specversion 0.2" in e
+    assert "Found invalid specversion 0.2" in str(e.value)

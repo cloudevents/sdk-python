@@ -17,3 +17,7 @@ class CloudEventMissingRequiredFields(Exception):
 
 class CloudEventTypeErrorRequiredFields(Exception):
     pass
+
+
+class InvalidStructuredJSON(Exception):
+    pass

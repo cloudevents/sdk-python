@@ -24,6 +24,11 @@ def from_http(
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
+    if not isinstance(data, (str, bytes, bytearray)):
+        raise cloud_exceptions.InvalidStructuredJSON(
+            "Expected json of type (str, bytes, bytearray), "
+            f"but instead found {type(data)}. "
+        )
     if data_unmarshaller is None:
         data_unmarshaller = _json_or_string
 
@@ -32,12 +37,12 @@ def from_http(
     if is_binary(headers):
         specversion = headers.get("ce-specversion", None)
     else:
-        raw_ce = data_unmarshaller(data)
-        if not isinstance(raw_ce, dict):
-            raise cloud_exceptions.CloudEventMissingRequiredFields(
+        try:
+            raw_ce = json.loads(data)
+        except json.decoder.JSONDecodeError:
+            raise cloud_exceptions.InvalidStructuredJSON(
                 "Failed to read fields from structured event. "
-                f"Found {raw_ce} of type {type(raw_ce)}. "
-                f"Was {data, type(data)} before unmarshalling with {data_unmarshaller.__name__}."
+                f"The following can not be parsed as json: {data}. "
             )
         specversion = raw_ce.get("specversion", None)
 
@@ -84,7 +89,7 @@ def _to_http(
 
     if event._attributes["specversion"] not in _obj_by_version:
         raise cloud_exceptions.CloudEventTypeErrorRequiredFields(
-            f"Unsupported specversion: {event._attributes['specversion']}"
+            f"Unsupported specversion: {event._attributes['specversion']}. "
         )
 
     event_handler = _obj_by_version[event._attributes["specversion"]]()
