@@ -11,16 +11,27 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import json
-import typing
+import pytest
 
-from cloudevents.http.event import CloudEvent
-from cloudevents.http.event_type import is_binary, is_structured
-from cloudevents.http.http_methods import (
-    from_http,
+from cloudevents.http import (
+    CloudEvent,
     to_binary,
     to_binary_http,
     to_structured,
     to_structured_http,
 )
-from cloudevents.http.json_methods import from_json, to_json
+
+
+@pytest.fixture
+def event():
+    return CloudEvent({"source": "s", "type": "t"}, None)
+
+
+def test_to_binary_http_deprecated(event):
+    with pytest.deprecated_call():
+        assert to_binary(event) == to_binary_http(event)
+
+
+def test_to_structured_http_deprecated(event):
+    with pytest.deprecated_call():
+        assert to_structured(event) == to_structured_http(event)

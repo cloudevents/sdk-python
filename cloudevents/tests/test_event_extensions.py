@@ -15,12 +15,7 @@ import json
 
 import pytest
 
-from cloudevents.http import (
-    CloudEvent,
-    from_http,
-    to_binary_http,
-    to_structured_http,
-)
+from cloudevents.http import CloudEvent, from_http, to_binary, to_structured
 
 test_data = json.dumps({"data-key": "val"})
 test_attributes = {
@@ -39,7 +34,7 @@ def test_cloudevent_access_extensions(specversion):
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
 def test_to_binary_extensions(specversion):
     event = CloudEvent(test_attributes, test_data)
-    headers, body = to_binary_http(event)
+    headers, body = to_binary(event)
 
     assert "ce-ext1" in headers
     assert headers.get("ce-ext1") == test_attributes["ext1"]
@@ -65,7 +60,7 @@ def test_from_binary_extensions(specversion):
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
 def test_to_structured_extensions(specversion):
     event = CloudEvent(test_attributes, test_data)
-    headers, body = to_structured_http(event)
+    headers, body = to_structured(event)
 
     body = json.loads(body)
 

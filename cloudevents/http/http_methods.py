@@ -1,6 +1,8 @@
 import json
 import typing
 
+from deprecation import deprecated
+
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http.event import CloudEvent
 from cloudevents.http.event_type import is_binary, is_structured
@@ -107,7 +109,7 @@ def _to_http(
     )
 
 
-def to_structured_http(
+def to_structured(
     event: CloudEvent, data_marshaller: types.MarshallerType = None,
 ) -> (dict, typing.Union[bytes, str]):
     """
@@ -123,7 +125,7 @@ def to_structured_http(
     return _to_http(event=event, data_marshaller=data_marshaller)
 
 
-def to_binary_http(
+def to_binary(
     event: CloudEvent, data_marshaller: types.MarshallerType = None,
 ) -> (dict, typing.Union[bytes, str]):
     """
@@ -141,3 +143,17 @@ def to_binary_http(
         format=converters.TypeBinary,
         data_marshaller=data_marshaller,
     )
+
+
+@deprecated(deprecated_in="1.0.2", details="Use to_binary function instead")
+def to_binary_http(
+    event: CloudEvent, data_marshaller: types.MarshallerType = None,
+) -> (dict, typing.Union[bytes, str]):
+    return to_binary(event, data_marshaller)
+
+
+@deprecated(deprecated_in="1.0.2", details="Use to_structured function instead")
+def to_structured_http(
+    event: CloudEvent, data_marshaller: types.MarshallerType = None,
+) -> (dict, typing.Union[bytes, str]):
+    return to_structured(event, data_marshaller)
