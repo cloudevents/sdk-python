@@ -26,7 +26,9 @@ from cloudevents.http import (
     from_http,
     is_binary,
     is_structured,
+    to_binary,
     to_binary_http,
+    to_structured,
     to_structured_http,
 )
 from cloudevents.sdk import converters
@@ -173,9 +175,9 @@ def test_roundtrip_non_json_event(converter, specversion):
     event = CloudEvent(attrs, compressed_data)
 
     if converter == converters.TypeStructured:
-        headers, data = to_structured_http(event, data_marshaller=lambda x: x)
+        headers, data = to_structured(event, data_marshaller=lambda x: x)
     elif converter == converters.TypeBinary:
-        headers, data = to_binary_http(event, data_marshaller=lambda x: x)
+        headers, data = to_binary(event, data_marshaller=lambda x: x)
 
     headers["binary-payload"] = "true"  # Decoding hint for server
     _, r = app.test_client.post("/event", headers=headers, data=data)
@@ -243,7 +245,7 @@ def test_structured_to_request(specversion):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body_bytes = to_structured_http(event)
+    headers, body_bytes = to_structured(event)
     assert isinstance(body_bytes, bytes)
     body = json.loads(body_bytes)
 
@@ -263,7 +265,7 @@ def test_binary_to_request(specversion):
     }
     data = {"message": "Hello World!"}
     event = CloudEvent(attributes, data)
-    headers, body_bytes = to_binary_http(event)
+    headers, body_bytes = to_binary(event)
     body = json.loads(body_bytes)
 
     for key in data:
@@ -394,8 +396,8 @@ def test_none_data_cloudevent(specversion):
             "specversion": specversion,
         }
     )
-    to_binary_http(event)
-    to_structured_http(event)
+    to_binary(event)
+    to_structured(event)
 
 
 def test_wrong_specversion():
@@ -425,7 +427,7 @@ def test_wrong_specversion_to_request():
     event = CloudEvent({"source": "s", "type": "t"}, None)
     with pytest.raises(cloud_exceptions.CloudEventTypeErrorRequiredFields) as e:
         event["specversion"] = "0.2"
-        to_binary_http(event)
+        to_binary(event)
     assert "Unsupported specversion: 0.2" in str(e.value)
 
 
@@ -468,5 +470,5 @@ def test_uppercase_headers_with_none_data_binary():
         assert event[key.lower()[3:]] == headers[key]
     assert event.data == None
 
-    _, new_data = to_binary_http(event)
+    _, new_data = to_binary(event)
     assert new_data == None

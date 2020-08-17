@@ -1,7 +1,7 @@
 import pytest
 from json_sample_server import app
 
-from cloudevents.http import CloudEvent, to_binary_http, to_structured_http
+from cloudevents.http import CloudEvent, to_binary, to_structured
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def test_binary_request(client):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body = to_binary_http(event)
+    headers, body = to_binary(event)
 
     r = client.post("/", headers=headers, data=body)
     assert r.status_code == 204
@@ -34,7 +34,7 @@ def test_structured_request(client):
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body = to_structured_http(event)
+    headers, body = to_structured(event)
 
     r = client.post("/", headers=headers, data=body)
     assert r.status_code == 204
