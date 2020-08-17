@@ -58,14 +58,14 @@ class CloudEvent:
             ).isoformat()
 
         if self._attributes["specversion"] not in _required_by_version:
-            raise cloud_exceptions.CloudEventMissingRequiredFields(
+            raise cloud_exceptions.MissingRequiredFields(
                 f"Invalid specversion: {self._attributes['specversion']}. "
             )
         # There is no good way to default 'source' and 'type', so this
         # checks for those (or any new required attributes).
         required_set = _required_by_version[self._attributes["specversion"]]
         if not required_set <= self._attributes.keys():
-            raise cloud_exceptions.CloudEventMissingRequiredFields(
+            raise cloud_exceptions.MissingRequiredFields(
                 f"Missing required keys: {required_set - self._attributes.keys()}. "
             )
 

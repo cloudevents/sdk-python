@@ -11,11 +11,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-class CloudEventMissingRequiredFields(Exception):
+class MissingRequiredFields(Exception):
     pass
 
 
-class CloudEventTypeErrorRequiredFields(Exception):
+class InvalidRequiredFields(Exception):
     pass
 
 

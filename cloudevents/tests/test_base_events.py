@@ -20,7 +20,7 @@ from cloudevents.sdk.event import v1, v03
 @pytest.mark.parametrize("event_class", [v1.Event, v03.Event])
 def test_unmarshall_binary_missing_fields(event_class):
     event = event_class()
-    with pytest.raises(cloud_exceptions.CloudEventMissingRequiredFields) as e:
+    with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
         event.UnmarshalBinary({}, "", lambda x: x)
     assert "Missing required attributes: " in str(e.value)
 
