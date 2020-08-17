@@ -113,7 +113,9 @@ def to_structured(
     event: CloudEvent, data_marshaller: types.MarshallerType = None,
 ) -> (dict, typing.Union[bytes, str]):
     """
-    Returns a tuple of HTTP headers/body dicts representing this cloudevent
+    Returns a tuple of HTTP headers/body dicts representing this cloudevent. If
+    event.data is a byte object, body will have a data_base64 field instead of
+    data.
 
     :param event: CloudEvent to cast into http data
     :type event: CloudEvent
