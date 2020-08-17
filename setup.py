@@ -41,5 +41,5 @@ setup(
     ],
     packages=find_packages(exclude=["cloudevents.tests"]),
     version=pypi_config["version_target"],
-    install_requires=["deprecation==2.1.0"],
+    install_requires=["deprecation>=2.0,<3.0"],
 )
