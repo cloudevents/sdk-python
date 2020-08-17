@@ -98,3 +98,19 @@ class Event(base.BaseEvent):
     def SetExtensions(self, extensions: dict) -> base.BaseEvent:
         self.Set("extensions", extensions)
         return self
+
+    @property
+    def schema(self) -> str:
+        return self.Schema()
+
+    @schema.setter
+    def schema(self, value: str):
+        self.SetSchema(value)
+
+    @property
+    def subject(self) -> str:
+        return self.Subject()
+
+    @subject.setter
+    def subject(self, value: str):
+        self.SetSubject(value)

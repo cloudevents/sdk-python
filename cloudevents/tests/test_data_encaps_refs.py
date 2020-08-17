@@ -92,7 +92,6 @@ def test_general_structured_properties(event_class):
         if key == "content-type":
             assert new_headers[key] == http_headers[key]
             continue
-        assert key in copy_of_ce
 
     # Test setters
     new_type = str(uuid4())
