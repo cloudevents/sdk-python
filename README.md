@@ -28,7 +28,7 @@ from cloudevents.http import CloudEvent, to_binary
 import requests
 
 
-# This data defines a binary cloudevent
+# id is uniquely generated and specversion defaults to 1.0
 attributes = {
     "type": "com.example.sampletype1",
     "source": "https://example.com/event-producer",
