@@ -69,10 +69,6 @@ test_data = {"payload-content": "Hello World!"}
 app = Sanic(__name__)
 
 
-def post(url, headers, data):
-    return app.test_client.post(url, headers=headers, data=data)
-
-
 @app.route("/event", ["POST"])
 async def echo(request):
     decoder = None
