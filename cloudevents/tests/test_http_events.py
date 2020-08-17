@@ -25,6 +25,7 @@ from cloudevents.http import (
     CloudEvent,
     from_http,
     is_binary,
+    is_structured,
     to_binary_http,
     to_structured_http,
 )
@@ -411,3 +412,43 @@ def test_wrong_specversion():
     with pytest.raises(cloud_exceptions.CloudEventTypeErrorRequiredFields) as e:
         from_http(data, headers)
     assert "Found invalid specversion 0.2" in str(e.value)
+
+
+def test_invalid_data_format_structured_from_http():
+    headers = {"Content-Type": "application/cloudevents+json"}
+    data = 20
+    with pytest.raises(cloud_exceptions.InvalidStructuredJSON) as e:
+        from_http(data, headers)
+    assert "Expected json of type (str, bytes, bytearray)" in str(e.value)
+
+
+def test_wrong_specversion_to_request():
+    event = CloudEvent({"source": "s", "type": "t"}, None)
+    with pytest.raises(cloud_exceptions.CloudEventTypeErrorRequiredFields) as e:
+        event["specversion"] = "0.2"
+        to_binary_http(event)
+    assert "Unsupported specversion: 0.2" in str(e.value)
+
+
+def test_is_structured():
+    headers = {
+        "Content-Type": "application/cloudevents+json",
+    }
+    assert is_structured(headers)
+
+    headers = {
+        "ce-id": "my-id",
+        "ce-source": "<event-source>",
+        "ce-type": "cloudevent.event.type",
+        "ce-specversion": "1.0",
+        "Content-Type": "text/plain",
+    }
+    assert not is_structured(headers)
+
+
+def test_empty_json_structured():
+    headers = {"Content-Type": "application/cloudevents+json"}
+    data = ""
+    with pytest.raises(cloud_exceptions.InvalidStructuredJSON) as e:
+        from_http(data, headers)
+    assert "Failed to read fields from structured event. " in str(e.value)

@@ -22,7 +22,7 @@ from cloudevents.sdk import types
 # TODO(slinkydeveloper) is this really needed?
 
 
-class EventGetterSetter(object):
+class EventGetterSetter(object):  # pragma: no cover
 
     # ce-specversion
     def CloudEventVersion(self) -> str:

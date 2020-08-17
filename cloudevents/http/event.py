@@ -66,7 +66,7 @@ class CloudEvent:
         required_set = _required_by_version[self._attributes["specversion"]]
         if not required_set <= self._attributes.keys():
             raise cloud_exceptions.CloudEventMissingRequiredFields(
-                f"Missing required keys: {required_set - attributes.keys()}. "
+                f"Missing required keys: {required_set - self._attributes.keys()}. "
             )
 
     def __eq__(self, other):
