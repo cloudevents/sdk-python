@@ -90,7 +90,7 @@ async def echo(request):
 
 @pytest.mark.parametrize("body", invalid_cloudevent_request_body)
 def test_missing_required_fields_structured(body):
-    with pytest.raises(cloud_exceptions.CloudEventMissingRequiredFields):
+    with pytest.raises(cloud_exceptions.MissingRequiredFields):
         # CloudEvent constructor throws TypeError if missing required field
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
@@ -102,7 +102,7 @@ def test_missing_required_fields_structured(body):
 
 @pytest.mark.parametrize("headers", invalid_test_headers)
 def test_missing_required_fields_binary(headers):
-    with pytest.raises(cloud_exceptions.CloudEventMissingRequiredFields):
+    with pytest.raises(cloud_exceptions.MissingRequiredFields):
         # CloudEvent constructor throws TypeError if missing required field
         # and NotImplementedError because structured calls aren't
         # implemented. In this instance one of the required keys should have
@@ -202,7 +202,7 @@ def test_missing_ce_prefix_binary_event(specversion):
         # breaking prefix e.g. e-id instead of ce-id
         prefixed_headers[key[1:]] = headers[key]
 
-        with pytest.raises(cloud_exceptions.CloudEventMissingRequiredFields):
+        with pytest.raises(cloud_exceptions.MissingRequiredFields):
             # CloudEvent constructor throws TypeError if missing required field
             # and NotImplementedError because structured calls aren't
             # implemented. In this instance one of the required keys should have
@@ -410,7 +410,7 @@ def test_wrong_specversion():
             "source": "<my-source>",
         }
     )
-    with pytest.raises(cloud_exceptions.CloudEventTypeErrorRequiredFields) as e:
+    with pytest.raises(cloud_exceptions.InvalidRequiredFields) as e:
         from_http(headers, data)
     assert "Found invalid specversion 0.2" in str(e.value)
 
@@ -425,7 +425,7 @@ def test_invalid_data_format_structured_from_http():
 
 def test_wrong_specversion_to_request():
     event = CloudEvent({"source": "s", "type": "t"}, None)
-    with pytest.raises(cloud_exceptions.CloudEventTypeErrorRequiredFields) as e:
+    with pytest.raises(cloud_exceptions.InvalidRequiredFields) as e:
         event["specversion"] = "0.2"
         to_binary(event)
     assert "Unsupported specversion: 0.2" in str(e.value)

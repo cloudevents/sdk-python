@@ -54,14 +54,14 @@ def from_http(
         specversion = raw_ce.get("specversion", None)
 
     if specversion is None:
-        raise cloud_exceptions.CloudEventMissingRequiredFields(
-            "Specversion was set to None in HTTP request. "
+        raise cloud_exceptions.MissingRequiredFields(
+            "Failed to find specversion in HTTP request. "
         )
 
     event_handler = _obj_by_version.get(specversion, None)
 
     if event_handler is None:
-        raise cloud_exceptions.CloudEventTypeErrorRequiredFields(
+        raise cloud_exceptions.InvalidRequiredFields(
             f"Found invalid specversion {specversion}. "
         )
 
@@ -95,7 +95,7 @@ def _to_http(
         data_marshaller = _marshaller_by_format[format]
 
     if event._attributes["specversion"] not in _obj_by_version:
-        raise cloud_exceptions.CloudEventTypeErrorRequiredFields(
+        raise cloud_exceptions.InvalidRequiredFields(
             f"Unsupported specversion: {event._attributes['specversion']}. "
         )
 
