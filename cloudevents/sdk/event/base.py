@@ -22,7 +22,7 @@ from cloudevents.sdk import types
 # TODO(slinkydeveloper) is this really needed?
 
 
-class EventGetterSetter(object):
+class EventGetterSetter(object):  # pragma: no cover
 
     # ce-specversion
     def CloudEventVersion(self) -> str:
@@ -220,7 +220,7 @@ class BaseEvent(EventGetterSetter):
 
         missing_fields = self._ce_required_fields - raw_ce.keys()
         if len(missing_fields) > 0:
-            raise cloud_exceptions.CloudEventMissingRequiredFields(
+            raise cloud_exceptions.MissingRequiredFields(
                 f"Missing required attributes: {missing_fields}"
             )
 
@@ -246,7 +246,7 @@ class BaseEvent(EventGetterSetter):
         missing_fields = required_binary_fields - headers.keys()
 
         if len(missing_fields) > 0:
-            raise cloud_exceptions.CloudEventMissingRequiredFields(
+            raise cloud_exceptions.MissingRequiredFields(
                 f"Missing required attributes: {missing_fields}"
             )
 

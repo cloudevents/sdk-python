@@ -15,7 +15,7 @@ import sys
 
 import requests
 
-from cloudevents.http import CloudEvent, to_binary_http, to_structured_http
+from cloudevents.http import CloudEvent, to_binary, to_structured
 
 resp = requests.get(
     "https://raw.githubusercontent.com/cncf/artwork/master/projects/cloudevents/horizontal/color/cloudevents-horizontal-color.png"
@@ -33,7 +33,7 @@ def send_binary_cloud_event(url: str):
     event = CloudEvent(attributes, image_bytes)
 
     # Create cloudevent HTTP headers and content
-    headers, body = to_binary_http(event)
+    headers, body = to_binary(event)
 
     # Send cloudevent
     requests.post(url, headers=headers, data=body)
@@ -50,10 +50,10 @@ def send_structured_cloud_event(url: str):
     event = CloudEvent(attributes, image_bytes)
 
     # Create cloudevent HTTP headers and content
-    # Note that to_structured_http will create a data_base64 data field in
+    # Note that to_structured will create a data_base64 data field in
     # specversion 1.0 (default specversion) if given
     # an event whose data field is of type bytes.
-    headers, body = to_structured_http(event)
+    headers, body = to_structured(event)
 
     # Send cloudevent
     requests.post(url, headers=headers, data=body)

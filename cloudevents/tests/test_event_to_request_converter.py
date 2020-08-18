@@ -61,4 +61,3 @@ def test_structured_event_to_request_upstream(event_class):
         if key == "content-type":
             assert new_headers[key] == http_headers[key]
             continue
-        assert key in copy_of_ce

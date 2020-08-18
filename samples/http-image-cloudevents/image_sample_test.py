@@ -7,12 +7,7 @@ from client import image_bytes
 from image_sample_server import app
 from PIL import Image
 
-from cloudevents.http import (
-    CloudEvent,
-    from_http,
-    to_binary_http,
-    to_structured_http,
-)
+from cloudevents.http import CloudEvent, from_http, to_binary, to_structured
 
 image_fileobj = io.BytesIO(image_bytes)
 image_expected_shape = (1880, 363)
@@ -35,11 +30,11 @@ def test_create_binary_image():
     event = CloudEvent(attributes, image_bytes)
 
     # Create http headers/body content
-    headers, body = to_binary_http(event)
+    headers, body = to_binary(event)
 
     # Unmarshall CloudEvent and re-create image
     reconstruct_event = from_http(
-        body, headers, data_unmarshaller=lambda x: io.BytesIO(x)
+        headers, body, data_unmarshaller=lambda x: io.BytesIO(x)
     )
 
     # reconstruct_event.data is an io.BytesIO object due to data_unmarshaller
@@ -62,7 +57,7 @@ def test_create_structured_image():
     event = CloudEvent(attributes, image_bytes)
 
     # Create http headers/body content
-    headers, body = to_structured_http(event)
+    headers, body = to_structured(event)
 
     # Structured has cloudevent attributes marshalled inside the body. For this
     # reason we must load the byte object to create the python dict containing
@@ -75,7 +70,7 @@ def test_create_structured_image():
 
     # Unmarshall CloudEvent and re-create image
     reconstruct_event = from_http(
-        body, headers, data_unmarshaller=lambda x: io.BytesIO(x)
+        headers, body, data_unmarshaller=lambda x: io.BytesIO(x)
     )
 
     # reconstruct_event.data is an io.BytesIO object due to data_unmarshaller
@@ -92,10 +87,10 @@ def test_server_structured(client):
     event = CloudEvent(attributes, image_bytes)
 
     # Create cloudevent HTTP headers and content
-    # Note that to_structured_http will create a data_base64 data field in
+    # Note that to_structured will create a data_base64 data field in
     # specversion 1.0 (default specversion) if given
     # an event whose data field is of type bytes.
-    headers, body = to_structured_http(event)
+    headers, body = to_structured(event)
 
     # Send cloudevent
     r = client.post("/", headers=headers, data=body)
@@ -113,7 +108,7 @@ def test_server_binary(client):
     event = CloudEvent(attributes, image_bytes)
 
     # Create cloudevent HTTP headers and content
-    headers, body = to_binary_http(event)
+    headers, body = to_binary(event)
 
     # Send cloudevent
     r = client.post("/", headers=headers, data=body)

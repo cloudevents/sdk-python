@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0]
+### Changed
+- Changed from_http to now expect headers argument before data ([#110])
+- Renamed exception names ([#111])
+
+### Deprecated
+- Renamed to_binary_http and to_structured_http. ([#108])
+
 ## [1.0.1]
 ### Added
 - CloudEvent exceptions and event type checking in http module ([#96])
@@ -94,3 +102,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#72]: https://github.com/cloudevents/sdk-python/pull/72
 [#96]: https://github.com/cloudevents/sdk-python/pull/96
 [#98]: https://github.com/cloudevents/sdk-python/pull/98
+[#108]: https://github.com/cloudevents/sdk-python/pull/108
+[#110]: https://github.com/cloudevents/sdk-python/pull/110
+[#111]: https://github.com/cloudevents/sdk-python/pull/111

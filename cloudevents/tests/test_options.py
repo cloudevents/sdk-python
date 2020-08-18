@@ -11,16 +11,26 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import json
-import typing
 
-from cloudevents.http.event import CloudEvent
-from cloudevents.http.event_type import is_binary, is_structured
-from cloudevents.http.http_methods import (
-    from_http,
-    to_binary,
-    to_binary_http,
-    to_structured,
-    to_structured_http,
-)
-from cloudevents.http.json_methods import from_json, to_json
+import pytest
+
+from cloudevents.sdk.event.opt import Option
+
+
+def test_set_raise_error():
+    with pytest.raises(ValueError):
+        o = Option("test", "value", True)
+        o.set(None)
+
+
+def test_options_eq_override():
+    o = Option("test", "value", True)
+    assert o.required()
+
+    o2 = Option("test", "value", True)
+    assert o2.required()
+
+    assert o == o2
+    o.set("setting to new value")
+
+    assert o != o2

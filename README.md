@@ -24,19 +24,20 @@ Below we will provide samples on how to send cloudevents using the popular
 ### Binary HTTP CloudEvent
 
 ```python
-from cloudevents.http import CloudEvent, to_binary_http
+from cloudevents.http import CloudEvent, to_binary
 import requests
 
-
-# This data defines a binary cloudevent
+# Create a CloudEvent
+# - The CloudEvent "id" is generated if omitted. "specversion" defaults to "1.0".
 attributes = {
     "type": "com.example.sampletype1",
     "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
-
 event = CloudEvent(attributes, data)
-headers, body = to_binary_http(event)
+
+# Creates the HTTP request representation of the CloudEvent in binary content mode
+headers, body = to_binary(event)
 
 # POST
 requests.post("<some-url>", data=body, headers=headers)
@@ -45,18 +46,20 @@ requests.post("<some-url>", data=body, headers=headers)
 ### Structured HTTP CloudEvent
 
 ```python
-from cloudevents.http import CloudEvent, to_structured_http
+from cloudevents.http import CloudEvent, to_structured
 import requests
 
-
-# This data defines a structured cloudevent
+# Create a CloudEvent
+# - The CloudEvent "id" is generated if omitted. "specversion" defaults to "1.0".
 attributes = {
     "type": "com.example.sampletype2",
     "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
-headers, body = to_structured_http(event)
+
+# Creates the HTTP request representation of the CloudEvent in structured content mode
+headers, body = to_structured(event)
 
 # POST
 requests.post("<some-url>", data=body, headers=headers)
@@ -81,7 +84,7 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def home():
     # create a CloudEvent
-    event = from_http(request.get_data(), request.headers)
+    event = from_http(request.headers, request.get_data())
 
     # you can access cloudevent fields as seen below
     print(
