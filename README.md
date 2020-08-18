@@ -58,7 +58,7 @@ attributes = {
 data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
 
-# Creates the HTTP request representation of the CloudEvent in structured json mode
+# Creates the HTTP request representation of the CloudEvent in structured content mode
 headers, body = to_structured(event)
 
 # POST
