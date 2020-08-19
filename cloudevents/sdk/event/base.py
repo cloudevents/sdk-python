@@ -201,7 +201,13 @@ class BaseEvent(EventGetterSetter):
             data_marshaller = lambda x: x  # noqa: E731
         props = self.Properties()
         if "data" in props:
-            data = data_marshaller(props.pop("data"))
+            try:
+                data = data_marshaller(props.pop("data"))
+            except Exception as e:
+                raise cloud_exceptions.DataMarshallerError(
+                    "Failed to marshall data with error: "
+                    f"{type(e).__name__}('{e}')"
+                )
             if isinstance(data, (bytes, bytes, memoryview)):
                 props["data_base64"] = base64.b64encode(data).decode("ascii")
             else:
@@ -225,14 +231,23 @@ class BaseEvent(EventGetterSetter):
             )
 
         for name, value in raw_ce.items():
+            decoder = lambda x: x
             if name == "data":
                 # Use the user-provided serializer, which may have customized
                 # JSON decoding
-                value = data_unmarshaller(json.dumps(value))
+                decoder = lambda v: data_unmarshaller(json.dumps(v))
             if name == "data_base64":
-                value = data_unmarshaller(base64.b64decode(value))
+                decoder = lambda v: data_unmarshaller(base64.b64decode(v))
                 name = "data"
-            self.Set(name, value)
+
+            try:
+                set_value = decoder(value)
+            except Exception as e:
+                raise cloud_exceptions.DataUnmarshallerError(
+                    "Failed to unmarshall data with error: "
+                    f"{type(e).__name__}('{e}')"
+                )
+            self.Set(name, set_value)
 
     def UnmarshalBinary(
         self,
@@ -256,7 +271,15 @@ class BaseEvent(EventGetterSetter):
                 self.SetContentType(value)
             elif header.startswith("ce-"):
                 self.Set(header[3:], value)
-        self.Set("data", data_unmarshaller(body))
+
+        try:
+            raw_ce = data_unmarshaller(body)
+        except Exception as e:
+            raise cloud_exceptions.DataUnmarshallerError(
+                "Failed to unmarshall data with error: "
+                f"{type(e).__name__}('{e}')"
+            )
+        self.Set("data", raw_ce)
 
     def MarshalBinary(
         self, data_marshaller: types.MarshallerType
@@ -276,7 +299,13 @@ class BaseEvent(EventGetterSetter):
             headers["ce-{0}".format(key)] = value
 
         data, _ = self.Get("data")
-        data = data_marshaller(data)
+        try:
+            data = data_marshaller(data)
+        except Exception as e:
+            raise cloud_exceptions.DataMarshallerError(
+                "Failed to marshall data with error: "
+                f"{type(e).__name__}('{e}')"
+            )
         if isinstance(data, str):  # Convenience method for json.dumps
             data = data.encode("utf-8")
         return headers, data

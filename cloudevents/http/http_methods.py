@@ -20,13 +20,15 @@ def from_http(
     Unwrap a CloudEvent (binary or structured) from an HTTP request.
     :param headers: the HTTP headers
     :type headers: typing.Dict[str, str]
-    :param data: the HTTP request body
+    :param data: the HTTP request body. If set to None, "" or b'', the returned
+        event's data field will be set to None
     :type data: typing.IO
     :param data_unmarshaller: Callable function to map data to a python object
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
-    if data is None:
+    if data is None or data == b"":
+        # Empty string will cause data to be marshalled into None
         data = ""
 
     if not isinstance(data, (str, bytes, bytearray)):
@@ -73,7 +75,13 @@ def from_http(
     attrs.pop("extensions", None)
     attrs.update(**event.extensions)
 
-    return CloudEvent(attrs, event.data)
+    if event.data == "" or event.data == b"":
+        # TODO: Check binary unmarshallers to debug why setting data to ""
+        # returns an event with data set to None, but structured will return ""
+        data = None
+    else:
+        data = event.data
+    return CloudEvent(attrs, data)
 
 
 def _to_http(
