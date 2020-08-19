@@ -4,10 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0]
+### Added
+- Added GenericException, DataMarshallingError and DataUnmarshallingError ([#120])
+
 ## [1.1.0]
 ### Changed
 - Changed from_http to now expect headers argument before data ([#110])
 - Renamed exception names ([#111])
+
+### Fixed
+- Fixed from_http bugs with data of type None, or not dict-like ([#119])
 
 ### Deprecated
 - Renamed to_binary_http and to_structured_http. ([#108])
@@ -105,3 +112,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#108]: https://github.com/cloudevents/sdk-python/pull/108
 [#110]: https://github.com/cloudevents/sdk-python/pull/110
 [#111]: https://github.com/cloudevents/sdk-python/pull/111
+[#119]: https://github.com/cloudevents/sdk-python/pull/119
+[#120]: https://github.com/cloudevents/sdk-python/pull/120
