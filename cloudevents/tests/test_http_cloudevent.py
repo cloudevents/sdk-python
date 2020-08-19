@@ -76,19 +76,19 @@ def test_http_cloudevent_mutates_equality(specversion):
 def test_cloudevent_missing_specversion():
     attributes = {"specversion": "0.2", "source": "s", "type": "t"}
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
-        event = CloudEvent(attributes, None)
+        _ = CloudEvent(attributes, None)
     assert "Invalid specversion: 0.2" in str(e.value)
 
 
 def test_cloudevent_missing_minimal_required_fields():
     attributes = {"type": "t"}
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
-        event = CloudEvent(attributes, None)
+        _ = CloudEvent(attributes, None)
     assert f"Missing required keys: {set(['source'])}" in str(e.value)
 
     attributes = {"source": "s"}
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
-        event = CloudEvent(attributes, None)
+        _ = CloudEvent(attributes, None)
     assert f"Missing required keys: {set(['type'])}" in str(e.value)
 
 
