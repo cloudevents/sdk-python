@@ -32,7 +32,7 @@ def from_http(
     if not isinstance(data, (str, bytes, bytearray)):
         raise cloud_exceptions.InvalidStructuredJSON(
             "Expected json of type (str, bytes, bytearray), "
-            f"but instead found {type(data)}. "
+            f"but instead found type {type(data)}"
         )
 
     headers = {key.lower(): value for key, value in headers.items()}
@@ -47,22 +47,28 @@ def from_http(
         try:
             raw_ce = json.loads(data)
         except json.decoder.JSONDecodeError:
-            raise cloud_exceptions.InvalidStructuredJSON(
-                "Failed to read fields from structured event. "
-                f"The following can not be parsed as json: {data}. "
+            raise cloud_exceptions.MissingRequiredFields(
+                "Failed to read specversion from both headers and data. "
+                f"The following can not be parsed as json: {data}"
             )
-        specversion = raw_ce.get("specversion", None)
+        if hasattr(raw_ce, "get"):
+            specversion = raw_ce.get("specversion", None)
+        else:
+            raise cloud_exceptions.MissingRequiredFields(
+                "Failed to read specversion from both headers and data. "
+                f"The following deserialized data has no 'get' method: {raw_ce}"
+            )
 
     if specversion is None:
         raise cloud_exceptions.MissingRequiredFields(
-            "Failed to find specversion in HTTP request. "
+            "Failed to find specversion in HTTP request"
         )
 
     event_handler = _obj_by_version.get(specversion, None)
 
     if event_handler is None:
         raise cloud_exceptions.InvalidRequiredFields(
-            f"Found invalid specversion {specversion}. "
+            f"Found invalid specversion {specversion}"
         )
 
     event = marshall.FromRequest(
@@ -96,7 +102,7 @@ def _to_http(
 
     if event._attributes["specversion"] not in _obj_by_version:
         raise cloud_exceptions.InvalidRequiredFields(
-            f"Unsupported specversion: {event._attributes['specversion']}. "
+            f"Unsupported specversion: {event._attributes['specversion']}"
         )
 
     event_handler = _obj_by_version[event._attributes["specversion"]]()
