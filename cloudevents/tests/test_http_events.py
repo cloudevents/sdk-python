@@ -90,11 +90,8 @@ async def echo(request):
 
 @pytest.mark.parametrize("body", invalid_cloudevent_request_body)
 def test_missing_required_fields_structured(body):
-    with pytest.raises(cloud_exceptions.MissingRequiredFields):
-        # CloudEvent constructor throws TypeError if missing required field
-        # and NotImplementedError because structured calls aren't
-        # implemented. In this instance one of the required keys should have
-        # prefix e-id instead of ce-id therefore it should throw
+    with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
+
         _ = from_http(
             {"Content-Type": "application/cloudevents+json"}, json.dumps(body),
         )
@@ -103,11 +100,14 @@ def test_missing_required_fields_structured(body):
 @pytest.mark.parametrize("headers", invalid_test_headers)
 def test_missing_required_fields_binary(headers):
     with pytest.raises(cloud_exceptions.MissingRequiredFields):
-        # CloudEvent constructor throws TypeError if missing required field
-        # and NotImplementedError because structured calls aren't
-        # implemented. In this instance one of the required keys should have
-        # prefix e-id instead of ce-id therefore it should throw
         _ = from_http(headers, json.dumps(test_data))
+
+
+@pytest.mark.parametrize("headers", invalid_test_headers)
+def test_missing_required_fields_empty_data_binary(headers):
+    # Test for issue #115
+    with pytest.raises(cloud_exceptions.MissingRequiredFields):
+        _ = from_http(headers, None)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -286,9 +286,17 @@ def test_empty_data_structured_event(specversion):
         "source": "<source-url>",
     }
 
-    _ = from_http(
+    event = from_http(
         {"content-type": "application/cloudevents+json"}, json.dumps(attributes)
     )
+    assert event.data == None
+
+    attributes["data"] = ""
+    # Data of empty string will be marshalled into None
+    event = from_http(
+        {"content-type": "application/cloudevents+json"}, json.dumps(attributes)
+    )
+    assert event.data == None
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -302,7 +310,13 @@ def test_empty_data_binary_event(specversion):
         "ce-time": "2018-10-23T12:28:22.4579346Z",
         "ce-source": "<source-url>",
     }
-    _ = from_http(headers, "")
+    event = from_http(headers, None)
+    assert event.data == None
+
+    data = ""
+    # Data of empty string will be marshalled into None
+    event = from_http(headers, data)
+    assert event.data == None
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -450,11 +464,13 @@ def test_is_structured():
 def test_empty_json_structured():
     headers = {"Content-Type": "application/cloudevents+json"}
     data = ""
-    with pytest.raises(cloud_exceptions.InvalidStructuredJSON) as e:
+    with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
         from_http(
             headers, data,
         )
-    assert "Failed to read fields from structured event. " in str(e.value)
+    assert "Failed to read specversion from both headers and data" in str(
+        e.value
+    )
 
 
 def test_uppercase_headers_with_none_data_binary():
@@ -472,3 +488,46 @@ def test_uppercase_headers_with_none_data_binary():
 
     _, new_data = to_binary(event)
     assert new_data == None
+
+
+def test_generic_exception():
+    headers = {"Content-Type": "application/cloudevents+json"}
+    data = json.dumps(
+        {
+            "specversion": "1.0",
+            "source": "s",
+            "type": "t",
+            "id": "1234-1234-1234",
+            "data": "",
+        }
+    )
+    with pytest.raises(cloud_exceptions.GenericException) as e:
+        from_http({}, None)
+    e.errisinstance(cloud_exceptions.MissingRequiredFields)
+
+    with pytest.raises(cloud_exceptions.GenericException) as e:
+        from_http({}, 123)
+    e.errisinstance(cloud_exceptions.InvalidStructuredJSON)
+
+    with pytest.raises(cloud_exceptions.GenericException) as e:
+        from_http(headers, data, data_unmarshaller=lambda x: 1 / 0)
+    e.errisinstance(cloud_exceptions.DataUnmarshallerError)
+
+    with pytest.raises(cloud_exceptions.GenericException) as e:
+        event = from_http(headers, data)
+        to_binary(event, data_marshaller=lambda x: 1 / 0)
+    e.errisinstance(cloud_exceptions.DataMarshallerError)
+
+
+def test_non_dict_data_no_headers_bug():
+    # Test for issue #116
+    headers = {"Content-Type": "application/cloudevents+json"}
+    data = "123"
+    with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
+        from_http(
+            headers, data,
+        )
+    assert "Failed to read specversion from both headers and data" in str(
+        e.value
+    )
+    assert "The following deserialized data has no 'get' method" in str(e.value)

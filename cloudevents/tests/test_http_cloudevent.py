@@ -2,6 +2,7 @@ import pytest
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http import CloudEvent
+from cloudevents.http.util import _json_or_string
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
@@ -75,19 +76,19 @@ def test_http_cloudevent_mutates_equality(specversion):
 def test_cloudevent_missing_specversion():
     attributes = {"specversion": "0.2", "source": "s", "type": "t"}
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
-        event = CloudEvent(attributes, None)
+        _ = CloudEvent(attributes, None)
     assert "Invalid specversion: 0.2" in str(e.value)
 
 
 def test_cloudevent_missing_minimal_required_fields():
     attributes = {"type": "t"}
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
-        event = CloudEvent(attributes, None)
+        _ = CloudEvent(attributes, None)
     assert f"Missing required keys: {set(['source'])}" in str(e.value)
 
     attributes = {"source": "s"}
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
-        event = CloudEvent(attributes, None)
+        _ = CloudEvent(attributes, None)
     assert f"Missing required keys: {set(['type'])}" in str(e.value)
 
 
@@ -114,3 +115,7 @@ def test_cloudevent_general_overrides():
         assert attribute in event
         del event[attribute]
     assert len(event) == 0
+
+
+def test_none_json_or_string():
+    assert _json_or_string(None) is None

@@ -20,19 +20,21 @@ def from_http(
     Unwrap a CloudEvent (binary or structured) from an HTTP request.
     :param headers: the HTTP headers
     :type headers: typing.Dict[str, str]
-    :param data: the HTTP request body
+    :param data: the HTTP request body. If set to None, "" or b'', the returned
+        event's data field will be set to None
     :type data: typing.IO
     :param data_unmarshaller: Callable function to map data to a python object
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
-    if data is None:
+    if data is None or data == b"":
+        # Empty string will cause data to be marshalled into None
         data = ""
 
     if not isinstance(data, (str, bytes, bytearray)):
         raise cloud_exceptions.InvalidStructuredJSON(
             "Expected json of type (str, bytes, bytearray), "
-            f"but instead found {type(data)}. "
+            f"but instead found type {type(data)}"
         )
 
     headers = {key.lower(): value for key, value in headers.items()}
@@ -47,22 +49,28 @@ def from_http(
         try:
             raw_ce = json.loads(data)
         except json.decoder.JSONDecodeError:
-            raise cloud_exceptions.InvalidStructuredJSON(
-                "Failed to read fields from structured event. "
-                f"The following can not be parsed as json: {data}. "
+            raise cloud_exceptions.MissingRequiredFields(
+                "Failed to read specversion from both headers and data. "
+                f"The following can not be parsed as json: {data}"
             )
-        specversion = raw_ce.get("specversion", None)
+        if hasattr(raw_ce, "get"):
+            specversion = raw_ce.get("specversion", None)
+        else:
+            raise cloud_exceptions.MissingRequiredFields(
+                "Failed to read specversion from both headers and data. "
+                f"The following deserialized data has no 'get' method: {raw_ce}"
+            )
 
     if specversion is None:
         raise cloud_exceptions.MissingRequiredFields(
-            "Failed to find specversion in HTTP request. "
+            "Failed to find specversion in HTTP request"
         )
 
     event_handler = _obj_by_version.get(specversion, None)
 
     if event_handler is None:
         raise cloud_exceptions.InvalidRequiredFields(
-            f"Found invalid specversion {specversion}. "
+            f"Found invalid specversion {specversion}"
         )
 
     event = marshall.FromRequest(
@@ -73,7 +81,13 @@ def from_http(
     attrs.pop("extensions", None)
     attrs.update(**event.extensions)
 
-    return CloudEvent(attrs, event.data)
+    if event.data == "" or event.data == b"":
+        # TODO: Check binary unmarshallers to debug why setting data to ""
+        # returns an event with data set to None, but structured will return ""
+        data = None
+    else:
+        data = event.data
+    return CloudEvent(attrs, data)
 
 
 def _to_http(
@@ -96,7 +110,7 @@ def _to_http(
 
     if event._attributes["specversion"] not in _obj_by_version:
         raise cloud_exceptions.InvalidRequiredFields(
-            f"Unsupported specversion: {event._attributes['specversion']}. "
+            f"Unsupported specversion: {event._attributes['specversion']}"
         )
 
     event_handler = _obj_by_version[event._attributes["specversion"]]()
