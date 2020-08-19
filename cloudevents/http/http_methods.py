@@ -47,11 +47,17 @@ def from_http(
         try:
             raw_ce = json.loads(data)
         except json.decoder.JSONDecodeError:
-            raise cloud_exceptions.InvalidStructuredJSON(
-                "Failed to read fields from structured event. "
-                f"The following can not be parsed as json: {data}. "
+            raise cloud_exceptions.MissingRequiredFields(
+                "Failed to read specversion from both headers and body. "
+                f"Furthermore, the following can not be parsed as json: {data}. "
             )
-        specversion = raw_ce.get("specversion", None)
+        if hasattr(raw_ce, "get"):
+            specversion = raw_ce.get("specversion", None)
+        else:
+            raise cloud_exceptions.MissingRequiredFields(
+                "Failed to read specversion from both headers and body.  "
+                f"The following data has no 'get' method: {raw_ce}. "
+            )
 
     if specversion is None:
         raise cloud_exceptions.MissingRequiredFields(

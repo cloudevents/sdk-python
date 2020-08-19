@@ -450,11 +450,11 @@ def test_is_structured():
 def test_empty_json_structured():
     headers = {"Content-Type": "application/cloudevents+json"}
     data = ""
-    with pytest.raises(cloud_exceptions.InvalidStructuredJSON) as e:
+    with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
         from_http(
             headers, data,
         )
-    assert "Failed to read fields from structured event. " in str(e.value)
+    assert "Failed to read specversion from both headers and body" in str(e.value)
 
 
 def test_uppercase_headers_with_none_data_binary():
@@ -472,3 +472,14 @@ def test_uppercase_headers_with_none_data_binary():
 
     _, new_data = to_binary(event)
     assert new_data == None
+
+
+def test_non_dict_data_no_headers_bug():
+    headers = {"Content-Type": "application/cloudevents+json"}
+    data = "123"
+    with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
+        from_http(
+            headers, data,
+        )
+    assert "Failed to read specversion from both headers and body" in str(e.value)
+    assert "The following data has no 'get' method:" in str(e.value)
