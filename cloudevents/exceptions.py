@@ -11,17 +11,29 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-class MissingRequiredFields(Exception):
+class GenericException(Exception):
     pass
 
 
-class InvalidRequiredFields(Exception):
+class MissingRequiredFields(GenericException):
     pass
 
 
-class InvalidStructuredJSON(Exception):
+class InvalidRequiredFields(GenericException):
     pass
 
 
-class InvalidHeadersFormat(Exception):
+class InvalidStructuredJSON(GenericException):
+    pass
+
+
+class InvalidHeadersFormat(GenericException):
+    pass
+
+
+class DataMarshallerError(GenericException):
+    pass
+
+
+class DataUnmarshallerError(GenericException):
     pass

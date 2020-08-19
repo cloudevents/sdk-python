@@ -2,6 +2,7 @@ import pytest
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http import CloudEvent
+from cloudevents.http.util import _json_or_string
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
@@ -114,3 +115,7 @@ def test_cloudevent_general_overrides():
         assert attribute in event
         del event[attribute]
     assert len(event) == 0
+
+
+def test_none_json_or_string():
+    assert _json_or_string(None) is None

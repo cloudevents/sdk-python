@@ -3,7 +3,7 @@ import typing
 
 
 def default_marshaller(content: any):
-    if content is None or len(content) == 0:
+    if content is None:
         return None
     try:
         return json.dumps(content)
@@ -12,7 +12,7 @@ def default_marshaller(content: any):
 
 
 def _json_or_string(content: typing.Union[str, bytes]):
-    if content is None or len(content) == 0:
+    if content is None:
         return None
     try:
         return json.loads(content)
