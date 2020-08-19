@@ -489,6 +489,16 @@ def test_uppercase_headers_with_none_data_binary():
 
 
 def test_generic_exception():
+    headers = {"Content-Type": "application/cloudevents+json"}
+    data = json.dumps(
+        {
+            "specversion": "1.0",
+            "source": "s",
+            "type": "t",
+            "id": "1234-1234-1234",
+            "data": "",
+        }
+    )
     with pytest.raises(cloud_exceptions.GenericException) as e:
         from_http({}, None)
     e.errisinstance(cloud_exceptions.MissingRequiredFields)
@@ -496,3 +506,12 @@ def test_generic_exception():
     with pytest.raises(cloud_exceptions.GenericException) as e:
         from_http({}, 123)
     e.errisinstance(cloud_exceptions.InvalidStructuredJSON)
+
+    with pytest.raises(cloud_exceptions.GenericException) as e:
+        from_http(headers, data, data_unmarshaller=lambda x: 1 / 0)
+    e.errisinstance(cloud_exceptions.DataUnmarshallerError)
+
+    with pytest.raises(cloud_exceptions.GenericException) as e:
+        event = from_http(headers, data)
+        to_binary(event, data_marshaller=lambda x: 1 / 0)
+    e.errisinstance(cloud_exceptions.DataMarshallerError)
