@@ -201,8 +201,9 @@ class BaseEvent(EventGetterSetter):
             data_marshaller = lambda x: x  # noqa: E731
         props = self.Properties()
         if "data" in props:
+            data = props.pop("data")
             try:
-                data = data_marshaller(props.pop("data"))
+                data = data_marshaller(data)
             except Exception as e:
                 raise cloud_exceptions.DataMarshallerError(
                     "Failed to marshall data with error: "

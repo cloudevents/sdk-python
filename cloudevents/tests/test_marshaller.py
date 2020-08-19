@@ -24,7 +24,7 @@ from cloudevents.sdk.event import v1
 
 
 @pytest.fixture
-def headers():
+def binary_headers():
     return {
         "ce-specversion": "1.0",
         "ce-source": "1.0",
@@ -34,14 +34,14 @@ def headers():
 
 
 @pytest.fixture
-def data():
+def structured_data():
     return json.dumps(
         {
             "specversion": "1.0",
             "source": "pytest",
             "type": "com.pytest.test",
             "id": "1234-1234-1234",
-            "data": "",
+            "data": "test",
         }
     )
 
@@ -58,7 +58,7 @@ def test_to_request_wrong_marshaller():
         _ = m.ToRequest(v1.Event(), data_marshaller="")
 
 
-def test_from_request_cannot_read(headers):
+def test_from_request_cannot_read(binary_headers):
     with pytest.raises(exceptions.UnsupportedEventConverter):
         m = marshaller.HTTPMarshaller(
             [binary.NewBinaryHTTPCloudEventConverter(),]
@@ -69,7 +69,7 @@ def test_from_request_cannot_read(headers):
         m = marshaller.HTTPMarshaller(
             [structured.NewJSONHTTPCloudEventConverter()]
         )
-        m.FromRequest(v1.Event(), headers, "")
+        m.FromRequest(v1.Event(), binary_headers, "")
 
 
 def test_to_request_invalid_converter():
@@ -80,10 +80,10 @@ def test_to_request_invalid_converter():
         m.ToRequest(v1.Event(), "")
 
 
-def test_http_data_marshaller_exceptions(headers, data):
+def test_http_data_unmarshaller_exceptions(binary_headers, structured_data):
     # binary
     with pytest.raises(cloud_exceptions.DataUnmarshallerError) as e:
-        from_http(headers, None, data_unmarshaller=lambda x: 1 / 0)
+        from_http(binary_headers, None, data_unmarshaller=lambda x: 1 / 0)
     assert (
         "Failed to unmarshall data with error: "
         "ZeroDivisionError('division by zero')" in str(e.value)
@@ -92,16 +92,16 @@ def test_http_data_marshaller_exceptions(headers, data):
     # structured
     headers = {"Content-Type": "application/cloudevents+json"}
     with pytest.raises(cloud_exceptions.DataUnmarshallerError) as e:
-        from_http(headers, data, data_unmarshaller=lambda x: 1 / 0)
+        from_http(headers, structured_data, data_unmarshaller=lambda x: 1 / 0)
     assert (
         "Failed to unmarshall data with error: "
         "ZeroDivisionError('division by zero')" in str(e.value)
     )
 
 
-def test_http_data_unmarshaller_exception(headers, data):
+def test_http_data_marshaller_exception(binary_headers, structured_data):
     # binary
-    event = from_http(headers, None)
+    event = from_http(binary_headers, None)
     with pytest.raises(cloud_exceptions.DataMarshallerError) as e:
         to_binary(event, data_marshaller=lambda x: 1 / 0)
     assert (
@@ -112,9 +112,9 @@ def test_http_data_unmarshaller_exception(headers, data):
     # structured
     headers = {"Content-Type": "application/cloudevents+json"}
 
-    event = from_http(headers, data)
+    event = from_http(headers, structured_data)
     with pytest.raises(cloud_exceptions.DataMarshallerError) as e:
-        to_binary(event, data_marshaller=lambda x: 1 / 0)
+        to_structured(event, data_marshaller=lambda x: 1 / 0)
     assert (
         "Failed to marshall data with error: "
         "ZeroDivisionError('division by zero')" in str(e.value)
@@ -122,7 +122,7 @@ def test_http_data_unmarshaller_exception(headers, data):
 
 
 @pytest.mark.parametrize("test_data", [[], {}, (), "", b"", None])
-def test_known_empty_edge_cases(headers, test_data):
+def test_known_empty_edge_cases(binary_headers, test_data):
     expect_data = test_data
     if test_data in ["", b""]:
         expect_data = None
@@ -131,7 +131,7 @@ def test_known_empty_edge_cases(headers, test_data):
         expect_data = []
 
     # Remove ce- prefix
-    headers = {key[3:]: value for key, value in headers.items()}
+    headers = {key[3:]: value for key, value in binary_headers.items()}
 
     # binary
     event = from_http(*to_binary(CloudEvent(headers, test_data)))
