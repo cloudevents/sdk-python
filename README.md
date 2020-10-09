@@ -16,6 +16,14 @@ This SDK current supports the following versions of CloudEvents:
 
 Package **cloudevents** provides primitives to work with CloudEvents specification: https://github.com/cloudevents/spec.
 
+### Installing
+
+The CloudEvents SDK can be installed with pip:
+
+```
+pip install cloudevents
+```
+
 ## Sending CloudEvents
 
 Below we will provide samples on how to send cloudevents using the popular
