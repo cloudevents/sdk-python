@@ -16,5 +16,5 @@ def _json_or_string(content: typing.Union[str, bytes]):
         return None
     try:
         return json.loads(content)
-    except (json.JSONDecodeError, TypeError) as e:
+    except (json.JSONDecodeError, TypeError):
         return content

@@ -13,7 +13,6 @@
 #    under the License.
 
 import bz2
-import copy
 import io
 import json
 
@@ -27,9 +26,7 @@ from cloudevents.http import (
     is_binary,
     is_structured,
     to_binary,
-    to_binary_http,
     to_structured,
-    to_structured_http,
 )
 from cloudevents.sdk import converters
 
@@ -90,7 +87,7 @@ async def echo(request):
 
 @pytest.mark.parametrize("body", invalid_cloudevent_request_body)
 def test_missing_required_fields_structured(body):
-    with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
+    with pytest.raises(cloud_exceptions.MissingRequiredFields):
 
         _ = from_http(
             {"Content-Type": "application/cloudevents+json"}, json.dumps(body)
@@ -220,7 +217,7 @@ def test_valid_binary_events(specversion):
         headers = {
             "ce-id": f"id{i}",
             "ce-source": f"source{i}.com.test",
-            "ce-type": f"cloudevent.test.type",
+            "ce-type": "cloudevent.test.type",
             "ce-specversion": specversion,
         }
         data = {"payload": f"payload-{i}"}
@@ -289,14 +286,14 @@ def test_empty_data_structured_event(specversion):
     event = from_http(
         {"content-type": "application/cloudevents+json"}, json.dumps(attributes)
     )
-    assert event.data == None
+    assert event.data is None
 
     attributes["data"] = ""
     # Data of empty string will be marshalled into None
     event = from_http(
         {"content-type": "application/cloudevents+json"}, json.dumps(attributes)
     )
-    assert event.data == None
+    assert event.data is None
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -311,12 +308,12 @@ def test_empty_data_binary_event(specversion):
         "ce-source": "<source-url>",
     }
     event = from_http(headers, None)
-    assert event.data == None
+    assert event.data is None
 
     data = ""
     # Data of empty string will be marshalled into None
     event = from_http(headers, data)
-    assert event.data == None
+    assert event.data is None
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -328,7 +325,7 @@ def test_valid_structured_events(specversion):
         event = {
             "id": f"id{i}",
             "source": f"source{i}.com.test",
-            "type": f"cloudevent.test.type",
+            "type": "cloudevent.test.type",
             "specversion": specversion,
             "data": {"payload": f"payload-{i}"},
         }
@@ -482,10 +479,10 @@ def test_uppercase_headers_with_none_data_binary():
 
     for key in headers:
         assert event[key.lower()[3:]] == headers[key]
-    assert event.data == None
+    assert event.data is None
 
     _, new_data = to_binary(event)
-    assert new_data == None
+    assert new_data is None
 
 
 def test_generic_exception():

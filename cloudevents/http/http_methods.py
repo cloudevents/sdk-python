@@ -5,7 +5,7 @@ from deprecation import deprecated
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http.event import CloudEvent
-from cloudevents.http.event_type import is_binary, is_structured
+from cloudevents.http.event_type import is_binary
 from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
 from cloudevents.http.util import _json_or_string
 from cloudevents.sdk import converters, marshaller, types

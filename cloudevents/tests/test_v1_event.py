@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import pytest
-
 from cloudevents.sdk.event import v1
 
 
