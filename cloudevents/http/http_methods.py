@@ -124,7 +124,7 @@ def _to_http(
 
 
 def to_structured(
-    event: CloudEvent, data_marshaller: types.MarshallerType = None,
+    event: CloudEvent, data_marshaller: types.MarshallerType = None
 ) -> (dict, typing.Union[bytes, str]):
     """
     Returns a tuple of HTTP headers/body dicts representing this cloudevent. If
@@ -142,7 +142,7 @@ def to_structured(
 
 
 def to_binary(
-    event: CloudEvent, data_marshaller: types.MarshallerType = None,
+    event: CloudEvent, data_marshaller: types.MarshallerType = None
 ) -> (dict, typing.Union[bytes, str]):
     """
     Returns a tuple of HTTP headers/body dicts representing this cloudevent
@@ -163,13 +163,13 @@ def to_binary(
 
 @deprecated(deprecated_in="1.0.2", details="Use to_binary function instead")
 def to_binary_http(
-    event: CloudEvent, data_marshaller: types.MarshallerType = None,
+    event: CloudEvent, data_marshaller: types.MarshallerType = None
 ) -> (dict, typing.Union[bytes, str]):
     return to_binary(event, data_marshaller)
 
 
 @deprecated(deprecated_in="1.0.2", details="Use to_structured function instead")
 def to_structured_http(
-    event: CloudEvent, data_marshaller: types.MarshallerType = None,
+    event: CloudEvent, data_marshaller: types.MarshallerType = None
 ) -> (dict, typing.Union[bytes, str]):
     return to_structured(event, data_marshaller)

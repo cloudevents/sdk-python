@@ -93,7 +93,7 @@ def test_missing_required_fields_structured(body):
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
 
         _ = from_http(
-            {"Content-Type": "application/cloudevents+json"}, json.dumps(body),
+            {"Content-Type": "application/cloudevents+json"}, json.dumps(body)
         )
 
 
@@ -465,9 +465,7 @@ def test_empty_json_structured():
     headers = {"Content-Type": "application/cloudevents+json"}
     data = ""
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
-        from_http(
-            headers, data,
-        )
+        from_http(headers, data)
     assert "Failed to read specversion from both headers and data" in str(
         e.value
     )
@@ -524,9 +522,7 @@ def test_non_dict_data_no_headers_bug():
     headers = {"Content-Type": "application/cloudevents+json"}
     data = "123"
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
-        from_http(
-            headers, data,
-        )
+        from_http(headers, data)
     assert "Failed to read specversion from both headers and data" in str(
         e.value
     )
