@@ -12,12 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import io
 import json
 
 import pytest
 
-from cloudevents.sdk import exceptions, marshaller
+from cloudevents.sdk import marshaller
 from cloudevents.sdk.converters import binary, structured
 from cloudevents.sdk.event import v1, v03
 from cloudevents.tests import data

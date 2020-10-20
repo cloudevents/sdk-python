@@ -75,10 +75,6 @@ class Event(base.BaseEvent):
     def ContentEncoding(self) -> str:
         return self.ce__datacontentencoding.get()
 
-    @property
-    def datacontentencoding(self):
-        return self.ContentEncoding()
-
     def SetEventType(self, eventType: str) -> base.BaseEvent:
         self.Set("type", eventType)
         return self
@@ -119,6 +115,26 @@ class Event(base.BaseEvent):
         self.Set("datacontentencoding", contentEncoding)
         return self
 
+    @property
+    def datacontentencoding(self):
+        return self.ContentEncoding()
+
     @datacontentencoding.setter
     def datacontentencoding(self, value: str):
         self.SetContentEncoding(value)
+
+    @property
+    def subject(self) -> str:
+        return self.Subject()
+
+    @subject.setter
+    def subject(self, value: str):
+        self.SetSubject(value)
+
+    @property
+    def schema_url(self) -> str:
+        return self.SchemaURL()
+
+    @schema_url.setter
+    def schema_url(self, value: str):
+        self.SetSchemaURL(value)

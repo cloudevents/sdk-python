@@ -16,11 +16,13 @@ import base64
 import json
 import typing
 
+import cloudevents.exceptions as cloud_exceptions
 from cloudevents.sdk import types
 
-
 # TODO(slinkydeveloper) is this really needed?
-class EventGetterSetter(object):
+
+
+class EventGetterSetter(object):  # pragma: no cover
 
     # ce-specversion
     def CloudEventVersion(self) -> str:
@@ -159,6 +161,9 @@ class EventGetterSetter(object):
 
 
 class BaseEvent(EventGetterSetter):
+    _ce_required_fields = set()
+    _ce_optional_fields = set()
+
     def Properties(self, with_nullable=False) -> dict:
         props = dict()
         for name, value in self.__dict__.items():
@@ -196,7 +201,14 @@ class BaseEvent(EventGetterSetter):
             data_marshaller = lambda x: x  # noqa: E731
         props = self.Properties()
         if "data" in props:
-            data = data_marshaller(props.pop("data"))
+            data = props.pop("data")
+            try:
+                data = data_marshaller(data)
+            except Exception as e:
+                raise cloud_exceptions.DataMarshallerError(
+                    "Failed to marshall data with error: "
+                    f"{type(e).__name__}('{e}')"
+                )
             if isinstance(data, (bytes, bytes, memoryview)):
                 props["data_base64"] = base64.b64encode(data).decode("ascii")
             else:
@@ -215,17 +227,28 @@ class BaseEvent(EventGetterSetter):
 
         missing_fields = self._ce_required_fields - raw_ce.keys()
         if len(missing_fields) > 0:
-            raise ValueError(f"Missing required attributes: {missing_fields}")
+            raise cloud_exceptions.MissingRequiredFields(
+                f"Missing required attributes: {missing_fields}"
+            )
 
         for name, value in raw_ce.items():
+            decoder = lambda x: x
             if name == "data":
                 # Use the user-provided serializer, which may have customized
                 # JSON decoding
-                value = data_unmarshaller(json.dumps(value))
+                decoder = lambda v: data_unmarshaller(json.dumps(v))
             if name == "data_base64":
-                value = data_unmarshaller(base64.b64decode(value))
+                decoder = lambda v: data_unmarshaller(base64.b64decode(v))
                 name = "data"
-            self.Set(name, value)
+
+            try:
+                set_value = decoder(value)
+            except Exception as e:
+                raise cloud_exceptions.DataUnmarshallerError(
+                    "Failed to unmarshall data with error: "
+                    f"{type(e).__name__}('{e}')"
+                )
+            self.Set(name, set_value)
 
     def UnmarshalBinary(
         self,
@@ -233,18 +256,31 @@ class BaseEvent(EventGetterSetter):
         body: typing.Union[bytes, str],
         data_unmarshaller: types.UnmarshallerType,
     ):
-        if "ce-specversion" not in headers:
-            raise ValueError("Missing required attribute: 'specversion'")
+        required_binary_fields = {
+            f"ce-{field}" for field in self._ce_required_fields
+        }
+        missing_fields = required_binary_fields - headers.keys()
+
+        if len(missing_fields) > 0:
+            raise cloud_exceptions.MissingRequiredFields(
+                f"Missing required attributes: {missing_fields}"
+            )
+
         for header, value in headers.items():
             header = header.lower()
             if header == "content-type":
                 self.SetContentType(value)
             elif header.startswith("ce-"):
                 self.Set(header[3:], value)
-        self.Set("data", data_unmarshaller(body))
-        missing_attrs = self._ce_required_fields - self.Properties().keys()
-        if len(missing_attrs) > 0:
-            raise ValueError(f"Missing required attributes: {missing_attrs}")
+
+        try:
+            raw_ce = data_unmarshaller(body)
+        except Exception as e:
+            raise cloud_exceptions.DataUnmarshallerError(
+                "Failed to unmarshall data with error: "
+                f"{type(e).__name__}('{e}')"
+            )
+        self.Set("data", raw_ce)
 
     def MarshalBinary(
         self, data_marshaller: types.MarshallerType
@@ -264,7 +300,13 @@ class BaseEvent(EventGetterSetter):
             headers["ce-{0}".format(key)] = value
 
         data, _ = self.Get("data")
-        data = data_marshaller(data)
+        try:
+            data = data_marshaller(data)
+        except Exception as e:
+            raise cloud_exceptions.DataMarshallerError(
+                "Failed to marshall data with error: "
+                f"{type(e).__name__}('{e}')"
+            )
         if isinstance(data, str):  # Convenience method for json.dumps
             data = data.encode("utf-8")
         return headers, data

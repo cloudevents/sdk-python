@@ -11,27 +11,29 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from flask import Flask, request
-
-from cloudevents.http import from_http
-
-app = Flask(__name__)
+class GenericException(Exception):
+    pass
 
 
-# create an endpoint at http://localhost:/3000/
-@app.route("/", methods=["POST"])
-def home():
-    # create a CloudEvent
-    event = from_http(request.headers, request.get_data())
-
-    # you can access cloudevent fields as seen below
-    print(
-        f"Found {event['id']} from {event['source']} with type "
-        f"{event['type']} and specversion {event['specversion']}"
-    )
-
-    return "", 204
+class MissingRequiredFields(GenericException):
+    pass
 
 
-if __name__ == "__main__":
-    app.run(port=3000)
+class InvalidRequiredFields(GenericException):
+    pass
+
+
+class InvalidStructuredJSON(GenericException):
+    pass
+
+
+class InvalidHeadersFormat(GenericException):
+    pass
+
+
+class DataMarshallerError(GenericException):
+    pass
+
+
+class DataUnmarshallerError(GenericException):
+    pass

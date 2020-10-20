@@ -13,7 +13,7 @@
 #    under the License.
 import io
 
-from flask import Flask, Response, request
+from flask import Flask, request
 from PIL import Image
 
 from cloudevents.http import from_http
@@ -26,8 +26,8 @@ def home():
     # Create a CloudEvent.
     # data_unmarshaller will cast event.data into an io.BytesIO object
     event = from_http(
-        request.get_data(),
         request.headers,
+        request.get_data(),
         data_unmarshaller=lambda x: io.BytesIO(x),
     )
 

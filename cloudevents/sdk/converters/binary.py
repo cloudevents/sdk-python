@@ -16,7 +16,7 @@ import typing
 
 from cloudevents.sdk import exceptions, types
 from cloudevents.sdk.converters import base
-from cloudevents.sdk.converters.structured import JSONHTTPCloudEventConverter
+from cloudevents.sdk.converters.util import has_binary_headers
 from cloudevents.sdk.event import base as event_base
 from cloudevents.sdk.event import v1, v03
 
@@ -28,13 +28,11 @@ class BinaryHTTPCloudEventConverter(base.Converter):
 
     def can_read(
         self,
-        content_type: str,
+        content_type: str = None,
         headers: typing.Dict[str, str] = {"ce-specversion": None},
     ) -> bool:
-        return ("ce-specversion" in headers) and not (
-            isinstance(content_type, str)
-            and content_type.startswith(JSONHTTPCloudEventConverter.MIME_TYPE)
-        )
+
+        return has_binary_headers(headers)
 
     def event_supported(self, event: object) -> bool:
         return type(event) in self.SUPPORTED_VERSIONS

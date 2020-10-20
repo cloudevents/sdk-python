@@ -24,19 +24,20 @@ Below we will provide samples on how to send cloudevents using the popular
 ### Binary HTTP CloudEvent
 
 ```python
-from cloudevents.http import CloudEvent, to_binary_http
+from cloudevents.http import CloudEvent, to_binary
 import requests
 
-
-# This data defines a binary cloudevent
+# Create a CloudEvent
+# - The CloudEvent "id" is generated if omitted. "specversion" defaults to "1.0".
 attributes = {
     "type": "com.example.sampletype1",
     "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
-
 event = CloudEvent(attributes, data)
-headers, body = to_binary_http(event)
+
+# Creates the HTTP request representation of the CloudEvent in binary content mode
+headers, body = to_binary(event)
 
 # POST
 requests.post("<some-url>", data=body, headers=headers)
@@ -45,18 +46,20 @@ requests.post("<some-url>", data=body, headers=headers)
 ### Structured HTTP CloudEvent
 
 ```python
-from cloudevents.http import CloudEvent, to_structured_http
+from cloudevents.http import CloudEvent, to_structured
 import requests
 
-
-# This data defines a structured cloudevent
+# Create a CloudEvent
+# - The CloudEvent "id" is generated if omitted. "specversion" defaults to "1.0".
 attributes = {
     "type": "com.example.sampletype2",
     "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
-headers, body = to_structured_http(event)
+
+# Creates the HTTP request representation of the CloudEvent in structured content mode
+headers, body = to_structured(event)
 
 # POST
 requests.post("<some-url>", data=body, headers=headers)
@@ -64,7 +67,7 @@ requests.post("<some-url>", data=body, headers=headers)
 
 You can find a complete example of turning a CloudEvent into a HTTP request [in the samples directory](samples/http-json-cloudevents/client.py).
 
-#### Request to CloudEvent
+## Receiving CloudEvents
 
 The code below shows how to consume a cloudevent using the popular python web framework
 [flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/):
@@ -81,7 +84,7 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def home():
     # create a CloudEvent
-    event = from_http(request.get_data(), request.headers)
+    event = from_http(request.headers, request.get_data())
 
     # you can access cloudevent fields as seen below
     print(
@@ -119,6 +122,17 @@ the same API. It will use semantic versioning with following rules:
   [CNCF's Slack workspace](https://slack.cncf.io/).
 - Email: https://lists.cncf.io/g/cncf-cloudevents-sdk
 - Contact for additional information: Denis Makogon (`@denysmakogon` on slack).
+
+Each SDK may have its own unique processes, tooling and guidelines, common
+governance related material can be found in the
+[CloudEvents `community`](https://github.com/cloudevents/spec/tree/master/community)
+directory. In particular, in there you will find information concerning
+how SDK projects are
+[managed](https://github.com/cloudevents/spec/blob/master/community/SDK-GOVERNANCE.md),
+[guidelines](https://github.com/cloudevents/spec/blob/master/community/SDK-maintainer-guidelines.md)
+for how PR reviews and approval, and our
+[Code of Conduct](https://github.com/cloudevents/spec/blob/master/community/GOVERNANCE.md#additional-information)
+information.
 
 ## Maintenance
 

@@ -16,6 +16,7 @@ import datetime
 import typing
 import uuid
 
+import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http.mappings import _required_by_version
 
 
@@ -57,16 +58,19 @@ class CloudEvent:
             ).isoformat()
 
         if self._attributes["specversion"] not in _required_by_version:
-            raise ValueError(
+            raise cloud_exceptions.MissingRequiredFields(
                 f"Invalid specversion: {self._attributes['specversion']}"
             )
         # There is no good way to default 'source' and 'type', so this
         # checks for those (or any new required attributes).
         required_set = _required_by_version[self._attributes["specversion"]]
         if not required_set <= self._attributes.keys():
-            raise ValueError(
-                f"Missing required keys: {required_set - attributes.keys()}"
+            raise cloud_exceptions.MissingRequiredFields(
+                f"Missing required keys: {required_set - self._attributes.keys()}"
             )
+
+    def __eq__(self, other):
+        return self.data == other.data and self._attributes == other._attributes
 
     # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type

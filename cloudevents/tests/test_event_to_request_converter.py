@@ -12,14 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
-import io
 import json
 
 import pytest
 
 from cloudevents.sdk import converters, marshaller
-from cloudevents.sdk.converters import structured
 from cloudevents.sdk.event import v1, v03
 from cloudevents.tests import data
 
@@ -45,7 +42,6 @@ def test_binary_event_to_request_upstream(event_class):
 
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
 def test_structured_event_to_request_upstream(event_class):
-    copy_of_ce = copy.deepcopy(data.json_ce[event_class])
     m = marshaller.NewDefaultHTTPMarshaller()
     http_headers = {"content-type": "application/cloudevents+json"}
     event = m.FromRequest(
@@ -61,4 +57,3 @@ def test_structured_event_to_request_upstream(event_class):
         if key == "content-type":
             assert new_headers[key] == http_headers[key]
             continue
-        assert key in copy_of_ce
