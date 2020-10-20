@@ -18,7 +18,7 @@ import requests
 from cloudevents.http import CloudEvent, to_binary, to_structured
 
 resp = requests.get(
-    "https://raw.githubusercontent.com/cncf/artwork/master/projects/cloudevents/horizontal/color/cloudevents-horizontal-color.png"
+    "https://raw.githubusercontent.com/cncf/artwork/master/projects/cloudevents/horizontal/color/cloudevents-horizontal-color.png"  # noqa
 )
 image_bytes = resp.content
 

@@ -18,7 +18,7 @@ import pytest
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http import CloudEvent, from_http, to_binary, to_structured
-from cloudevents.sdk import converters, exceptions, marshaller
+from cloudevents.sdk import exceptions, marshaller
 from cloudevents.sdk.converters import binary, structured
 from cloudevents.sdk.event import v1
 
@@ -61,7 +61,7 @@ def test_to_request_wrong_marshaller():
 def test_from_request_cannot_read(binary_headers):
     with pytest.raises(exceptions.UnsupportedEventConverter):
         m = marshaller.HTTPMarshaller(
-            [binary.NewBinaryHTTPCloudEventConverter(),]
+            [binary.NewBinaryHTTPCloudEventConverter()]
         )
         m.FromRequest(v1.Event(), {}, "")
 

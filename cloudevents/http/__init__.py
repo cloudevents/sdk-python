@@ -11,16 +11,14 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import json
-import typing
 
-from cloudevents.http.event import CloudEvent
-from cloudevents.http.event_type import is_binary, is_structured
-from cloudevents.http.http_methods import (
+from cloudevents.http.event import CloudEvent  # noqa
+from cloudevents.http.event_type import is_binary, is_structured  # noqa
+from cloudevents.http.http_methods import (  # noqa
     from_http,
     to_binary,
     to_binary_http,
     to_structured,
     to_structured_http,
 )
-from cloudevents.http.json_methods import from_json, to_json
+from cloudevents.http.json_methods import from_json, to_json  # noqa

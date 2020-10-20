@@ -27,7 +27,7 @@ class JSONHTTPCloudEventConverter(base.Converter):
     MIME_TYPE = "application/cloudevents+json"
 
     def can_read(
-        self, content_type: str, headers: typing.Dict[str, str] = {},
+        self, content_type: str, headers: typing.Dict[str, str] = {}
     ) -> bool:
         return (
             isinstance(content_type, str)
