@@ -14,7 +14,7 @@
 import pytest
 
 from cloudevents.sdk import exceptions
-from cloudevents.sdk.converters import base, binary, structured
+from cloudevents.sdk.converters import base, binary
 
 
 def test_binary_converter_raise_unsupported():

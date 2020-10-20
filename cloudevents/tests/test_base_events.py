@@ -30,4 +30,4 @@ def test_get_nonexistent_optional(event_class):
     event = event_class()
     event.SetExtensions({"ext1": "val"})
     res = event.Get("ext1")
-    assert res[0] == "val" and res[1] == True
+    assert res[0] == "val" and res[1] is True
