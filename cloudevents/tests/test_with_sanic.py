@@ -34,7 +34,7 @@ async def echo(request):
         v1.Event(), dict(request.headers), request.body, lambda x: x
     )
     hs, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
-    return response.text(body, headers=hs)
+    return response.text(body.decode(), headers=hs)
 
 
 def test_reusable_marshaller():
