@@ -20,11 +20,29 @@ import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http.mappings import _required_by_version
 
 
+def _prop(prop_name: str):
+    def getter(self):
+        return self._attributes[prop_name]
+
+    def setter(self, value):
+        self._attributes[prop_name] = value
+
+    return property(getter, setter)
+
+
 class CloudEvent:
     """
     Python-friendly cloudevent class supporting v1 events
     Supports both binary and structured mode CloudEvents
     """
+
+    id: str
+    type: str
+    source: str
+    spec_version: str
+    subject: str
+    time: str
+    data: typing.Any
 
     def __init__(
         self, attributes: typing.Dict[str, str], data: typing.Any = None
@@ -94,3 +112,10 @@ class CloudEvent:
 
     def __repr__(self):
         return str({"attributes": self._attributes, "data": self.data})
+
+    id = _prop("id")
+    type = _prop("type")
+    source = _prop("source")
+    spec_version = _prop("specversion")
+    time = _prop("time")
+    subject = _prop("subject")
