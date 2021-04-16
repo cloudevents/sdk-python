@@ -130,7 +130,7 @@ def test_emit_binary_event(specversion):
         if key != "Content-Type":
             attribute_key = key[3:]
             assert r.headers[attribute_key] == headers[key]
-    assert r.status_code == 200
+    assert r.status == 200
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -154,7 +154,7 @@ def test_emit_structured_event(specversion):
     # Check response fields
     for key in test_data:
         assert body[key] == test_data[key]
-    assert r.status_code == 200
+    assert r.status == 200
 
 
 @pytest.mark.parametrize(
@@ -179,7 +179,7 @@ def test_roundtrip_non_json_event(converter, specversion):
     headers["binary-payload"] = "true"  # Decoding hint for server
     _, r = app.test_client.post("/event", headers=headers, data=data)
 
-    assert r.status_code == 200
+    assert r.status == 200
     for key in attrs:
         assert r.headers[key] == attrs[key]
     assert compressed_data == r.body, r.body

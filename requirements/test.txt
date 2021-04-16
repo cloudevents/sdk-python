@@ -3,11 +3,12 @@ pep8-naming==0.5.0
 flake8-import-order
 flake8-print
 flake8-strict
-pytest==4.0.0
-pytest-cov==2.4.0
+pytest==6.2.3
+pytest-cov==2.11.1
 # web app tests
 sanic
 aiohttp
 Pillow
 requests
 flask
+sanic-testing==0.3.0
