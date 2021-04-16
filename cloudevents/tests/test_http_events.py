@@ -226,8 +226,11 @@ def test_valid_binary_events(specversion):
     for i, event in enumerate(events_queue):
         data = event.data
         assert event["id"] == f"id{i}"
+        assert event.id == f"id{i}"
         assert event["source"] == f"source{i}.com.test"
+        assert event.source == f"source{i}.com.test"
         assert event["specversion"] == specversion
+        assert event.spec_version == specversion
         assert event.data["payload"] == f"payload-{i}"
 
 
@@ -338,8 +341,11 @@ def test_valid_structured_events(specversion):
 
     for i, event in enumerate(events_queue):
         assert event["id"] == f"id{i}"
+        assert event.id == f"id{i}"
         assert event["source"] == f"source{i}.com.test"
+        assert event.source == f"source{i}.com.test"
         assert event["specversion"] == specversion
+        assert event.spec_version == specversion
         assert event.data["payload"] == f"payload-{i}"
 
 
@@ -356,8 +362,11 @@ def test_structured_no_content_type(specversion):
     event = from_http({}, json.dumps(data))
 
     assert event["id"] == "id"
+    assert event.id == "id"
     assert event["source"] == "source.com.test"
+    assert event.source == "source.com.test"
     assert event["specversion"] == specversion
+    assert event.spec_version == specversion
     for key, val in test_data.items():
         assert event.data[key] == val
 

@@ -24,10 +24,7 @@ def _prop(prop_name: str):
     def getter(self):
         return self._attributes[prop_name]
 
-    def setter(self, value):
-        self._attributes[prop_name] = value
-
-    return property(getter, setter)
+    return property(getter)
 
 
 class CloudEvent:
