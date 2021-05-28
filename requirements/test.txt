@@ -6,8 +6,7 @@ flake8-strict
 pytest==4.0.0
 pytest-cov==2.4.0
 # web app tests
-sanic
-sanic_testing
+sanic==20.12.3
 aiohttp
 Pillow
 requests
