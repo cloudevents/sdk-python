@@ -292,7 +292,7 @@ class BaseEvent(EventGetterSetter):
             headers["content-type"] = self.ContentType()
         props = self.Properties()
         for key, value in props.items():
-            if key not in ["data", "extensions", "contenttype"]:
+            if key not in ["data", "extensions", "datacontenttype"]:
                 if value is not None:
                     headers["ce-{0}".format(key)] = value
 
