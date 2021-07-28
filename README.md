@@ -4,13 +4,10 @@
 
 ## Status
 
-This SDK is still considered a work in progress, therefore things might (and
-will) break with every update.
+This SDK currently supports the following versions of CloudEvents:
 
-This SDK current supports the following versions of CloudEvents:
-
-- v1.0
-- v0.3
+- [v1.0](https://github.com/cloudevents/spec/blob/v1.0.1/spec.md)
+- [v0.3](https://github.com/cloudevents/spec/blob/v0.3/spec.md)
 
 ## Python SDK
 
