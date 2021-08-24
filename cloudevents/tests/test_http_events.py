@@ -30,6 +30,8 @@ from cloudevents.http import (
 )
 from cloudevents.sdk import converters
 
+required_headers = {"ce-id", "ce-source", "ce-type", "ce-specversion"}
+
 invalid_test_headers = [
     {
         "ce-source": "<event-source>",
@@ -96,8 +98,16 @@ def test_missing_required_fields_structured(body):
 
 @pytest.mark.parametrize("headers", invalid_test_headers)
 def test_missing_required_fields_binary(headers):
-    with pytest.raises(cloud_exceptions.MissingRequiredFields):
+    with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
         _ = from_http(headers, json.dumps(test_data))
+
+    if "ce-specversion" not in headers:
+        assert "Failed to find specversion in HTTP request" == str(e.value)
+    else:
+        assert (
+            f"Missing required attributes: {set(required_headers) - set(headers)}"
+            == str(e.value)
+        )
 
 
 @pytest.mark.parametrize("headers", invalid_test_headers)
