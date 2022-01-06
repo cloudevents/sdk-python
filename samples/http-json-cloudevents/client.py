@@ -31,7 +31,7 @@ def send_binary_cloud_event(url):
 
     # send and print event
     requests.post(url, headers=headers, data=body)
-    print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
+    print(f"Sent {event['id']} from {event['source']} with {event.data}")
 
 
 def send_structured_cloud_event(url):
@@ -47,7 +47,7 @@ def send_structured_cloud_event(url):
 
     # send and print event
     requests.post(url, headers=headers, data=body)
-    print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
+    print(f"Sent {event['id']} from {event['source']} with {event.data}")
 
 
 if __name__ == "__main__":
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # e.g. python3 client.py http://localhost:3000/
     if len(sys.argv) < 2:
         sys.exit(
-            "Usage: python with_requests.py " "<CloudEvents controller URL>"
+            "Usage: python with_requests.py <CloudEvents controller URL>"
         )
 
     url = sys.argv[1]
