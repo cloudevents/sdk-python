@@ -66,7 +66,7 @@ invalid_cloudevent_request_body = [
 
 test_data = {"payload-content": "Hello World!"}
 
-app = Sanic(__name__)
+app = Sanic()
 
 
 @app.route("/event", ["POST"])

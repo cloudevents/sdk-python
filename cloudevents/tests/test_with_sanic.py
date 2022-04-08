@@ -19,7 +19,7 @@ from cloudevents.sdk.event import v1
 from cloudevents.tests import data as test_data
 
 m = marshaller.NewDefaultHTTPMarshaller()
-app = Sanic(__name__)
+app = Sanic()
 
 
 @app.route("/is-ok", ["POST"])
