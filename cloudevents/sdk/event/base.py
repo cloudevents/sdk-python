@@ -174,7 +174,7 @@ class BaseEvent(EventGetterSetter):
 
         return props
 
-    def Get(self, key: str) -> (object, bool):
+    def Get(self, key: str) -> typing.Tuple[object, bool]:
         formatted_key = "ce__{0}".format(key.lower())
         ok = hasattr(self, formatted_key)
         value = getattr(self, formatted_key, None)
@@ -284,7 +284,7 @@ class BaseEvent(EventGetterSetter):
 
     def MarshalBinary(
         self, data_marshaller: types.MarshallerType
-    ) -> (dict, bytes):
+    ) -> typing.Tuple[dict, bytes]:
         if data_marshaller is None:
             data_marshaller = json.dumps
         headers = {}
