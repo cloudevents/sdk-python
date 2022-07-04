@@ -23,8 +23,13 @@ def dummy_attributes(specversion):
     }
 
 
+_my_dummy_data = '{"name":"john"}'
+_your_dummy_data = '{"name":"paul"}'
+assert _my_dummy_data != _your_dummy_data
+
+
 def test_http_cloudevent_equality(dummy_attributes):
-    data = '{"name":"john"}'
+    data = _my_dummy_data
     event1 = CloudEvent(dummy_attributes, data)
     event2 = CloudEvent(dummy_attributes, data)
     assert event1 == event2
@@ -40,7 +45,7 @@ def test_http_cloudevent_equality(dummy_attributes):
         assert event1 != event2 and event3 != event1
 
     # Test different data
-    data = '{"name":"paul"}'
+    data = _your_dummy_data
     event3 = CloudEvent(dummy_attributes, data)
     event2 = CloudEvent(dummy_attributes, data)
     assert event2 == event3
@@ -48,7 +53,7 @@ def test_http_cloudevent_equality(dummy_attributes):
 
 
 def test_http_cloudevent_mutates_equality(dummy_attributes):
-    data = '{"name":"john"}'
+    data = _my_dummy_data
     event1 = CloudEvent(dummy_attributes, data)
     event2 = CloudEvent(dummy_attributes, data)
     event3 = CloudEvent(dummy_attributes, data)
@@ -65,8 +70,8 @@ def test_http_cloudevent_mutates_equality(dummy_attributes):
         assert event1 != event2 and event3 != event1
 
     # Test different data
-    event2.data = '{"name":"paul"}'
-    event3.data = '{"name":"paul"}'
+    event2.data = _your_dummy_data
+    event3.data = _your_dummy_data
     assert event2 == event3
     assert event1 != event2 and event3 != event1
 
