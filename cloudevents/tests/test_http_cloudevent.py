@@ -5,9 +5,14 @@ from cloudevents.http import CloudEvent
 from cloudevents.http.util import _json_or_string
 
 
-@pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_http_cloudevent_equality(specversion):
-    attributes = {
+@pytest.fixture(params=["0.3", "1.0"])
+def specversion(request):
+    return request.param
+
+
+@pytest.fixture()
+def dummy_attributes(specversion):
+    return {
         "source": "<source>",
         "specversion": specversion,
         "id": "my-id",
@@ -16,48 +21,41 @@ def test_http_cloudevent_equality(specversion):
         "datacontenttype": "application/json",
         "subject": "my-subject",
     }
+
+
+def test_http_cloudevent_equality(dummy_attributes):
     data = '{"name":"john"}'
-    event1 = CloudEvent(attributes, data)
-    event2 = CloudEvent(attributes, data)
+    event1 = CloudEvent(dummy_attributes, data)
+    event2 = CloudEvent(dummy_attributes, data)
     assert event1 == event2
     # Test different attributes
-    for key in attributes:
+    for key in dummy_attributes:
         if key == "specversion":
             continue
         else:
-            attributes[key] = f"noise-{key}"
-        event3 = CloudEvent(attributes, data)
-        event2 = CloudEvent(attributes, data)
+            dummy_attributes[key] = f"noise-{key}"
+        event3 = CloudEvent(dummy_attributes, data)
+        event2 = CloudEvent(dummy_attributes, data)
         assert event2 == event3
         assert event1 != event2 and event3 != event1
 
     # Test different data
     data = '{"name":"paul"}'
-    event3 = CloudEvent(attributes, data)
-    event2 = CloudEvent(attributes, data)
+    event3 = CloudEvent(dummy_attributes, data)
+    event2 = CloudEvent(dummy_attributes, data)
     assert event2 == event3
     assert event1 != event2 and event3 != event1
 
 
-@pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_http_cloudevent_mutates_equality(specversion):
-    attributes = {
-        "source": "<source>",
-        "specversion": specversion,
-        "id": "my-id",
-        "time": "tomorrow",
-        "type": "tests.cloudevents.override",
-        "datacontenttype": "application/json",
-        "subject": "my-subject",
-    }
+def test_http_cloudevent_mutates_equality(dummy_attributes):
     data = '{"name":"john"}'
-    event1 = CloudEvent(attributes, data)
-    event2 = CloudEvent(attributes, data)
-    event3 = CloudEvent(attributes, data)
+    event1 = CloudEvent(dummy_attributes, data)
+    event2 = CloudEvent(dummy_attributes, data)
+    event3 = CloudEvent(dummy_attributes, data)
 
     assert event1 == event2
     # Test different attributes
-    for key in attributes:
+    for key in dummy_attributes:
         if key == "specversion":
             continue
         else:
