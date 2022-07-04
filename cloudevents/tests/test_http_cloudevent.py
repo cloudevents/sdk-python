@@ -122,3 +122,39 @@ def test_cloudevent_general_overrides():
 
 def test_none_json_or_string():
     assert _json_or_string(None) is None
+
+
+@pytest.fixture()
+def dummy_event(dummy_attributes):
+    return CloudEvent(attributes=dummy_attributes, data=_my_dummy_data)
+
+
+@pytest.fixture()
+def non_exiting_attribute_name(dummy_event):
+    result = "nonexisting"
+    assert result not in dummy_event
+    return result
+
+
+def test_get_operation_on_non_existing_attribute_must_not_raise_exception(dummy_event, non_exiting_attribute_name):
+    dummy_event.get(non_exiting_attribute_name)
+
+
+def test_get_operation_must_return_attribute_value_of_an_existing_attribute_matching_the_given_key(dummy_event):
+    assert dummy_event.get("source") == dummy_event["source"]
+
+
+def test_get_operation_on_non_existing_attribute_must_return_none_by_default(dummy_event, non_exiting_attribute_name):
+    assert dummy_event.get(non_exiting_attribute_name) is None
+
+
+def test_get_operation_on_non_existing_attribute_must_return_default_value_if_given(dummy_event,
+                                                                                    non_exiting_attribute_name):
+    dummy_value = "Hello World"
+    assert dummy_event.get(non_exiting_attribute_name, dummy_value) == dummy_value
+
+
+def test_get_operation_on_non_existing_attribute_should_not_copy_default_value(dummy_event,
+                                                                               non_exiting_attribute_name):
+    dummy_value = object()
+    assert dummy_event.get(non_exiting_attribute_name, dummy_value) is dummy_value
