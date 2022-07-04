@@ -78,6 +78,12 @@ class CloudEvent:
         return self._attributes[key]
 
     def get(self, key: str, default: typing.Optional[typing.Any] = None) -> typing.Optional[typing.Any]:
+        """
+        Get a an attribute value, return default if does not exist.
+        MUST NOT throw exception when the key does not exist
+        :param key: attribute name
+        :param default: value which will be returned if the attribute does not exist
+        """
         return self._attributes.get(key, default)
 
     def __setitem__(self, key, value):
