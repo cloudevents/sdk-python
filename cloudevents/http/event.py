@@ -27,7 +27,7 @@ class CloudEvent:
     """
 
     def __init__(
-        self, attributes: typing.Dict[str, str], data: typing.Any = None
+            self, attributes: typing.Dict[str, str], data: typing.Any = None
     ):
         """
         Event Constructor
@@ -76,6 +76,9 @@ class CloudEvent:
     # Attribute access is managed via Mapping type
     def __getitem__(self, key):
         return self._attributes[key]
+
+    def get(self, key: str, default: typing.Optional[typing.Any] = None) -> typing.Optional[typing.Any]:
+        return self._attributes.get(key, default)
 
     def __setitem__(self, key, value):
         self._attributes[key] = value
