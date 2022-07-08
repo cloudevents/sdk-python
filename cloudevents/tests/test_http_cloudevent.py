@@ -23,12 +23,18 @@ def dummy_attributes(specversion):
     }
 
 
-_my_dummy_data = '{"name":"john"}'
-_your_dummy_data = '{"name":"paul"}'
+@pytest.fixture()
+def my_dummy_data():
+    return '{"name":"john"}'
 
 
-def test_http_cloudevent_equality(dummy_attributes):
-    data = _my_dummy_data
+@pytest.fixture()
+def your_dummy_data():
+    return '{"name":"paul"}'
+
+
+def test_http_cloudevent_equality(dummy_attributes, my_dummy_data, your_dummy_data):
+    data = my_dummy_data
     event1 = CloudEvent(dummy_attributes, data)
     event2 = CloudEvent(dummy_attributes, data)
     assert event1 == event2
@@ -44,15 +50,15 @@ def test_http_cloudevent_equality(dummy_attributes):
         assert event1 != event2 and event3 != event1
 
     # Test different data
-    data = _your_dummy_data
+    data = your_dummy_data
     event3 = CloudEvent(dummy_attributes, data)
     event2 = CloudEvent(dummy_attributes, data)
     assert event2 == event3
     assert event1 != event2 and event3 != event1
 
 
-def test_http_cloudevent_mutates_equality(dummy_attributes):
-    data = _my_dummy_data
+def test_http_cloudevent_mutates_equality(dummy_attributes, my_dummy_data, your_dummy_data):
+    data = my_dummy_data
     event1 = CloudEvent(dummy_attributes, data)
     event2 = CloudEvent(dummy_attributes, data)
     event3 = CloudEvent(dummy_attributes, data)
@@ -69,8 +75,8 @@ def test_http_cloudevent_mutates_equality(dummy_attributes):
         assert event1 != event2 and event3 != event1
 
     # Test different data
-    event2.data = _your_dummy_data
-    event3.data = _your_dummy_data
+    event2.data = your_dummy_data
+    event3.data = your_dummy_data
     assert event2 == event3
     assert event1 != event2 and event3 != event1
 
@@ -124,8 +130,8 @@ def test_none_json_or_string():
 
 
 @pytest.fixture()
-def dummy_event(dummy_attributes):
-    return CloudEvent(attributes=dummy_attributes, data=_my_dummy_data)
+def dummy_event(dummy_attributes, my_dummy_data):
+    return CloudEvent(attributes=dummy_attributes, data=my_dummy_data)
 
 
 @pytest.fixture()
