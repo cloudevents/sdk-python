@@ -54,9 +54,7 @@ if __name__ == "__main__":
     # expects a url from command line.
     # e.g. python3 client.py http://localhost:3000/
     if len(sys.argv) < 2:
-        sys.exit(
-            "Usage: python with_requests.py <CloudEvents controller URL>"
-        )
+        sys.exit("Usage: python with_requests.py <CloudEvents controller URL>")
 
     url = sys.argv[1]
     send_binary_cloud_event(url)
