@@ -27,7 +27,7 @@ class CloudEvent:
     """
 
     def __init__(
-            self, attributes: typing.Dict[str, str], data: typing.Any = None
+        self, attributes: typing.Dict[str, str], data: typing.Any = None
     ):
         """
         Event Constructor
@@ -77,7 +77,9 @@ class CloudEvent:
     def __getitem__(self, key):
         return self._attributes[key]
 
-    def get(self, key: str, default: typing.Optional[typing.Any] = None) -> typing.Optional[typing.Any]:
+    def get(
+        self, key: str, default: typing.Optional[typing.Any] = None
+    ) -> typing.Optional[typing.Any]:
         """
         Get a an attribute value, return default if does not exist.
         MUST NOT throw exception when the key does not exist
