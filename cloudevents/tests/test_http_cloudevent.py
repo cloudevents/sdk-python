@@ -25,7 +25,6 @@ def dummy_attributes(specversion):
 
 _my_dummy_data = '{"name":"john"}'
 _your_dummy_data = '{"name":"paul"}'
-assert _my_dummy_data != _your_dummy_data
 
 
 def test_http_cloudevent_equality(dummy_attributes):
