@@ -144,7 +144,7 @@ information.
 
 ## Maintenance
 
-We use [black][black] and [isort][isort] for autoformatting. We set up a [tox][tox] environment 
+We use [black][black] and [isort][isort] for autoformatting. We set up a [tox][tox] environment
 to reformat the codebase.
 
 e.g.
