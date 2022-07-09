@@ -151,9 +151,7 @@ def test_get_operation_on_non_existing_attribute_must_not_raise_exception(
     dummy_event.get(non_exiting_attribute_name)
 
 
-def test_get_operation_must_return_attribute_value_of_an_existing_attribute_matching_the_given_key(
-    dummy_event,
-):
+def test_get_must_return_attribute_value_if_exists(dummy_event):
     assert dummy_event.get("source") == dummy_event["source"]
 
 
