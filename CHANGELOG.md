@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Code quality and styling tooling is unified and configs compatibility is ensured ([#PR])
+- Code quality and styling tooling is unified and configs compatibility is ensured ([#167])
 
 ## [1.3.0] — 2022-09-07
 ### Added
@@ -20,11 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed typings issues ([#149])
 - The package redistributive ability by inlining required `pypi-packaging.py` functions ([#151])
 
-## [1.2.0]
+## [1.2.0] — 2020-08-20
 ### Added
 - Added GenericException, DataMarshallingError and DataUnmarshallingError ([#120])
 
-## [1.1.0]
+## [1.1.0] — 2020-08-18
 ### Changed
 - Changed from_http to now expect headers argument before data ([#110])
 - Renamed exception names ([#111])
@@ -35,12 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 - Renamed to_binary_http and to_structured_http. ([#108])
 
-## [1.0.1]
+## [1.0.1] — 2020-08-14
 ### Added
 - CloudEvent exceptions and event type checking in http module ([#96])
 - CloudEvent equality override ([#98])
 
-## [1.0.0]
+## [1.0.0] — 2020-08-11
 ### Added
 - Update types and handle data_base64 structured ([#34])
 - Added a user friendly CloudEvent class with data validation ([#36])
@@ -54,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Removed support for Cloudevents V0.2 and V0.1 ([#43])
 
-## [0.3.0]
+## [0.3.0] — 2020-07-11
 ### Added
 - Added Cloudevents V0.3 and V1 implementations ([#22])
 - Add helpful text to README ([#23])
@@ -95,7 +95,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
-[0.3.0]: https://github.com/cloudevents/sdk-python/compare/0.2.4...HEAD
+[1.3.0]: https://github.com/cloudevents/sdk-python/compare/1.2.0...1.3.0
+[1.2.0]: https://github.com/cloudevents/sdk-python/compare/1.1.0...1.2.0
+[1.1.0]: https://github.com/cloudevents/sdk-python/compare/1.0.1...1.1.0
+[1.0.1]: https://github.com/cloudevents/sdk-python/compare/1.0.0...1.0.1
+[1.0.0]: https://github.com/cloudevents/sdk-python/compare/0.3.0...1.0.0
+[0.3.0]: https://github.com/cloudevents/sdk-python/compare/0.2.4...0.3.0
 [0.2.4]: https://github.com/cloudevents/sdk-python/compare/0.2.3...0.2.4
 [0.2.3]: https://github.com/cloudevents/sdk-python/compare/0.2.2...0.2.3
 [0.2.2]: https://github.com/cloudevents/sdk-python/compare/0.2.1...0.2.2
@@ -130,3 +135,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#111]: https://github.com/cloudevents/sdk-python/pull/111
 [#119]: https://github.com/cloudevents/sdk-python/pull/119
 [#120]: https://github.com/cloudevents/sdk-python/pull/120
+[#144]: https://github.com/cloudevents/sdk-python/pull/144
+[#149]: https://github.com/cloudevents/sdk-python/pull/149
+[#150]: https://github.com/cloudevents/sdk-python/pull/150
+[#151]: https://github.com/cloudevents/sdk-python/pull/151
+[#158]: https://github.com/cloudevents/sdk-python/pull/158
+[#159]: https://github.com/cloudevents/sdk-python/pull/159
+[#160]: https://github.com/cloudevents/sdk-python/pull/160
+[#167]: https://github.com/cloudevents/sdk-python/pull/167
