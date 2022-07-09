@@ -94,7 +94,7 @@ def _to_http(
     event: CloudEvent,
     format: str = converters.TypeStructured,
     data_marshaller: types.MarshallerType = None,
-) -> (dict, typing.Union[bytes, str]):
+) -> typing.Tuple[dict, typing.Union[bytes, str]]:
     """
     Returns a tuple of HTTP headers/body dicts representing this cloudevent
 
@@ -125,7 +125,7 @@ def _to_http(
 
 def to_structured(
     event: CloudEvent, data_marshaller: types.MarshallerType = None
-) -> (dict, typing.Union[bytes, str]):
+) -> typing.Tuple[dict, typing.Union[bytes, str]]:
     """
     Returns a tuple of HTTP headers/body dicts representing this cloudevent. If
     event.data is a byte object, body will have a data_base64 field instead of
@@ -143,7 +143,7 @@ def to_structured(
 
 def to_binary(
     event: CloudEvent, data_marshaller: types.MarshallerType = None
-) -> (dict, typing.Union[bytes, str]):
+) -> typing.Tuple[dict, typing.Union[bytes, str]]:
     """
     Returns a tuple of HTTP headers/body dicts representing this cloudevent
 
@@ -164,12 +164,12 @@ def to_binary(
 @deprecated(deprecated_in="1.0.2", details="Use to_binary function instead")
 def to_binary_http(
     event: CloudEvent, data_marshaller: types.MarshallerType = None
-) -> (dict, typing.Union[bytes, str]):
+) -> typing.Tuple[dict, typing.Union[bytes, str]]:
     return to_binary(event, data_marshaller)
 
 
 @deprecated(deprecated_in="1.0.2", details="Use to_structured function instead")
 def to_structured_http(
     event: CloudEvent, data_marshaller: types.MarshallerType = None
-) -> (dict, typing.Union[bytes, str]):
+) -> typing.Tuple[dict, typing.Union[bytes, str]]:
     return to_structured(event, data_marshaller)

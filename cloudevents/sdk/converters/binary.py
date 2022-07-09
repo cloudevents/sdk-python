@@ -51,7 +51,7 @@ class BinaryHTTPCloudEventConverter(base.Converter):
 
     def write(
         self, event: event_base.BaseEvent, data_marshaller: types.MarshallerType
-    ) -> (dict, bytes):
+    ) -> typing.Tuple[dict, bytes]:
         return event.MarshalBinary(data_marshaller)
 
 
