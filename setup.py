@@ -11,37 +11,59 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from pypi_packaging import pypi_config
-
 from setuptools import setup, find_packages
 
+import os
+import codecs
 import pathlib
 
+
+def read(rel_path):
+    here = os.path.abspath(os.path.dirname(__file__))
+    with codecs.open(os.path.join(here, rel_path), "r") as fp:
+        return fp.read()
+
+
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith("__version__"):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
+
+
+# FORMAT: 1.x.x
+pypi_config = {
+    "version_target": get_version("cloudevents/__init__.py"),
+    "package_name": "cloudevents",
+}
 
 here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
-setup(
-    name=pypi_config["package_name"],
-    summary="CloudEvents SDK Python",
-    long_description_content_type="text/markdown",
-    long_description=long_description,
-    author="The Cloud Events Contributors",
-    author_email="cncfcloudevents@gmail.com",
-    home_page="https://cloudevents.io",
-    classifiers=[
-        "Intended Audience :: Information Technology",
-        "Intended Audience :: System Administrators",
-        "License :: OSI Approved :: Apache Software License",
-        "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-    ],
-    packages=find_packages(exclude=["cloudevents.tests"]),
-    version=pypi_config["version_target"],
-    install_requires=["deprecation>=2.0,<3.0"],
-)
+if __name__ == "__main__":
+    setup(
+        name=pypi_config["package_name"],
+        summary="CloudEvents SDK Python",
+        long_description_content_type="text/markdown",
+        long_description=long_description,
+        author="The Cloud Events Contributors",
+        author_email="cncfcloudevents@gmail.com",
+        home_page="https://cloudevents.io",
+        classifiers=[
+            "Intended Audience :: Information Technology",
+            "Intended Audience :: System Administrators",
+            "License :: OSI Approved :: Apache Software License",
+            "Operating System :: POSIX :: Linux",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+        ],
+        packages=find_packages(exclude=["cloudevents.tests"]),
+        version=pypi_config["version_target"],
+        install_requires=["deprecation>=2.0,<3.0"],
+    )
