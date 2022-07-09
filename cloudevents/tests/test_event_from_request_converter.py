@@ -24,12 +24,8 @@ from cloudevents.tests import data
 
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
 def test_binary_converter_upstream(event_class):
-    m = marshaller.NewHTTPMarshaller(
-        [binary.NewBinaryHTTPCloudEventConverter()]
-    )
-    event = m.FromRequest(
-        event_class(), data.headers[event_class], None, lambda x: x
-    )
+    m = marshaller.NewHTTPMarshaller([binary.NewBinaryHTTPCloudEventConverter()])
+    event = m.FromRequest(event_class(), data.headers[event_class], None, lambda x: x)
     assert event is not None
     assert event.EventType() == data.ce_type
     assert event.EventID() == data.ce_id
@@ -38,9 +34,7 @@ def test_binary_converter_upstream(event_class):
 
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
 def test_structured_converter_upstream(event_class):
-    m = marshaller.NewHTTPMarshaller(
-        [structured.NewJSONHTTPCloudEventConverter()]
-    )
+    m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
     event = m.FromRequest(
         event_class(),
         {"Content-Type": "application/cloudevents+json"},

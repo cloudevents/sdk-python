@@ -60,23 +60,17 @@ def test_to_request_wrong_marshaller():
 
 def test_from_request_cannot_read(binary_headers):
     with pytest.raises(exceptions.UnsupportedEventConverter):
-        m = marshaller.HTTPMarshaller(
-            [binary.NewBinaryHTTPCloudEventConverter()]
-        )
+        m = marshaller.HTTPMarshaller([binary.NewBinaryHTTPCloudEventConverter()])
         m.FromRequest(v1.Event(), {}, "")
 
     with pytest.raises(exceptions.UnsupportedEventConverter):
-        m = marshaller.HTTPMarshaller(
-            [structured.NewJSONHTTPCloudEventConverter()]
-        )
+        m = marshaller.HTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
         m.FromRequest(v1.Event(), binary_headers, "")
 
 
 def test_to_request_invalid_converter():
     with pytest.raises(exceptions.NoSuchConverter):
-        m = marshaller.HTTPMarshaller(
-            [structured.NewJSONHTTPCloudEventConverter()]
-        )
+        m = marshaller.HTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
         m.ToRequest(v1.Event(), "")
 
 

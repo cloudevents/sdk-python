@@ -30,9 +30,7 @@ async def is_ok(request):
 
 @app.route("/echo", ["POST"])
 async def echo(request):
-    event = m.FromRequest(
-        v1.Event(), dict(request.headers), request.body, lambda x: x
-    )
+    event = m.FromRequest(v1.Event(), dict(request.headers), request.body, lambda x: x)
     hs, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
     return response.text(body.decode("utf-8"), headers=hs)
 
