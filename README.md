@@ -149,7 +149,7 @@ the codebase.
 
 e.g.
 
-```python
+```bash
 pip install tox
 tox -e reformat
 ```
