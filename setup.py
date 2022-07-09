@@ -54,7 +54,9 @@ if __name__ == "__main__":
         classifiers=[
             "Intended Audience :: Information Technology",
             "Intended Audience :: System Administrators",
+            "Intended Audience :: Developers",
             "License :: OSI Approved :: Apache Software License",
+            "Development Status :: 5 - Production/Stable",
             "Operating System :: POSIX :: Linux",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.6",
