@@ -87,7 +87,8 @@ class CloudEvent:
         MUST NOT throw an exception when the key does not exist.
 
         :param key: The event attribute name.
-        :param default: The default value to be returned when no attribute with the given key exists.
+        :param default: The default value to be returned when
+            no attribute with the given key exists.
         :returns: The event attribute value if exists, default value otherwise.
         """
         return self._attributes.get(key, default)
