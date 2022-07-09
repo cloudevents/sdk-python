@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Code quality and styling tooling is unified and configs compatibility is ensured ([#PR])
+
 ## [1.3.0] — 2022-09-07
 ### Added
 - Python 3.9 support ([#144])
