@@ -6,7 +6,7 @@ flake8-strict
 pytest
 pytest-cov
 # web app tests
-sanic<=20.12.4; python_version <= '3.6'
+sanic<=20.12.6; python_version <= '3.6'
 sanic; python_version > '3.6'
 sanic-testing; python_version > '3.6'
 aiohttp
