@@ -206,8 +206,7 @@ class BaseEvent(EventGetterSetter):
                 data = data_marshaller(data)
             except Exception as e:
                 raise cloud_exceptions.DataMarshallerError(
-                    "Failed to marshall data with error: "
-                    f"{type(e).__name__}('{e}')"
+                    f"Failed to marshall data with error: {type(e).__name__}('{e}')"
                 )
             if isinstance(data, (bytes, bytes, memoryview)):
                 props["data_base64"] = base64.b64encode(data).decode("ascii")
@@ -256,9 +255,7 @@ class BaseEvent(EventGetterSetter):
         body: typing.Union[bytes, str],
         data_unmarshaller: types.UnmarshallerType,
     ):
-        required_binary_fields = {
-            f"ce-{field}" for field in self._ce_required_fields
-        }
+        required_binary_fields = {f"ce-{field}" for field in self._ce_required_fields}
         missing_fields = required_binary_fields - headers.keys()
 
         if len(missing_fields) > 0:
@@ -277,8 +274,7 @@ class BaseEvent(EventGetterSetter):
             raw_ce = data_unmarshaller(body)
         except Exception as e:
             raise cloud_exceptions.DataUnmarshallerError(
-                "Failed to unmarshall data with error: "
-                f"{type(e).__name__}('{e}')"
+                f"Failed to unmarshall data with error: {type(e).__name__}('{e}')"
             )
         self.Set("data", raw_ce)
 
@@ -304,8 +300,7 @@ class BaseEvent(EventGetterSetter):
             data = data_marshaller(data)
         except Exception as e:
             raise cloud_exceptions.DataMarshallerError(
-                "Failed to marshall data with error: "
-                f"{type(e).__name__}('{e}')"
+                f"Failed to marshall data with error: {type(e).__name__}('{e}')"
             )
         if isinstance(data, str):  # Convenience method for json.dumps
             data = data.encode("utf-8")

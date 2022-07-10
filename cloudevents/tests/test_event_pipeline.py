@@ -59,14 +59,8 @@ def test_extensions_are_set_upstream():
 
 
 def test_binary_event_v1():
-    event = (
-        v1.Event()
-        .SetContentType("application/octet-stream")
-        .SetData(b"\x00\x01")
-    )
-    m = marshaller.NewHTTPMarshaller(
-        [structured.NewJSONHTTPCloudEventConverter()]
-    )
+    event = v1.Event().SetContentType("application/octet-stream").SetData(b"\x00\x01")
+    m = marshaller.NewHTTPMarshaller([structured.NewJSONHTTPCloudEventConverter()])
 
     _, body = m.ToRequest(event, converters.TypeStructured, lambda x: x)
     assert isinstance(body, bytes)
@@ -76,9 +70,7 @@ def test_binary_event_v1():
 
 
 def test_object_event_v1():
-    event = (
-        v1.Event().SetContentType("application/json").SetData({"name": "john"})
-    )
+    event = v1.Event().SetContentType("application/json").SetData({"name": "john"})
 
     m = marshaller.NewDefaultHTTPMarshaller()
 

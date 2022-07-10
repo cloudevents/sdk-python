@@ -26,9 +26,7 @@ class CloudEvent:
     Supports both binary and structured mode CloudEvents
     """
 
-    def __init__(
-        self, attributes: typing.Dict[str, str], data: typing.Any = None
-    ):
+    def __init__(self, attributes: typing.Dict[str, str], data: typing.Any = None):
         """
         Event Constructor
         :param attributes: a dict with cloudevent attributes. Minimally

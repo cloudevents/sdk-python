@@ -11,11 +11,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from setuptools import setup, find_packages
-
-import os
 import codecs
+import os
 import pathlib
+
+from setuptools import find_packages, setup
 
 
 def read(rel_path):
@@ -54,7 +54,9 @@ if __name__ == "__main__":
         classifiers=[
             "Intended Audience :: Information Technology",
             "Intended Audience :: System Administrators",
+            "Intended Audience :: Developers",
             "License :: OSI Approved :: Apache Software License",
+            "Development Status :: 5 - Production/Stable",
             "Operating System :: POSIX :: Linux",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.6",
