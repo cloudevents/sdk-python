@@ -74,9 +74,7 @@ async def echo(request):
     decoder = None
     if "binary-payload" in request.headers:
         decoder = lambda x: x
-    event = from_http(
-        dict(request.headers), request.body, data_unmarshaller=decoder
-    )
+    event = from_http(dict(request.headers), request.body, data_unmarshaller=decoder)
     data = (
         event.data
         if isinstance(event.data, (bytes, bytearray, memoryview))
@@ -143,9 +141,7 @@ def test_emit_structured_event(specversion):
         "specversion": specversion,
         "data": test_data,
     }
-    _, r = app.test_client.post(
-        "/event", headers=headers, data=json.dumps(body)
-    )
+    _, r = app.test_client.post("/event", headers=headers, data=json.dumps(body))
 
     # Convert byte array to dict
     # e.g. r.body = b'{"payload-content": "Hello World!"}'
@@ -463,9 +459,7 @@ def test_empty_json_structured():
     data = ""
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
         from_http(headers, data)
-    assert "Failed to read specversion from both headers and data" in str(
-        e.value
-    )
+    assert "Failed to read specversion from both headers and data" in str(e.value)
 
 
 def test_uppercase_headers_with_none_data_binary():
@@ -520,7 +514,5 @@ def test_non_dict_data_no_headers_bug():
     data = "123"
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
         from_http(headers, data)
-    assert "Failed to read specversion from both headers and data" in str(
-        e.value
-    )
+    assert "Failed to read specversion from both headers and data" in str(e.value)
     assert "The following deserialized data has no 'get' method" in str(e.value)

@@ -1,0 +1,9 @@
+black
+isort
+flake8
+pep8-naming
+flake8-import-order
+flake8-print
+flake8-strict
+tox
+pre-commit
