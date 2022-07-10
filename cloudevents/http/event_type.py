@@ -26,6 +26,4 @@ def is_structured(headers: typing.Dict[str, str]) -> bool:
     headers = {key.lower(): value for key, value in headers.items()}
     content_type = headers.get("content-type", "")
     structured_parser = structured.JSONHTTPCloudEventConverter()
-    return structured_parser.can_read(
-        content_type=content_type, headers=headers
-    )
+    return structured_parser.can_read(content_type=content_type, headers=headers)

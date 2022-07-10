@@ -19,7 +19,7 @@ from cloudevents.sdk.event import v1
 from cloudevents.tests import data as test_data
 
 m = marshaller.NewDefaultHTTPMarshaller()
-app = Sanic(__name__)
+app = Sanic("test_with_sanic")
 
 
 @app.route("/is-ok", ["POST"])
@@ -30,9 +30,7 @@ async def is_ok(request):
 
 @app.route("/echo", ["POST"])
 async def echo(request):
-    event = m.FromRequest(
-        v1.Event(), dict(request.headers), request.body, lambda x: x
-    )
+    event = m.FromRequest(v1.Event(), dict(request.headers), request.body, lambda x: x)
     hs, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
     return response.text(body.decode("utf-8"), headers=hs)
 
