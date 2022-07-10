@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added `.get` accessor for even properties ([#165])
+
 ### Changed
 - Code quality and styling tooling is unified and configs compatibility is ensured ([#167])
 
@@ -142,4 +145,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#158]: https://github.com/cloudevents/sdk-python/pull/158
 [#159]: https://github.com/cloudevents/sdk-python/pull/159
 [#160]: https://github.com/cloudevents/sdk-python/pull/160
+[#165]: https://github.com/cloudevents/sdk-python/pull/165
 [#167]: https://github.com/cloudevents/sdk-python/pull/167
