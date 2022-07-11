@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Code quality and styling tooling is unified and configs compatibility is ensured ([#167])
 - CI configurations updated and added macOS and Windows tests ([#169])
+- Copyright is unified with the other SDKs and updated/added where needed. ([#170])
 
 ### Removed
 - `docs` folder and related unused tooling ([#168])
@@ -153,3 +154,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#167]: https://github.com/cloudevents/sdk-python/pull/167
 [#168]: https://github.com/cloudevents/sdk-python/pull/168
 [#169]: https://github.com/cloudevents/sdk-python/pull/169
+[#170]: https://github.com/cloudevents/sdk-python/pull/170
