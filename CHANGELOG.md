@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code quality and styling tooling is unified and configs compatibility is ensured ([#167])
 - Copyright is unified with the other SDKs and updated/added where needed. ([#170])
 
+### Removed
+- `docs` folder and related unused tooling ([#168])
+
 ## [1.3.0] — 2022-09-07
 ### Added
 - Python 3.9 support ([#144])
@@ -148,4 +151,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#160]: https://github.com/cloudevents/sdk-python/pull/160
 [#165]: https://github.com/cloudevents/sdk-python/pull/165
 [#167]: https://github.com/cloudevents/sdk-python/pull/167
+[#168]: https://github.com/cloudevents/sdk-python/pull/168
 [#170]: https://github.com/cloudevents/sdk-python/pull/170

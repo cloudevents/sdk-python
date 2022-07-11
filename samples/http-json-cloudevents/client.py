@@ -32,7 +32,7 @@ def send_binary_cloud_event(url):
 
     # send and print event
     requests.post(url, headers=headers, data=body)
-    print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
+    print(f"Sent {event['id']} from {event['source']} with {event.data}")
 
 
 def send_structured_cloud_event(url):
@@ -48,7 +48,7 @@ def send_structured_cloud_event(url):
 
     # send and print event
     requests.post(url, headers=headers, data=body)
-    print(f"Sent {event['id']} from {event['source']} with " f"{event.data}")
+    print(f"Sent {event['id']} from {event['source']} with {event.data}")
 
 
 if __name__ == "__main__":
