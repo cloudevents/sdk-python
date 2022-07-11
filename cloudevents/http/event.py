@@ -67,8 +67,11 @@ class CloudEvent:
                 f"Missing required keys: {required_set - self._attributes.keys()}"
             )
 
-    def __eq__(self, other):
-        return self.data == other.data and self._attributes == other._attributes
+    def __eq__(self, other: typing.Any) -> bool:
+        if isinstance(other, CloudEvent):
+            return self.data == other.data and self._attributes == other._attributes
+        else:
+            return False
 
     # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type
