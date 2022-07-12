@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `.get` accessor for even properties ([#165])
 
 ### Fixed
--  Fixed event `__eq__` operator raising `AttributeError` on non-CloudEvent values ([#172]) 
+-  Fixed event `__eq__` operator raising `AttributeError` on non-CloudEvent values ([#172])
 
 ### Changed
 - Code quality and styling tooling is unified and configs compatibility is ensured ([#167])
