@@ -156,11 +156,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#160]: https://github.com/cloudevents/sdk-python/pull/160
 [#165]: https://github.com/cloudevents/sdk-python/pull/165
 [#167]: https://github.com/cloudevents/sdk-python/pull/167
-<<<<<<< master
-[#167]: https://github.com/cloudevents/sdk-python/pull/167
-[#172]: https://github.com/cloudevents/sdk-python/pull/172
-=======
 [#168]: https://github.com/cloudevents/sdk-python/pull/168
 [#169]: https://github.com/cloudevents/sdk-python/pull/169
 [#170]: https://github.com/cloudevents/sdk-python/pull/170
->>>>>>> master
+[#172]: https://github.com/cloudevents/sdk-python/pull/172
+
