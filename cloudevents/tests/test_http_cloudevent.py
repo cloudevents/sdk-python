@@ -81,10 +81,6 @@ def test_http_cloudevent_equality(dummy_attributes, my_dummy_data, your_dummy_da
     assert event1 != event2 and event3 != event1
 
 
-def test_http_cloudevent_equality_must_not_throw(dummy_event, non_cloudevent_value):
-    assert isinstance(dummy_event == non_cloudevent_value, bool)
-
-
 def test_http_cloudevent_must_not_equal_to_non_cloudevent_value(
     dummy_event, non_cloudevent_value
 ):
