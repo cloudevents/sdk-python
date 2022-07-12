@@ -45,18 +45,6 @@ def non_exiting_attribute_name(dummy_event):
     return result
 
 
-@pytest.fixture(
-    params=(
-        1,
-        None,
-        object(),
-        "Hello World",
-    )
-)
-def non_cloudevent_value(request):
-    return request.param
-
-
 def test_http_cloudevent_equality(dummy_attributes, my_dummy_data, your_dummy_data):
     data = my_dummy_data
     event1 = CloudEvent(dummy_attributes, data)
@@ -81,6 +69,15 @@ def test_http_cloudevent_equality(dummy_attributes, my_dummy_data, your_dummy_da
     assert event1 != event2 and event3 != event1
 
 
+@pytest.mark.parametrize(
+    "non_cloudevent_value",
+    (
+        1,
+        None,
+        object(),
+        "Hello World",
+    ),
+)
 def test_http_cloudevent_must_not_equal_to_non_cloudevent_value(
     dummy_event, non_cloudevent_value
 ):
