@@ -160,4 +160,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#169]: https://github.com/cloudevents/sdk-python/pull/169
 [#170]: https://github.com/cloudevents/sdk-python/pull/170
 [#172]: https://github.com/cloudevents/sdk-python/pull/172
-
