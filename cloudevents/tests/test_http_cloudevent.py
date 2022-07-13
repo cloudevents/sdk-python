@@ -47,6 +47,18 @@ def your_dummy_data():
     return '{"name":"paul"}'
 
 
+@pytest.fixture()
+def dummy_event(dummy_attributes, my_dummy_data):
+    return CloudEvent(attributes=dummy_attributes, data=my_dummy_data)
+
+
+@pytest.fixture()
+def non_exiting_attribute_name(dummy_event):
+    result = "nonexisting"
+    assert result not in dummy_event
+    return result
+
+
 def test_http_cloudevent_equality(dummy_attributes, my_dummy_data, your_dummy_data):
     data = my_dummy_data
     event1 = CloudEvent(dummy_attributes, data)
@@ -69,6 +81,21 @@ def test_http_cloudevent_equality(dummy_attributes, my_dummy_data, your_dummy_da
     event2 = CloudEvent(dummy_attributes, data)
     assert event2 == event3
     assert event1 != event2 and event3 != event1
+
+
+@pytest.mark.parametrize(
+    "non_cloudevent_value",
+    (
+        1,
+        None,
+        object(),
+        "Hello World",
+    ),
+)
+def test_http_cloudevent_must_not_equal_to_non_cloudevent_value(
+    dummy_event, non_cloudevent_value
+):
+    assert not dummy_event == non_cloudevent_value
 
 
 def test_http_cloudevent_mutates_equality(
@@ -143,18 +170,6 @@ def test_cloudevent_general_overrides():
 
 def test_none_json_or_string():
     assert _json_or_string(None) is None
-
-
-@pytest.fixture()
-def dummy_event(dummy_attributes, my_dummy_data):
-    return CloudEvent(attributes=dummy_attributes, data=my_dummy_data)
-
-
-@pytest.fixture()
-def non_exiting_attribute_name(dummy_event):
-    result = "nonexisting"
-    assert result not in dummy_event
-    return result
 
 
 def test_get_operation_on_non_existing_attribute_must_not_raise_exception(

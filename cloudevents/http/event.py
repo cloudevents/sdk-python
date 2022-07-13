@@ -68,7 +68,9 @@ class CloudEvent:
             )
 
     def __eq__(self, other: typing.Any) -> bool:
-        return self.data == other.data and self._attributes == other._attributes
+        if isinstance(other, CloudEvent):
+            return self.data == other.data and self._attributes == other._attributes
+        return False
 
     # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type
