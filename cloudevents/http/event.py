@@ -72,7 +72,6 @@ class CloudEvent:
             return self.data == other.data and self._attributes == other._attributes
         return False
 
-
     # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type
     def __getitem__(self, key: str) -> typing.Any:
