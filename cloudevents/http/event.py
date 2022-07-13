@@ -72,9 +72,10 @@ class CloudEvent:
             return self.data == other.data and self._attributes == other._attributes
         return False
 
+
     # Data access is handled via `.data` member
     # Attribute access is managed via Mapping type
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> typing.Any:
         return self._attributes[key]
 
     def get(
@@ -93,20 +94,20 @@ class CloudEvent:
         """
         return self._attributes.get(key, default)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: typing.Any) -> None:
         self._attributes[key] = value
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> None:
         del self._attributes[key]
 
-    def __iter__(self):
+    def __iter__(self) -> typing.Iterator[typing.Any]:
         return iter(self._attributes)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._attributes)
 
-    def __contains__(self, key):
+    def __contains__(self, key: str) -> bool:
         return key in self._attributes
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str({"attributes": self._attributes, "data": self.data})
