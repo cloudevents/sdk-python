@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.4.0] — 2022-07-14
 ### Added
 - Added `.get` accessor for even properties ([#165])
 - Added type information for all event member functions ([#173])
@@ -22,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs` folder and related unused tooling ([#168])
 
 
-## [1.3.0] — 2022-09-07
+## [1.3.0] — 2022-07-09
 ### Added
 - Python 3.9 support ([#144])
 - Python 3.10 support ([#150])
@@ -108,6 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.4.0]: https://github.com/cloudevents/sdk-python/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/cloudevents/sdk-python/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/cloudevents/sdk-python/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/cloudevents/sdk-python/compare/1.0.1...1.1.0
