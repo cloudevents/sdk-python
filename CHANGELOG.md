@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Default branch changed from `master` to `main` ([#180])
+
 
 ## [1.4.0] — 2022-07-14
 ### Added
@@ -165,3 +168,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#170]: https://github.com/cloudevents/sdk-python/pull/170
 [#172]: https://github.com/cloudevents/sdk-python/pull/172
 [#173]: https://github.com/cloudevents/sdk-python/pull/173
+[#180]: https://github.com/cloudevents/sdk-python/pull/180
