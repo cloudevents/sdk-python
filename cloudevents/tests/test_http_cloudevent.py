@@ -168,8 +168,19 @@ def test_cloudevent_general_overrides():
     assert len(event) == 0
 
 
-def test_none_json_or_string():
-    assert _json_or_string(None) is None
+@pytest.mark.parametrize(
+    "given, expected",
+    [
+        (None, None),
+        ('{"hello": "world"}', {"hello": "world"}),
+        (b'{"hello": "world"}', {"hello": "world"}),
+        (b"Hello World", b"Hello World"),
+        ("Hello World", "Hello World"),
+        (b"\x00\x00\x11Hello World", b"\x00\x00\x11Hello World"),
+    ],
+)
+def test_json_or_string_match_golden_sample(given, expected):
+    assert _json_or_string(given) == expected
 
 
 def test_get_operation_on_non_existing_attribute_must_not_raise_exception(
