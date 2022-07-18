@@ -25,7 +25,7 @@ def default_marshaller(content: any):
         return content
 
 
-def _json_or_string(content: typing.Union[str, bytes]):
+def _json_or_string(content: typing.Optional[typing.Union[str, bytes]]):
     if content is None:
         return None
     try:
