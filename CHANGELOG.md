@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Malformed unicode buffer encoded in `base_64` json field no-longer fail CloudEvent
  class construction ([#184])
- 
+
 ### Changed
 - Default branch changed from `master` to `main` ([#180])
 
