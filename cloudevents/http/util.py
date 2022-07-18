@@ -25,7 +25,18 @@ def default_marshaller(content: any):
         return content
 
 
-def _json_or_string(content: typing.Optional[typing.Union[str, bytes]]):
+ContentT = typing.TypeVar("ContentT", bound=typing.Union[str, bytes])
+
+
+def _json_or_string(
+    content: typing.Optional[ContentT],
+) -> typing.Optional[
+    typing.Union[
+        typing.Dict[typing.Any, typing.Any],
+        typing.List[typing.Any],
+        ContentT,
+    ]
+]:
     if content is None:
         return None
     try:
