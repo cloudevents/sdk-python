@@ -29,12 +29,12 @@ ContentT = typing.TypeVar("ContentT", bound=typing.Union[str, bytes])
 
 
 def _json_or_string(
-    content: typing.Optional[ContentT],
+    content: typing.Optional[typing.AnyStr],
 ) -> typing.Optional[
     typing.Union[
         typing.Dict[typing.Any, typing.Any],
         typing.List[typing.Any],
-        ContentT,
+        typing.AnyStr,
     ]
 ]:
     if content is None:
