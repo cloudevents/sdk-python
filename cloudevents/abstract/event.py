@@ -4,16 +4,32 @@ from typing import TypeVar
 
 
 class CloudEvent(abc.ABC):
+    """
+    Used internally for multi-framework event type integration
+    """
+
     @classmethod
     def create(
         cls,
         attributes: typing.Dict[str, typing.Any],
         data: typing.Optional[typing.Any],
     ) -> "CloudEvent":
+        """
+        Factory function.
+        We SHOULD NOT use the __init__ function as the factory because
+        we MUST NOT assume how the __init__ function looks across different python
+        frameworks
+        """
         raise NotImplementedError()
 
     @property
     def _attributes_read_model(self) -> typing.Dict[str, typing.Any]:
+        """
+        :return: dict read model of all of the attributes of this event
+
+        you MUST NOT mutate this dict
+        implementation MAY assume the dic will not be mutated
+        """
         raise NotImplementedError()
 
     @property
