@@ -3,13 +3,13 @@ import typing
 from typing import TypeVar
 
 
-class AbstractCloudEvent(abc.ABC):
+class CloudEvent(abc.ABC):
     @classmethod
     def create(
         cls,
         attributes: typing.Dict[str, typing.Any],
         data: typing.Optional[typing.Any],
-    ) -> "AbstractCloudEvent":
+    ) -> "CloudEvent":
         raise NotImplementedError()
 
     @property
@@ -31,7 +31,7 @@ class AbstractCloudEvent(abc.ABC):
         raise NotImplementedError()
 
     def __eq__(self, other: typing.Any) -> bool:
-        if isinstance(other, AbstractCloudEvent):
+        if isinstance(other, CloudEvent):
             return (
                 self.data == other.data
                 and self._attributes_read_model == other._attributes_read_model
@@ -72,4 +72,4 @@ class AbstractCloudEvent(abc.ABC):
         return str({"attributes": self._attributes_read_model, "data": self.data})
 
 
-AnyCloudEvent = TypeVar("AnyCloudEvent", bound=AbstractCloudEvent)
+AnyCloudEvent = TypeVar("AnyCloudEvent", bound=CloudEvent)

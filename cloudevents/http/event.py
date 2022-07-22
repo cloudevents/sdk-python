@@ -18,14 +18,20 @@ import uuid
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http.mappings import _required_by_version
-from cloudevents.sdk.event import abstract_event
+from cloudevents import abstract
 
 
-class CloudEvent(abstract_event.AbstractCloudEvent):
+class CloudEvent(abstract.CloudEvent):
     """
     Python-friendly cloudevent class supporting v1 events
     Supports both binary and structured mode CloudEvents
     """
+
+    @classmethod
+    def create(
+        cls, attributes: typing.Dict[str, typing.Any], data: typing.Optional[typing.Any]
+    ) -> "CloudEvent":
+        return cls(attributes, data)
 
     def __init__(self, attributes: typing.Dict[str, str], data: typing.Any = None):
         """

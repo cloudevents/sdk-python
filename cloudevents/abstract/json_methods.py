@@ -14,24 +14,41 @@
 
 import typing
 
-from cloudevents.http.event import CloudEvent
+from cloudevents.abstract import AnyCloudEvent
 from cloudevents.sdk import types
+from cloudevents.abstract.http_methods import to_structured, from_http
 
-# backwards compatibility
-from cloudevents.abstract.json_methods import to_json  # noqa
-from cloudevents.abstract.json_methods import from_json as _abstract_from_json
+
+def to_json(
+    event: AnyCloudEvent,
+    data_marshaller: types.MarshallerType = None,
+) -> typing.Union[str, bytes]:
+    """
+    Cast an CloudEvent into a json object
+    :param event: CloudEvent which will be converted into a json object
+    :type event: CloudEvent
+    :param data_marshaller: Callable function which will cast event.data
+        into a json object
+    :type data_marshaller: typing.Callable
+    :returns: json object representing the given event
+    """
+    return to_structured(event, data_marshaller=data_marshaller)[1]
 
 
 def from_json(
+    event_type: typing.Type[AnyCloudEvent],
     data: typing.Union[str, bytes],
     data_unmarshaller: types.UnmarshallerType = None,
-) -> CloudEvent:
+) -> AnyCloudEvent:
     """
     Cast json encoded data into an CloudEvent
+    :param event_type: Concrete event type to which deserialize the json event
     :param data: json encoded cloudevent data
     :param data_unmarshaller: Callable function which will cast data to a
         python object
     :type data_unmarshaller: typing.Callable
     :returns: CloudEvent representing given cloudevent json object
     """
-    return _abstract_from_json(CloudEvent, data, data_unmarshaller)
+    return from_http(
+        event_type, headers={}, data=data, data_unmarshaller=data_unmarshaller
+    )
