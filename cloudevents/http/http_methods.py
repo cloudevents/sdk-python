@@ -29,7 +29,7 @@ def from_http(
     headers: typing.Dict[str, str],
     data: typing.Union[str, bytes, None],
     data_unmarshaller: types.UnmarshallerType = None,
-):
+) -> CloudEvent:
     """
     Unwrap a CloudEvent (binary or structured) from an HTTP request.
     :param headers: the HTTP headers
