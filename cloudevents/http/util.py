@@ -34,6 +34,10 @@ def _json_or_string(
         typing.AnyStr,
     ]
 ]:
+    """
+    Given an encoded JSON string MUST return decoded JSON object.
+    Otherwise, MUST return the given string as-is.
+    """
     if content is None:
         return None
     try:
