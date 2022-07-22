@@ -3,6 +3,14 @@ import typing
 
 
 class AbstractCloudEvent(abc.ABC):
+    @classmethod
+    def create(
+        cls,
+        attributes: typing.Dict[str, typing.Any],
+        data: typing.Optional[typing.Any],
+    ) -> "AbstractCloudEvent":
+        raise NotImplementedError()
+
     @property
     def _attributes_read_model(self) -> typing.Dict[str, typing.Any]:
         raise NotImplementedError()
