@@ -18,9 +18,10 @@ import uuid
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http.mappings import _required_by_version
+from cloudevents.sdk.event import abstract_event
 
 
-class CloudEvent:
+class CloudEvent(abstract_event.AbstractCloudEvent):
     """
     Python-friendly cloudevent class supporting v1 events
     Supports both binary and structured mode CloudEvents
@@ -45,7 +46,7 @@ class CloudEvent:
         :type data: typing.Any
         """
         self._attributes = {k.lower(): v for k, v in attributes.items()}
-        self.data = data
+        self._data = data
         if "specversion" not in self._attributes:
             self._attributes["specversion"] = "1.0"
         if "id" not in self._attributes:
@@ -67,46 +68,20 @@ class CloudEvent:
                 f"Missing required keys: {required_set - self._attributes.keys()}"
             )
 
-    def __eq__(self, other: typing.Any) -> bool:
-        if isinstance(other, CloudEvent):
-            return self.data == other.data and self._attributes == other._attributes
-        return False
+    @property
+    def _attributes_read_model(self) -> typing.Dict[str, typing.Any]:
+        return self._attributes
 
-    # Data access is handled via `.data` member
-    # Attribute access is managed via Mapping type
-    def __getitem__(self, key: str) -> typing.Any:
-        return self._attributes[key]
+    @property
+    def data(self) -> typing.Optional[typing.Any]:
+        return self._data
 
-    def get(
-        self, key: str, default: typing.Optional[typing.Any] = None
-    ) -> typing.Optional[typing.Any]:
-        """
-        Retrieves an event attribute value for the given key.
-        Returns the default value if not attribute for the given key exists.
-
-        MUST NOT throw an exception when the key does not exist.
-
-        :param key: The event attribute name.
-        :param default: The default value to be returned when
-            no attribute with the given key exists.
-        :returns: The event attribute value if exists, default value otherwise.
-        """
-        return self._attributes.get(key, default)
+    @data.setter
+    def data(self, value) -> None:
+        self._data = value
 
     def __setitem__(self, key: str, value: typing.Any) -> None:
         self._attributes[key] = value
 
     def __delitem__(self, key: str) -> None:
         del self._attributes[key]
-
-    def __iter__(self) -> typing.Iterator[typing.Any]:
-        return iter(self._attributes)
-
-    def __len__(self) -> int:
-        return len(self._attributes)
-
-    def __contains__(self, key: str) -> bool:
-        return key in self._attributes
-
-    def __repr__(self) -> str:
-        return str({"attributes": self._attributes, "data": self.data})
