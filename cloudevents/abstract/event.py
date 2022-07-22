@@ -25,7 +25,7 @@ class CloudEvent(abc.ABC):
     @property
     def _attributes_read_model(self) -> typing.Dict[str, typing.Any]:
         """
-        :return: dict read model of all of the attributes of this event
+        :return: attributes of this event
 
         you MUST NOT mutate this dict
         implementation MAY assume the dic will not be mutated
@@ -33,11 +33,12 @@ class CloudEvent(abc.ABC):
         raise NotImplementedError()
 
     @property
-    def data(self) -> typing.Optional[typing.Any]:
-        raise NotImplementedError()
-
-    @data.setter
-    def data(self, value: typing.Optional[typing.Any]) -> None:
+    def _data_read_model(self) -> typing.Optional[typing.Any]:
+        """
+        :return: data value of the  event
+        you MUST NOT mutate this value
+        implementation MAY assume the value will not be mutated
+        """
         raise NotImplementedError()
 
     def __setitem__(self, key: str, value: typing.Any) -> None:
@@ -49,7 +50,7 @@ class CloudEvent(abc.ABC):
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, CloudEvent):
             return (
-                self.data == other.data
+                self._data_read_model == other._data_read_model
                 and self._attributes_read_model == other._attributes_read_model
             )
         return False
@@ -85,7 +86,9 @@ class CloudEvent(abc.ABC):
         return key in self._attributes_read_model
 
     def __repr__(self) -> str:
-        return str({"attributes": self._attributes_read_model, "data": self.data})
+        return str(
+            {"attributes": self._attributes_read_model, "data": self._data_read_model}
+        )
 
 
 AnyCloudEvent = TypeVar("AnyCloudEvent", bound=CloudEvent)
