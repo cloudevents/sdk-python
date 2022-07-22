@@ -52,7 +52,7 @@ class CloudEvent(abstract.CloudEvent):
         :type data: typing.Any
         """
         self._attributes = {k.lower(): v for k, v in attributes.items()}
-        self._data = data
+        self.data = data
         if "specversion" not in self._attributes:
             self._attributes["specversion"] = "1.0"
         if "id" not in self._attributes:
@@ -79,12 +79,8 @@ class CloudEvent(abstract.CloudEvent):
         return self._attributes
 
     @property
-    def data(self) -> typing.Optional[typing.Any]:
-        return self._data
-
-    @data.setter
-    def data(self, value) -> None:
-        self._data = value
+    def _data_read_model(self) -> typing.Optional[typing.Any]:
+        return self.data
 
     def __setitem__(self, key: str, value: typing.Any) -> None:
         self._attributes[key] = value
