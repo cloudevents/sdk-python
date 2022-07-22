@@ -9,6 +9,7 @@ class CloudEvent(abc.ABC):
     """
 
     @classmethod
+    @abc.abstractmethod
     def create(
         cls,
         attributes: typing.Dict[str, typing.Any],
@@ -20,9 +21,10 @@ class CloudEvent(abc.ABC):
         we MUST NOT assume how the __init__ function looks across different python
         frameworks
         """
-        raise NotImplementedError()
+        pass
 
     @property
+    @abc.abstractmethod
     def _attributes_read_model(self) -> typing.Dict[str, typing.Any]:
         """
         :return: attributes of this event
@@ -30,16 +32,17 @@ class CloudEvent(abc.ABC):
         you MUST NOT mutate this dict
         implementation MAY assume the dic will not be mutated
         """
-        raise NotImplementedError()
+        pass
 
     @property
+    @abc.abstractmethod
     def _data_read_model(self) -> typing.Optional[typing.Any]:
         """
         :return: data value of the  event
         you MUST NOT mutate this value
         implementation MAY assume the value will not be mutated
         """
-        raise NotImplementedError()
+        pass
 
     def __setitem__(self, key: str, value: typing.Any) -> None:
         raise NotImplementedError()
