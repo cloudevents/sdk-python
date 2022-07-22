@@ -1,5 +1,6 @@
 import abc
 import typing
+from typing import TypeVar
 
 
 class AbstractCloudEvent(abc.ABC):
@@ -69,3 +70,6 @@ class AbstractCloudEvent(abc.ABC):
 
     def __repr__(self) -> str:
         return str({"attributes": self._attributes_read_model, "data": self.data})
+
+
+AnyCloudEvent = TypeVar("AnyCloudEvent", bound=AbstractCloudEvent)
