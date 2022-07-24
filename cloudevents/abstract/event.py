@@ -14,7 +14,7 @@ class CloudEvent(abc.ABC):
         cls,
         attributes: typing.Dict[str, typing.Any],
         data: typing.Optional[typing.Any],
-    ) -> "CloudEvent":
+    ) -> "AnyCloudEvent":
         """
         Factory function.
         We SHOULD NOT use the __init__ function as the factory because
