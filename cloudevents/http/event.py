@@ -18,10 +18,10 @@ import uuid
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http.mappings import _required_by_version
-from cloudevents import abstract
+from cloudevents import generic
 
 
-class CloudEvent(abstract.CloudEvent):
+class CloudEvent(generic.CloudEvent):
     """
     Python-friendly cloudevent class supporting v1 events
     Supports both binary and structured mode CloudEvents
