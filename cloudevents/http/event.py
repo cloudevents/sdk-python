@@ -17,8 +17,8 @@ import typing
 import uuid
 
 import cloudevents.exceptions as cloud_exceptions
-from cloudevents.http.mappings import _required_by_version
 from cloudevents import abstract
+from cloudevents.http.mappings import _required_by_version
 
 
 class CloudEvent(abstract.CloudEvent):

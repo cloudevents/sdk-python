@@ -1,4 +1,3 @@
-import abc
 import typing
 from typing import TypeVar
 

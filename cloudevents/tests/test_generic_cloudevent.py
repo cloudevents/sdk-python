@@ -1,5 +1,6 @@
-from cloudevents.abstract import CloudEvent
 import pytest
+
+from cloudevents.abstract import CloudEvent
 
 
 def test_del_is_abstract():

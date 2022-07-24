@@ -11,17 +11,50 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
 import json
 import typing
 
-
-import cloudevents.exceptions as cloud_exceptions
-from cloudevents.abstract.event import AnyCloudEvent
-from cloudevents.http.event_type import is_binary
+from cloudevents import exceptions as cloud_exceptions
+from cloudevents.abstract import AnyCloudEvent
+from cloudevents.http import is_binary
 from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
 from cloudevents.http.util import _json_or_string
 from cloudevents.sdk import converters, marshaller, types
+
+
+def to_json(
+    event: AnyCloudEvent,
+    data_marshaller: types.MarshallerType = None,
+) -> typing.Union[str, bytes]:
+    """
+    Cast an CloudEvent into a json object
+    :param event: CloudEvent which will be converted into a json object
+    :type event: CloudEvent
+    :param data_marshaller: Callable function which will cast event.data
+        into a json object
+    :type data_marshaller: typing.Callable
+    :returns: json object representing the given event
+    """
+    return to_structured(event, data_marshaller=data_marshaller)[1]
+
+
+def from_json(
+    event_type: typing.Type[AnyCloudEvent],
+    data: typing.Union[str, bytes],
+    data_unmarshaller: types.UnmarshallerType = None,
+) -> AnyCloudEvent:
+    """
+    Cast json encoded data into an CloudEvent
+    :param event_type: Concrete event type to which deserialize the json event
+    :param data: json encoded cloudevent data
+    :param data_unmarshaller: Callable function which will cast data to a
+        python object
+    :type data_unmarshaller: typing.Callable
+    :returns: CloudEvent representing given cloudevent json object
+    """
+    return from_http(
+        event_type, headers={}, data=data, data_unmarshaller=data_unmarshaller
+    )
 
 
 def from_http(

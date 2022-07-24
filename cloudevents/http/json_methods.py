@@ -14,12 +14,10 @@
 
 import typing
 
+from cloudevents.conversion import from_json as _abstract_from_json
+from cloudevents.conversion import to_json
 from cloudevents.http.event import CloudEvent
 from cloudevents.sdk import types
-
-# backwards compatibility
-from cloudevents.abstract.json_methods import to_json  # noqa
-from cloudevents.abstract.json_methods import from_json as _abstract_from_json
 
 
 def from_json(
@@ -35,3 +33,7 @@ def from_json(
     :returns: CloudEvent representing given cloudevent json object
     """
     return _abstract_from_json(CloudEvent, data, data_unmarshaller)
+
+
+# backwards compatibility
+to_json = to_json

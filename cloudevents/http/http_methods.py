@@ -12,19 +12,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import typing
 
 from deprecation import deprecated
 
+from cloudevents.conversion import from_http as _abstract_from_http
+from cloudevents.conversion import to_binary, to_structured
 from cloudevents.http.event import CloudEvent
 from cloudevents.sdk import types
-
-# backwards compatability imports
-from cloudevents.abstract.http_methods import to_binary, to_structured  # noqa
-
-
-from cloudevents.abstract.http_methods import from_http as _abstract_from_http
 
 
 def from_http(
@@ -44,6 +39,12 @@ def from_http(
     :type data_unmarshaller: types.UnmarshallerType
     """
     return _abstract_from_http(CloudEvent, headers, data, data_unmarshaller)
+
+
+# backwards compatibility
+to_binary = to_binary
+# backwards compatibility
+to_structured = to_structured
 
 
 @deprecated(deprecated_in="1.0.2", details="Use to_binary function instead")
