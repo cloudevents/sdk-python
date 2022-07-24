@@ -32,7 +32,7 @@ def from_json(
     :type data_unmarshaller: typing.Callable
     :returns: CloudEvent representing given cloudevent json object
     """
-    return _abstract_from_json(CloudEvent, data, data_unmarshaller)
+    return _abstract_from_json(data, data_unmarshaller, event_type=CloudEvent)
 
 
 # backwards compatibility

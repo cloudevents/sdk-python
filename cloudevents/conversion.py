@@ -16,7 +16,7 @@ import typing
 
 from cloudevents import exceptions as cloud_exceptions
 from cloudevents.abstract import AnyCloudEvent
-from cloudevents.http import is_binary
+from cloudevents.http import CloudEvent, is_binary
 from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
 from cloudevents.http.util import _json_or_string
 from cloudevents.sdk import converters, marshaller, types
@@ -39,33 +39,35 @@ def to_json(
 
 
 def from_json(
-    event_type: typing.Type[AnyCloudEvent],
     data: typing.Union[str, bytes],
     data_unmarshaller: types.UnmarshallerType = None,
+    event_type: typing.Type[AnyCloudEvent] = CloudEvent,
 ) -> AnyCloudEvent:
     """
     Cast json encoded data into an CloudEvent
-    :param event_type: Concrete event type to which deserialize the json event
     :param data: json encoded cloudevent data
     :param data_unmarshaller: Callable function which will cast data to a
         python object
     :type data_unmarshaller: typing.Callable
+    :param event_type: Concrete event type to which deserialize the json event
     :returns: CloudEvent representing given cloudevent json object
     """
     return from_http(
-        event_type, headers={}, data=data, data_unmarshaller=data_unmarshaller
+        headers={},
+        data=data,
+        data_unmarshaller=data_unmarshaller,
+        event_type=event_type,
     )
 
 
 def from_http(
-    event_type: typing.Type[AnyCloudEvent],
     headers: typing.Dict[str, str],
     data: typing.Union[str, bytes, None],
     data_unmarshaller: types.UnmarshallerType = None,
+    event_type: typing.Type[AnyCloudEvent] = CloudEvent,
 ) -> AnyCloudEvent:
     """
     Unwrap a CloudEvent (binary or structured) from an HTTP request.
-    :param event_type: concrete CloudEvent type to deserialize the event to.
     :param headers: the HTTP headers
     :type headers: typing.Dict[str, str]
     :param data: the HTTP request body. If set to None, "" or b'', the returned
@@ -74,6 +76,7 @@ def from_http(
     :param data_unmarshaller: Callable function to map data to a python object
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
+    :param event_type: concrete CloudEvent type to deserialize the event to.
     """
     if data is None or data == b"":
         # Empty string will cause data to be marshalled into None
