@@ -5,7 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Malformed unicode buffer encoded in `base_64` json field no-longer fail CloudEvent
+ class construction ([#184])
 
+### Changed
+- Default branch changed from `master` to `main` ([#180])
+
+
+## [1.4.0] — 2022-07-14
 ### Added
 - Added `.get` accessor for even properties ([#165])
 - Added type information for all event member functions ([#173])
@@ -22,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs` folder and related unused tooling ([#168])
 
 
-## [1.3.0] — 2022-09-07
+## [1.3.0] — 2022-07-09
 ### Added
 - Python 3.9 support ([#144])
 - Python 3.10 support ([#150])
@@ -108,6 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.4.0]: https://github.com/cloudevents/sdk-python/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/cloudevents/sdk-python/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/cloudevents/sdk-python/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/cloudevents/sdk-python/compare/1.0.1...1.1.0
@@ -162,3 +171,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#170]: https://github.com/cloudevents/sdk-python/pull/170
 [#172]: https://github.com/cloudevents/sdk-python/pull/172
 [#173]: https://github.com/cloudevents/sdk-python/pull/173
+[#180]: https://github.com/cloudevents/sdk-python/pull/180
+[#184]: https://github.com/cloudevents/sdk-python/pull/184
