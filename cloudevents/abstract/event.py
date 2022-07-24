@@ -31,10 +31,19 @@ class CloudEvent(abc.ABC):
     @abc.abstractmethod
     def _attributes_read_model(self) -> typing.Dict[str, typing.Any]:
         """
-        :return: attributes of this event
+        :return: Attributes of this event.
 
-        you MUST NOT mutate this dict
-        implementation MAY assume the dic will not be mutated
+        You MUST NOT mutate this dict.
+        Implementation MAY assume the dict will not be mutated.
+
+        The reason this is only a read model and not a write model is
+        because you MAY not have an easy write access to the data.
+
+        For example - a database row or a cached value.
+
+        We don't wont to restrict our future selves.
+
+        When a write model will be needed, it will be implemented
         """
         pass
 
@@ -42,9 +51,19 @@ class CloudEvent(abc.ABC):
     @abc.abstractmethod
     def _data_read_model(self) -> typing.Optional[typing.Any]:
         """
-        :return: data value of the  event
-        you MUST NOT mutate this value
-        implementation MAY assume the value will not be mutated
+        :return: Data value of the  event.
+        You MUST NOT mutate this dict.
+        Implementation MAY assume the dict will not be mutated.
+
+        The reason this is only a read model and not a write model is
+        because you MAY not have an easy write access to the data.
+
+        For example - a database row or a cached value.
+
+        We don't wont to restrict our future selves.
+
+        When a write model will be needed, it will be implemented
+
         """
         pass
 
