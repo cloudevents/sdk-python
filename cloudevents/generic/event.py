@@ -3,7 +3,7 @@ import typing
 from typing import TypeVar
 
 
-class CloudEvent(abc.ABC):
+class CloudEvent:
     """
     The CloudEvent Python wrapper contract exposing generically-available
     properties and APIs.
@@ -13,7 +13,6 @@ class CloudEvent(abc.ABC):
     """
 
     @classmethod
-    @abc.abstractmethod
     def create(
         cls,
         attributes: typing.Dict[str, typing.Any],
@@ -25,10 +24,9 @@ class CloudEvent(abc.ABC):
         we MUST NOT assume how the __init__ function looks across different python
         frameworks
         """
-        pass
+        raise NotImplementedError()
 
     @property
-    @abc.abstractmethod
     def _attributes_read_model(self) -> typing.Dict[str, typing.Any]:
         """
         :return: Attributes of this event.
@@ -51,10 +49,9 @@ class CloudEvent(abc.ABC):
         `event.attributes.get("myattr")`
         * What SHOULD I use `event["myattr"]` or `event.attributes["myattr"]` ?
         """
-        pass
+        raise NotImplementedError()
 
     @property
-    @abc.abstractmethod
     def _data_read_model(self) -> typing.Optional[typing.Any]:
         """
         :return: Data value of the  event.
@@ -71,7 +68,7 @@ class CloudEvent(abc.ABC):
         When a write model will be needed, it will be implemented
 
         """
-        pass
+        raise NotImplementedError()
 
     def __setitem__(self, key: str, value: typing.Any) -> None:
         """
