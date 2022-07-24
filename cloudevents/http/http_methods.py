@@ -21,10 +21,10 @@ from cloudevents.http.event import CloudEvent
 from cloudevents.sdk import types
 
 # backwards compatability imports
-from cloudevents.generic.http_methods import to_binary, to_structured  # noqa
+from cloudevents.abstract.http_methods import to_binary, to_structured  # noqa
 
 
-from cloudevents.generic.http_methods import from_http as _generic_from_http
+from cloudevents.abstract.http_methods import from_http as _abstract_from_http
 
 
 def from_http(
@@ -43,7 +43,7 @@ def from_http(
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
-    return _generic_from_http(CloudEvent, headers, data, data_unmarshaller)
+    return _abstract_from_http(CloudEvent, headers, data, data_unmarshaller)
 
 
 @deprecated(deprecated_in="1.0.2", details="Use to_binary function instead")

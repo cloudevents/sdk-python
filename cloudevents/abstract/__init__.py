@@ -12,4 +12,4 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.generic.event import CloudEvent, AnyCloudEvent  # noqa
+from cloudevents.abstract.event import CloudEvent, AnyCloudEvent  # noqa

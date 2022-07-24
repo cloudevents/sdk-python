@@ -18,8 +18,8 @@ from cloudevents.http.event import CloudEvent
 from cloudevents.sdk import types
 
 # backwards compatibility
-from cloudevents.generic.json_methods import to_json  # noqa
-from cloudevents.generic.json_methods import from_json as _generic_from_json
+from cloudevents.abstract.json_methods import to_json  # noqa
+from cloudevents.abstract.json_methods import from_json as _abstract_from_json
 
 
 def from_json(
@@ -34,4 +34,4 @@ def from_json(
     :type data_unmarshaller: typing.Callable
     :returns: CloudEvent representing given cloudevent json object
     """
-    return _generic_from_json(CloudEvent, data, data_unmarshaller)
+    return _abstract_from_json(CloudEvent, data, data_unmarshaller)

@@ -17,7 +17,7 @@ import typing
 
 
 import cloudevents.exceptions as cloud_exceptions
-from cloudevents.generic.event import AnyCloudEvent
+from cloudevents.abstract.event import AnyCloudEvent
 from cloudevents.http.event_type import is_binary
 from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
 from cloudevents.http.util import _json_or_string

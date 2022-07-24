@@ -1,4 +1,4 @@
-from cloudevents.generic import CloudEvent
+from cloudevents.abstract import CloudEvent
 import pytest
 
 

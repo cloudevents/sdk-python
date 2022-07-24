@@ -14,9 +14,9 @@
 
 import typing
 
-from cloudevents.generic import AnyCloudEvent
+from cloudevents.abstract import AnyCloudEvent
 from cloudevents.sdk import types
-from cloudevents.generic.http_methods import to_structured, from_http
+from cloudevents.abstract.http_methods import to_structured, from_http
 
 
 def to_json(
