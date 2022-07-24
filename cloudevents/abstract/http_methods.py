@@ -30,7 +30,18 @@ def from_http(
     data: typing.Union[str, bytes, None],
     data_unmarshaller: types.UnmarshallerType = None,
 ) -> AnyCloudEvent:
-
+    """
+    Unwrap a CloudEvent (binary or structured) from an HTTP request.
+    :param event_type: concrete CloudEvent type to deserialize the event to.
+    :param headers: the HTTP headers
+    :type headers: typing.Dict[str, str]
+    :param data: the HTTP request body. If set to None, "" or b'', the returned
+        event's data field will be set to None
+    :type data: typing.IO
+    :param data_unmarshaller: Callable function to map data to a python object
+        e.g. lambda x: x or lambda x: json.loads(x)
+    :type data_unmarshaller: types.UnmarshallerType
+    """
     if data is None or data == b"":
         # Empty string will cause data to be marshalled into None
         data = ""
