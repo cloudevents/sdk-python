@@ -52,7 +52,7 @@ class CloudEvent(abstract.CloudEvent):
         :type data: typing.Any
         """
         self._attributes = {k.lower(): v for k, v in attributes.items()}
-        self._data = data
+        self.data = data
         if "specversion" not in self._attributes:
             self._attributes["specversion"] = "1.0"
         if "id" not in self._attributes:
@@ -74,21 +74,13 @@ class CloudEvent(abstract.CloudEvent):
                 f"Missing required keys: {required_set - self._attributes.keys()}"
             )
 
-    @property
-    def attributes(self) -> typing.Dict[str, typing.Any]:
-        return self._attributes
+    @classmethod
+    def get_attributes(cls, event: "CloudEvent") -> typing.Dict[str, typing.Any]:
+        return event._attributes
 
-    @property
-    def data(self) -> typing.Optional[typing.Any]:
-        return self._data
-
-    @data.setter
-    def data(self, value) -> None:
-        """
-        Exists for backwards compatibility
-        :param value: new data vale
-        """
-        self._data = value
+    @classmethod
+    def get_data(cls, event: "CloudEvent") -> typing.Optional[typing.Any]:
+        return event.data
 
     def __setitem__(self, key: str, value: typing.Any) -> None:
         self._attributes[key] = value

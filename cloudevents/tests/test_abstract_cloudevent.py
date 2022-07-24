@@ -16,7 +16,7 @@ def test_data_is_abstract():
     exists mainly for coverage reasons
     """
     with pytest.raises(NotImplementedError):
-        CloudEvent().data
+        CloudEvent.get_data(CloudEvent())
 
 
 def test_attributes_is_abstract():
@@ -24,4 +24,4 @@ def test_attributes_is_abstract():
     exists mainly for coverage reasons
     """
     with pytest.raises(NotImplementedError):
-        CloudEvent().attributes
+        CloudEvent.get_attributes(CloudEvent())

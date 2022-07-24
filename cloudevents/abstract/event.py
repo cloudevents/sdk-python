@@ -25,8 +25,8 @@ class CloudEvent:
         """
         raise NotImplementedError()
 
-    @property
-    def attributes(self) -> typing.Dict[str, typing.Any]:
+    @classmethod
+    def get_attributes(cls, event: "CloudEvent") -> typing.Dict[str, typing.Any]:
         """
         :return: Attributes of this event.
 
@@ -35,8 +35,8 @@ class CloudEvent:
         """
         raise NotImplementedError()
 
-    @property
-    def data(self) -> typing.Optional[typing.Any]:
+    @classmethod
+    def get_data(cls, event: "CloudEvent") -> typing.Optional[typing.Any]:
         """
         :return: Data value of the  event.
         You MUST NOT mutate this dict.
@@ -46,7 +46,9 @@ class CloudEvent:
 
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, CloudEvent):
-            return self.data == other.data and self.attributes == other.attributes
+            same_data = self.get_data(self) == other.get_data(other)
+            same_attributes = self.get_attributes(self) == other.get_attributes(other)
+            return same_data and same_attributes
         return False
 
     def __getitem__(self, key: str) -> typing.Any:
@@ -56,7 +58,7 @@ class CloudEvent:
         :param key: The event attribute name.
         :return: The event attribute value.
         """
-        return self.attributes[key]
+        return self.get_attributes(self)[key]
 
     def get(
         self, key: str, default: typing.Optional[typing.Any] = None
@@ -72,19 +74,21 @@ class CloudEvent:
             no attribute with the given key exists.
         :returns: The event attribute value if exists, default value otherwise.
         """
-        return self.attributes.get(key, default)
+        return self.get_attributes(self).get(key, default)
 
     def __iter__(self) -> typing.Iterator[typing.Any]:
-        return iter(self.attributes)
+        return iter(self.get_attributes(self))
 
     def __len__(self) -> int:
-        return len(self.attributes)
+        return len(self.get_attributes(self))
 
     def __contains__(self, key: str) -> bool:
-        return key in self.attributes
+        return key in self.get_attributes(self)
 
     def __repr__(self) -> str:
-        return str({"attributes": self.attributes, "data": self.data})
+        return str(
+            {"attributes": self.get_attributes(self), "data": self.get_data(self)}
+        )
 
 
 AnyCloudEvent = TypeVar("AnyCloudEvent", bound=CloudEvent)
