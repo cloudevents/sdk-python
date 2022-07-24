@@ -69,25 +69,6 @@ class CloudEvent:
         """
         raise NotImplementedError()
 
-    def __setitem__(self, key: str, value: typing.Any) -> None:
-        """
-        :param key: Event attribute name to change the value of.
-        :param value: The new event attribute value
-        """
-        # requiring the user to implement the setting of the value because the read
-        # model is READ-ONLY.
-        # The abstract class SHOULD NOT know how is the concrete class is implemented
-        raise NotImplementedError()
-
-    def __delitem__(self, key: str) -> None:
-        """
-        :param key: Event attribute name to delete the value of.
-        """
-        # requiring the user to implement the deletion of the value because the read
-        # model is READ-ONLY.
-        # The abstract class SHOULD NOT know how is the concrete class is implemented
-        raise NotImplementedError()
-
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, CloudEvent):
             return (
