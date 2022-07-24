@@ -16,7 +16,7 @@ import typing
 
 from cloudevents import exceptions as cloud_exceptions
 from cloudevents.abstract import AnyCloudEvent
-from cloudevents.http import CloudEvent, is_binary
+from cloudevents.http import is_binary
 from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
 from cloudevents.http.util import _json_or_string
 from cloudevents.sdk import converters, marshaller, types
@@ -37,9 +37,9 @@ def to_json(
 
 
 def from_json(
+    event_type: typing.Type[AnyCloudEvent],
     data: typing.Union[str, bytes],
     data_unmarshaller: types.UnmarshallerType = None,
-    event_type: typing.Type[AnyCloudEvent] = CloudEvent,
 ) -> AnyCloudEvent:
     """
     Cast json encoded data into an CloudEvent
@@ -58,10 +58,10 @@ def from_json(
 
 
 def from_http(
+    event_type: typing.Type[AnyCloudEvent],
     headers: typing.Dict[str, str],
     data: typing.Union[str, bytes, None],
     data_unmarshaller: types.UnmarshallerType = None,
-    event_type: typing.Type[AnyCloudEvent] = CloudEvent,
 ) -> AnyCloudEvent:
     """
     Unwrap a CloudEvent (binary or structured) from an HTTP request.

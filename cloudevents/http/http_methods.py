@@ -38,7 +38,7 @@ def from_http(
         e.g. lambda x: x or lambda x: json.loads(x)
     :type data_unmarshaller: types.UnmarshallerType
     """
-    return _abstract_from_http(headers, data, data_unmarshaller, event_type=CloudEvent)
+    return _abstract_from_http(CloudEvent, headers, data, data_unmarshaller)
 
 
 # backwards compatibility
