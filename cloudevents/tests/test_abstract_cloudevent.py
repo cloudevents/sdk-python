@@ -27,17 +27,17 @@ def test_create_is_abstract():
         assert CloudEvent.create({}, None) is None
 
 
-def test_data_read_is_abstract():
+def test_data_is_abstract():
     """
     exists mainly for coverage reasons
     """
     with pytest.raises(NotImplementedError):
-        CloudEvent()._data_read_model
+        CloudEvent().data
 
 
-def test_attributes_read_model_is_abstract():
+def test_attributes_is_abstract():
     """
     exists mainly for coverage reasons
     """
     with pytest.raises(NotImplementedError):
-        CloudEvent()._attributes_read_model
+        CloudEvent().attributes
