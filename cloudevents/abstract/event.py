@@ -44,6 +44,12 @@ class CloudEvent(abc.ABC):
         We don't wont to restrict our future selves.
 
         When a write model will be needed, it will be implemented
+
+        The we don't have an `attributes` property is to prevent API confusion
+        Examples of confusion:
+        * What is the difference between `event.get("myattr")` and
+        `event.attributes.get("myattr")`
+        * What SHOULD I use `event["myattr"]` or `event.attributes["myattr"]` ?
         """
         pass
 
