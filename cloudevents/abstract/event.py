@@ -58,9 +58,13 @@ class CloudEvent(abc.ABC):
             )
         return False
 
-    # Data access is handled via `.data` member
-    # Attribute access is managed via Mapping type
     def __getitem__(self, key: str) -> typing.Any:
+        """
+        Data access is handled via `.data` member
+        Attribute access is managed via Mapping type
+        :param key: The event attribute name.
+        :return: The event attribute value.
+        """
         return self._attributes_read_model[key]
 
     def get(
