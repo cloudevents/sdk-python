@@ -5,7 +5,11 @@ from typing import TypeVar
 
 class CloudEvent(abc.ABC):
     """
-    Used internally for multi-framework event type integration
+    The CloudEvent Python wrapper contract exposing generically-available
+    properties and APIs.
+
+    Implementations might handle fields and have other APIs exposed but are
+    obliged to follow this contract.
     """
 
     @classmethod
