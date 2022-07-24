@@ -25,10 +25,22 @@ def default_marshaller(content: any):
         return content
 
 
-def _json_or_string(content: typing.Union[str, bytes]):
+def _json_or_string(
+    content: typing.Optional[typing.AnyStr],
+) -> typing.Optional[
+    typing.Union[
+        typing.Dict[typing.Any, typing.Any],
+        typing.List[typing.Any],
+        typing.AnyStr,
+    ]
+]:
+    """
+    Given an encoded JSON string MUST return decoded JSON object.
+    Otherwise, MUST return the given string as-is.
+    """
     if content is None:
         return None
     try:
         return json.loads(content)
-    except (json.JSONDecodeError, TypeError):
+    except (json.JSONDecodeError, TypeError, UnicodeDecodeError):
         return content
