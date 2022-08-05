@@ -74,13 +74,11 @@ class CloudEvent(abstract.CloudEvent):
                 f"Missing required keys: {required_set - self._attributes.keys()}"
             )
 
-    @classmethod
-    def get_attributes(cls, event: "CloudEvent") -> typing.Dict[str, typing.Any]:
-        return event._attributes
+    def _get_attributes(self) -> typing.Dict[str, typing.Any]:
+        return self._attributes
 
-    @classmethod
-    def get_data(cls, event: "CloudEvent") -> typing.Optional[typing.Any]:
-        return event.data
+    def _get_data(self) -> typing.Optional[typing.Any]:
+        return self.data
 
     def __setitem__(self, key: str, value: typing.Any) -> None:
         self._attributes[key] = value
