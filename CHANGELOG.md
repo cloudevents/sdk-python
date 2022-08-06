@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## [1.5.0] — 2022-08-06
+### Added
+- A new `CloudEvent` abstract class is available in the `cloudevents.abstract.event`
+  module. The new abstraction simplifies creation of custom framework-specific
+  implementations of `CloudEvents` wrappers ([#186])
 ### Fixed
 - Malformed unicode buffer encoded in `base_64` json field no-longer fail CloudEvent
  class construction ([#184])
@@ -116,6 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.5.0]: https://github.com/cloudevents/sdk-python/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/cloudevents/sdk-python/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/cloudevents/sdk-python/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/cloudevents/sdk-python/compare/1.1.0...1.2.0
@@ -173,3 +181,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#173]: https://github.com/cloudevents/sdk-python/pull/173
 [#180]: https://github.com/cloudevents/sdk-python/pull/180
 [#184]: https://github.com/cloudevents/sdk-python/pull/184
+[#186]: https://github.com/cloudevents/sdk-python/pull/186
