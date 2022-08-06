@@ -17,14 +17,21 @@ import typing
 import uuid
 
 import cloudevents.exceptions as cloud_exceptions
+from cloudevents import abstract
 from cloudevents.http.mappings import _required_by_version
 
 
-class CloudEvent:
+class CloudEvent(abstract.CloudEvent):
     """
     Python-friendly cloudevent class supporting v1 events
     Supports both binary and structured mode CloudEvents
     """
+
+    @classmethod
+    def create(
+        cls, attributes: typing.Dict[str, typing.Any], data: typing.Optional[typing.Any]
+    ) -> "CloudEvent":
+        return cls(attributes, data)
 
     def __init__(self, attributes: typing.Dict[str, str], data: typing.Any = None):
         """
@@ -67,46 +74,14 @@ class CloudEvent:
                 f"Missing required keys: {required_set - self._attributes.keys()}"
             )
 
-    def __eq__(self, other: typing.Any) -> bool:
-        if isinstance(other, CloudEvent):
-            return self.data == other.data and self._attributes == other._attributes
-        return False
+    def _get_attributes(self) -> typing.Dict[str, typing.Any]:
+        return self._attributes
 
-    # Data access is handled via `.data` member
-    # Attribute access is managed via Mapping type
-    def __getitem__(self, key: str) -> typing.Any:
-        return self._attributes[key]
-
-    def get(
-        self, key: str, default: typing.Optional[typing.Any] = None
-    ) -> typing.Optional[typing.Any]:
-        """
-        Retrieves an event attribute value for the given key.
-        Returns the default value if not attribute for the given key exists.
-
-        MUST NOT throw an exception when the key does not exist.
-
-        :param key: The event attribute name.
-        :param default: The default value to be returned when
-            no attribute with the given key exists.
-        :returns: The event attribute value if exists, default value otherwise.
-        """
-        return self._attributes.get(key, default)
+    def _get_data(self) -> typing.Optional[typing.Any]:
+        return self.data
 
     def __setitem__(self, key: str, value: typing.Any) -> None:
         self._attributes[key] = value
 
     def __delitem__(self, key: str) -> None:
         del self._attributes[key]
-
-    def __iter__(self) -> typing.Iterator[typing.Any]:
-        return iter(self._attributes)
-
-    def __len__(self) -> int:
-        return len(self._attributes)
-
-    def __contains__(self, key: str) -> bool:
-        return key in self._attributes
-
-    def __repr__(self) -> str:
-        return str({"attributes": self._attributes, "data": self.data})
