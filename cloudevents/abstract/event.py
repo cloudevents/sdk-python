@@ -33,13 +33,13 @@ class CloudEvent:
         data: typing.Optional[typing.Any],
     ) -> "AnyCloudEvent":
         """
-        Creates a new instance of the CloudEvent using supplied `attributes` 
+        Creates a new instance of the CloudEvent using supplied `attributes`
         and `data`.
-        
+
         This method should be preferably used over the constructor to create events
         while custom framework-specific implementations may require or assume
         different arguments.
-        
+
         :param attributes: The attributes of the CloudEvent instance.
         :param data: The payload of the CloudEvent instance.
         :returns: A new instance of the CloudEvent created from the passed arguments.
@@ -50,12 +50,12 @@ class CloudEvent:
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
         """
         Returns the attributes of the event.
-        
+
         The implementation MUST assume that the returned value MAY be mutated.
-        
-        Having a function over a property simplifies integration for custom 
+
+        Having a function over a property simplifies integration for custom
         framework-specific implementations.
-        
+
         :returns: Attributes of the event.
         """
         raise NotImplementedError()
@@ -84,10 +84,10 @@ class CloudEvent:
     def __getitem__(self, key: str) -> typing.Any:
         """
         Returns a value of an attribute of the event denoted by the given `key`.
-        
+
         The `data` of the event should be accessed by the `.data` accessor rather
         than this mapping.
-        
+
         :param key: The name of the event attribute to retrieve the value for.
         :returns: The event attribute value.
         """
@@ -98,10 +98,10 @@ class CloudEvent:
     ) -> typing.Optional[typing.Any]:
         """
         Retrieves an event attribute value for the given `key`.
-        
+
         Returns the `default` value if the attribute for the given key does not exist.
 
-        The implementation MUST NOT throw an error when the key does not exist, but 
+        The implementation MUST NOT throw an error when the key does not exist, but
         rather should return `None` or the configured `default`.
 
         :param key: The name of the event attribute to retrieve the value for.
@@ -125,7 +125,7 @@ class CloudEvent:
 
     def __contains__(self, key: str) -> bool:
         """
-        Determines if an attribute with a given `key` is present 
+        Determines if an attribute with a given `key` is present
         in the event attributes.
         """
         return key in self._get_attributes()

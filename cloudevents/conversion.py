@@ -40,7 +40,7 @@ def to_json(
 ) -> typing.Union[str, bytes]:
     """
     Converts given `event` to a JSON string.
-    
+
     :param event: A CloudEvent to be converted into a JSON string.
     :param data_marshaller: Callable function which will cast `event.data`
         into a JSON string.
@@ -56,11 +56,11 @@ def from_json(
 ) -> AnyCloudEvent:
     """
     Parses JSON string `data` into a CloudEvent.
-    
+
     :param data: JSON string representation of a CloudEvent.
     :param data_unmarshaller: Callable function that casts `data` to a
         Python object.
-    :param event_type: A concrete type of the event into which the data is 
+    :param event_type: A concrete type of the event into which the data is
         deserialized.
     :returns: A CloudEvent parsed from the given JSON representation.
     """
@@ -90,7 +90,7 @@ def from_http(
         e.g. lambda x: x or lambda x: json.loads(x)
     :param event_type: The actual type of CloudEvent to deserialize the event to.
     :returns: A CloudEvent instance parsed from the passed HTTP parameters of
-        the specified type. 
+        the specified type.
     """
     if data is None or data == b"":
         # Empty string will cause data to be marshalled into None
@@ -191,8 +191,8 @@ def to_structured(
     data_marshaller: types.MarshallerType = None,
 ) -> typing.Tuple[dict, typing.Union[bytes, str]]:
     """
-    Returns a tuple of HTTP headers/body dicts representing this Cloud Event. 
-    
+    Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
+
     If event.data is a byte object, body will have a `data_base64` field instead of
     `data`.
 
