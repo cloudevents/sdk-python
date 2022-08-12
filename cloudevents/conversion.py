@@ -23,15 +23,44 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import datetime
+import enum
 import json
 import typing
 
 from cloudevents import exceptions as cloud_exceptions
 from cloudevents.abstract import AnyCloudEvent
-from cloudevents.http import is_binary
-from cloudevents.http.mappings import _marshaller_by_format, _obj_by_version
-from cloudevents.http.util import _json_or_string
 from cloudevents.sdk import converters, marshaller, types
+from cloudevents.sdk.converters import is_binary
+from cloudevents.sdk.event import v1, v03
+
+
+def _best_effort_serialize_to_json(
+    value: typing.Any, *args, **kwargs
+) -> typing.Optional[typing.Union[bytes, str, typing.Any]]:
+    """
+    Serializes the given value into a JSON-encoded string.
+
+    Given a None value returns None as is.
+    Given a non-JSON-serializable value returns return the value as is.
+
+    :param value:  The value to be serialized into a JSON string.
+    :return: JSON string of the given value OR None OR given value.
+    """
+    if value is None:
+        return None
+    try:
+        return json.dumps(value, *args, **kwargs)
+    except TypeError:
+        return value
+
+
+_default_marshaller_by_format = {
+    converters.TypeStructured: lambda x: x,
+    converters.TypeBinary: _best_effort_serialize_to_json,
+}  # type: typing.Dict[str, types.MarshallerType]
+
+_obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
 
 
 def to_json(
@@ -169,7 +198,7 @@ def _to_http(
     :returns: (http_headers: dict, http_body: bytes or str)
     """
     if data_marshaller is None:
-        data_marshaller = _marshaller_by_format[format]
+        data_marshaller = _default_marshaller_by_format[format]
 
     if event["specversion"] not in _obj_by_version:
         raise cloud_exceptions.InvalidRequiredFields(
@@ -222,3 +251,76 @@ def to_binary(
         format=converters.TypeBinary,
         data_marshaller=data_marshaller,
     )
+
+
+def best_effort_encode_attribute_value(value: typing.Any) -> typing.Any:
+    """
+    SHOULD convert any value into a JSON serialization friendly format.
+
+    This function acts in a best-effort manner and MAY not actually encode the value
+    if it does not know how to do that, or the value is already JSON-friendly.
+
+    :param value: Value which MAY or MAY NOT be JSON serializable.
+    :return: Possibly encoded value.
+    """
+    if isinstance(value, enum.Enum):
+        return value.value
+    if isinstance(value, datetime.datetime):
+        return value.isoformat()
+
+    return value
+
+
+def from_dict(
+    event_type: typing.Type[AnyCloudEvent],
+    event: typing.Dict[str, typing.Any],
+) -> AnyCloudEvent:
+    """
+    Constructs an Event object of a given `event_type` from
+    a dict `event` representation.
+
+    :param event: The event represented as a  dict.
+    :param event_type: The type of the event to be constructed from the dict.
+    :returns: The event of the specified type backed by the given dict.
+    """
+    attributes = {
+        attr_name: best_effort_encode_attribute_value(attr_value)
+        for attr_name, attr_value in event.items()
+        if attr_name != "data"
+    }
+    return event_type.create(attributes=attributes, data=event.get("data"))
+
+
+def to_dict(event: AnyCloudEvent) -> typing.Dict[str, typing.Any]:
+    """
+    Converts given `event` to its canonical dictionary representation.
+
+    :param event: The event to be converted into a dict.
+    :returns: The canonical dict representation of the event.
+    """
+    result = {attribute_name: event.get(attribute_name) for attribute_name in event}
+    result["data"] = event.data
+    return result
+
+
+def _json_or_string(
+    content: typing.Optional[typing.AnyStr],
+) -> typing.Optional[
+    typing.Union[
+        typing.Dict[typing.Any, typing.Any],
+        typing.List[typing.Any],
+        typing.AnyStr,
+    ]
+]:
+    """
+    Returns a JSON-decoded dictionary or a list of dictionaries if
+    a valid JSON string is provided.
+
+    Returns the same `content` in case of an error or `None` when no content provided.
+    """
+    if content is None:
+        return None
+    try:
+        return json.loads(content)
+    except (json.JSONDecodeError, TypeError, UnicodeDecodeError):
+        return content

@@ -57,3 +57,17 @@ class BinaryHTTPCloudEventConverter(base.Converter):
 
 def NewBinaryHTTPCloudEventConverter() -> BinaryHTTPCloudEventConverter:
     return BinaryHTTPCloudEventConverter()
+
+
+def is_binary(headers: typing.Dict[str, str]) -> bool:
+    """
+    Determines whether an event with the supplied `headers` is in binary format.
+
+    :param headers: The HTTP headers of a potential event.
+    :returns: Returns a bool indicating whether the headers indicate
+        a binary event type.
+    """
+    headers = {key.lower(): value for key, value in headers.items()}
+    content_type = headers.get("content-type", "")
+    binary_parser = BinaryHTTPCloudEventConverter()
+    return binary_parser.can_read(content_type=content_type, headers=headers)

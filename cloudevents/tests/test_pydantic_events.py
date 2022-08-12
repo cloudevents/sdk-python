@@ -20,9 +20,7 @@ import pytest
 from sanic import Sanic, response
 
 import cloudevents.exceptions as cloud_exceptions
-from cloudevents.http import CloudEvent, from_http, to_binary, to_structured
-from cloudevents.http.event_type import is_binary as deprecated_is_binary
-from cloudevents.http.event_type import is_structured as deprecated_is_structured
+from cloudevents.pydantic import CloudEvent, from_http, to_binary, to_structured
 from cloudevents.sdk import converters
 from cloudevents.sdk.converters.binary import is_binary
 from cloudevents.sdk.converters.structured import is_structured
@@ -63,7 +61,7 @@ invalid_cloudevent_request_body = [
 
 test_data = {"payload-content": "Hello World!"}
 
-app = Sanic("test_http_events")
+app = Sanic("test_pydantic_http_events")
 
 
 @app.route("/event", ["POST"])
@@ -355,36 +353,23 @@ def test_structured_no_content_type(specversion):
         assert event.data[key] == val
 
 
-parameterize_binary_func = pytest.mark.parametrize(
-    "is_binary_func", [is_binary, deprecated_is_binary]
-)
+def test_is_binary():
+    headers = {
+        "ce-id": "my-id",
+        "ce-source": "<event-source>",
+        "ce-type": "cloudevent.event.type",
+        "ce-specversion": "1.0",
+        "Content-Type": "text/plain",
+    }
+    assert is_binary(headers)
 
+    headers = {
+        "Content-Type": "application/cloudevents+json",
+    }
+    assert not is_binary(headers)
 
-@parameterize_binary_func
-def test_empty_headers_must_not_be_recognized_as_binary(is_binary_func):
-    assert not is_binary_func({})
-
-
-@parameterize_binary_func
-def test_non_binary_headers_must_not_be_recognized_as_binary(is_binary_func):
-    assert not is_binary_func(
-        {
-            "Content-Type": "application/cloudevents+json",
-        }
-    )
-
-
-@parameterize_binary_func
-def test_binary_ce_headers_must_be_recognize_as_binary(is_binary_func):
-    assert is_binary_func(
-        {
-            "ce-id": "my-id",
-            "ce-source": "<event-source>",
-            "ce-type": "cloudevent.event.type",
-            "ce-specversion": "1.0",
-            "Content-Type": "text/plain",
-        }
-    )
+    headers = {}
+    assert not is_binary(headers)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
@@ -448,14 +433,11 @@ def test_wrong_specversion_to_request():
     assert "Unsupported specversion: 0.2" in str(e.value)
 
 
-@pytest.mark.parametrize(
-    "is_structured_func", [is_structured, deprecated_is_structured]
-)
-def test_is_structured(is_structured_func):
+def test_is_structured():
     headers = {
         "Content-Type": "application/cloudevents+json",
     }
-    assert is_structured_func(headers)
+    assert is_structured(headers)
 
     headers = {
         "ce-id": "my-id",
@@ -464,7 +446,7 @@ def test_is_structured(is_structured_func):
         "ce-specversion": "1.0",
         "Content-Type": "text/plain",
     }
-    assert not is_structured_func(headers)
+    assert not is_structured(headers)
 
 
 def test_empty_json_structured():

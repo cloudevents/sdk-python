@@ -15,8 +15,8 @@
 import pytest
 
 import cloudevents.exceptions as cloud_exceptions
+from cloudevents.conversion import _json_or_string
 from cloudevents.http import CloudEvent
-from cloudevents.http.util import _json_or_string
 
 
 @pytest.fixture(params=["0.3", "1.0"])

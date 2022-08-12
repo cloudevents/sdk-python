@@ -11,36 +11,18 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from deprecation import deprecated
 
-import json
-import typing
+from cloudevents.conversion import (  # noqa
+    _best_effort_serialize_to_json as _moved_default_marshaller,
+)
+
+# THIS MODULE IS DEPRECATED, YOU SHOULD NOT ADD NEW FUNCTIONALLY HERE
 
 
+@deprecated(
+    deprecated_in="1.6.0",
+    details="You SHOULD NOT use the default marshaller",
+)
 def default_marshaller(content: any):
-    if content is None:
-        return None
-    try:
-        return json.dumps(content)
-    except TypeError:
-        return content
-
-
-def _json_or_string(
-    content: typing.Optional[typing.AnyStr],
-) -> typing.Optional[
-    typing.Union[
-        typing.Dict[typing.Any, typing.Any],
-        typing.List[typing.Any],
-        typing.AnyStr,
-    ]
-]:
-    """
-    Given an encoded JSON string MUST return decoded JSON object.
-    Otherwise, MUST return the given string as-is.
-    """
-    if content is None:
-        return None
-    try:
-        return json.loads(content)
-    except (json.JSONDecodeError, TypeError, UnicodeDecodeError):
-        return content
+    return _moved_default_marshaller(content)

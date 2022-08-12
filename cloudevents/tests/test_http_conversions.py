@@ -13,11 +13,13 @@
 #    under the License.
 
 import base64
+import datetime
 import json
 
 import pytest
 
-from cloudevents.http import CloudEvent, from_json, to_json
+from cloudevents.http import CloudEvent, from_dict, from_json, to_dict, to_json
+from cloudevents.sdk.event.attribute import SpecVersion
 
 test_data = json.dumps({"data-key": "val"})
 test_attributes = {
@@ -127,3 +129,30 @@ def test_json_can_talk_to_itself_base64(specversion):
     for key, val in test_attributes.items():
         assert event[key] == val
     assert event.data == data
+
+
+def test_from_dict():
+    given = {
+        "data": b"\x00\x00\x11Hello World",
+        "datacontenttype": "application/octet-stream",
+        "dataschema": None,
+        "id": "11775cb2-fd00-4487-a18b-30c3600eaa5f",
+        "source": "dummy:source",
+        "specversion": SpecVersion.v1_0,
+        "subject": None,
+        "time": datetime.datetime(
+            2022, 7, 16, 12, 3, 20, 519216, tzinfo=datetime.timezone.utc
+        ),
+        "type": "dummy.type",
+    }
+    assert to_dict(from_dict(given)) == {
+        "data": b"\x00\x00\x11Hello World",
+        "datacontenttype": "application/octet-stream",
+        "dataschema": None,
+        "id": "11775cb2-fd00-4487-a18b-30c3600eaa5f",
+        "source": "dummy:source",
+        "specversion": "1.0",
+        "subject": None,
+        "time": "2022-07-16T12:03:20.519216+00:00",
+        "type": "dummy.type",
+    }
