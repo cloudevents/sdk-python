@@ -7,20 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- A new `CloudEvent` optional `pydantic` model class is available in the 
+- A new `CloudEvent` optional `pydantic` model class is available in the
   `cloudevents.pydantic.event` module. The new model enables the integration of
    CloudEvents in your existing pydantic models or integration with pydantic
     dependent systems such as FastAPI. ([#182])
-    
+
 ### Changed
-- Deprecated `cloudevents.http.event_type` module, 
+- Deprecated `cloudevents.http.event_type` module,
     moved under `cloudevents.sdk.converters`.
-- Deprecated `cloudevents.http.json_methods` module, 
+- Deprecated `cloudevents.http.json_methods` module,
     moved under `cloudevents.http.conversion`.
-- Deprecated `cloudevents.http.http_methods` module, 
+- Deprecated `cloudevents.http.http_methods` module,
     moved under `cloudevents.http.conversion`.
 - Deprecated `cloudevents.http.util` module.
- 
+
 
 
 ## [1.5.0] — 2022-08-06
