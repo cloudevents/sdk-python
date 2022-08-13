@@ -12,13 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.http.event import CloudEvent  # noqa
-from cloudevents.http.event_type import is_binary, is_structured  # noqa
-from cloudevents.http.http_methods import (  # noqa
+
+from cloudevents.http.conversion import (  # noqa
+    from_dict,
     from_http,
+    from_json,
     to_binary,
-    to_binary_http,
+    to_dict,
+    to_json,
     to_structured,
-    to_structured_http,
 )
-from cloudevents.http.json_methods import from_json, to_json  # noqa
+from cloudevents.http.event import CloudEvent  # noqa
+from cloudevents.http.http_methods import to_binary_http  # deprecated # noqa
+from cloudevents.http.http_methods import to_structured_http  # deprecated # noqa
+from cloudevents.sdk.converters.binary import is_binary  # noqa
+from cloudevents.sdk.converters.structured import is_structured  # noqa

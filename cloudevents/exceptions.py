@@ -39,3 +39,16 @@ class DataMarshallerError(GenericException):
 
 class DataUnmarshallerError(GenericException):
     pass
+
+
+class IncompatibleArgumentsError(GenericException):
+    """
+    Raised when a user tries to call a function with arguments which are incompatible
+    with each other.
+    """
+
+
+class PydanticFeatureNotInstalled(GenericException):
+    """
+    Raised when a user tries to use the pydantic feature but did not install it.
+    """

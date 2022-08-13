@@ -14,26 +14,34 @@
 
 import typing
 
-from cloudevents.conversion import from_json as _abstract_from_json
-from cloudevents.conversion import to_json
-from cloudevents.http.event import CloudEvent
+from deprecation import deprecated
+
+from cloudevents.abstract import AnyCloudEvent
+from cloudevents.http import CloudEvent
+from cloudevents.http.conversion import from_json as _moved_from_json
+from cloudevents.http.conversion import to_json as _moved_to_json
 from cloudevents.sdk import types
 
+# THIS MODULE IS DEPRECATED, YOU SHOULD NOT ADD NEW FUNCTIONALLY HERE
 
+
+@deprecated(
+    deprecated_in="1.6.0",
+    details="Use cloudevents.http.to_json function instead",
+)
+def to_json(
+    event: AnyCloudEvent,
+    data_marshaller: types.MarshallerType = None,
+) -> typing.Union[str, bytes]:
+    return _moved_to_json(event, data_marshaller)
+
+
+@deprecated(
+    deprecated_in="1.6.0",
+    details="Use cloudevents.http.from_json function instead",
+)
 def from_json(
     data: typing.Union[str, bytes],
     data_unmarshaller: types.UnmarshallerType = None,
 ) -> CloudEvent:
-    """
-    Cast json encoded data into an CloudEvent
-    :param data: json encoded cloudevent data
-    :param data_unmarshaller: Callable function which will cast data to a
-        python object
-    :type data_unmarshaller: typing.Callable
-    :returns: CloudEvent representing given cloudevent json object
-    """
-    return _abstract_from_json(CloudEvent, data, data_unmarshaller)
-
-
-# backwards compatibility
-to_json = to_json
+    return _moved_from_json(data, data_unmarshaller)

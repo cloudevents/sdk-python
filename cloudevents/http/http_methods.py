@@ -16,46 +16,58 @@ import typing
 
 from deprecation import deprecated
 
-from cloudevents.conversion import from_http as _abstract_from_http
-from cloudevents.conversion import to_binary, to_structured
+from cloudevents.abstract import AnyCloudEvent
+from cloudevents.http.conversion import from_http as _moved_from_http
+from cloudevents.http.conversion import to_binary as _moved_to_binary
+from cloudevents.http.conversion import to_structured as _moved_to_structured
 from cloudevents.http.event import CloudEvent
 from cloudevents.sdk import types
 
+# THIS MODULE IS DEPRECATED, YOU SHOULD NOT ADD NEW FUNCTIONALLY HERE
 
+
+@deprecated(
+    deprecated_in="1.6.0",
+    details="Use cloudevents.http.to_binary function instead",
+)
+def to_binary(
+    event: AnyCloudEvent, data_marshaller: types.MarshallerType = None
+) -> typing.Tuple[dict, typing.Union[bytes, str]]:
+    return _moved_to_binary(event, data_marshaller)
+
+
+@deprecated(
+    deprecated_in="1.6.0",
+    details="Use cloudevents.http.to_structured function instead",
+)
+def to_structured(
+    event: AnyCloudEvent,
+    data_marshaller: types.MarshallerType = None,
+) -> typing.Tuple[dict, typing.Union[bytes, str]]:
+    return _moved_to_structured(event, data_marshaller)
+
+
+@deprecated(
+    deprecated_in="1.6.0",
+    details="Use cloudevents.http.from_http function instead",
+)
 def from_http(
     headers: typing.Dict[str, str],
     data: typing.Union[str, bytes, None],
     data_unmarshaller: types.UnmarshallerType = None,
 ) -> CloudEvent:
-    """
-    Unwrap a CloudEvent (binary or structured) from an HTTP request.
-    :param headers: the HTTP headers
-    :type headers: typing.Dict[str, str]
-    :param data: the HTTP request body. If set to None, "" or b'', the returned
-        event's data field will be set to None
-    :type data: typing.IO
-    :param data_unmarshaller: Callable function to map data to a python object
-        e.g. lambda x: x or lambda x: json.loads(x)
-    :type data_unmarshaller: types.UnmarshallerType
-    """
-    return _abstract_from_http(CloudEvent, headers, data, data_unmarshaller)
-
-
-# backwards compatibility
-to_binary = to_binary
-# backwards compatibility
-to_structured = to_structured
+    return _moved_from_http(headers, data, data_unmarshaller)
 
 
 @deprecated(deprecated_in="1.0.2", details="Use to_binary function instead")
 def to_binary_http(
     event: CloudEvent, data_marshaller: types.MarshallerType = None
 ) -> typing.Tuple[dict, typing.Union[bytes, str]]:
-    return to_binary(event, data_marshaller)
+    return _moved_to_binary(event, data_marshaller)
 
 
 @deprecated(deprecated_in="1.0.2", details="Use to_structured function instead")
 def to_structured_http(
     event: CloudEvent, data_marshaller: types.MarshallerType = None
 ) -> typing.Tuple[dict, typing.Union[bytes, str]]:
-    return to_structured(event, data_marshaller)
+    return _moved_to_structured(event, data_marshaller)

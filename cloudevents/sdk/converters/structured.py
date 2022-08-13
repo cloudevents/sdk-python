@@ -56,3 +56,17 @@ class JSONHTTPCloudEventConverter(base.Converter):
 
 def NewJSONHTTPCloudEventConverter() -> JSONHTTPCloudEventConverter:
     return JSONHTTPCloudEventConverter()
+
+
+def is_structured(headers: typing.Dict[str, str]) -> bool:
+    """
+    Determines whether an event with the supplied `headers` is in a structured format.
+
+    :param headers: The HTTP headers of a potential event.
+    :returns: Returns a bool indicating whether the headers indicate
+        a structured event type.
+    """
+    headers = {key.lower(): value for key, value in headers.items()}
+    content_type = headers.get("content-type", "")
+    structured_parser = JSONHTTPCloudEventConverter()
+    return structured_parser.can_read(content_type=content_type, headers=headers)

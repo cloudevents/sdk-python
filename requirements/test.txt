@@ -13,3 +13,5 @@ aiohttp
 Pillow
 requests
 flask
+pydantic>=1.0.0<1.9.0; python_version <= '3.6'
+pydantic>=1.0.0<2.0; python_version > '3.6'

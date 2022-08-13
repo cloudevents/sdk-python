@@ -18,7 +18,12 @@ import uuid
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents import abstract
-from cloudevents.http.mappings import _required_by_version
+from cloudevents.sdk.event import v1, v03
+
+_required_by_version = {
+    "1.0": v1.Event._ce_required_fields,
+    "0.3": v03.Event._ce_required_fields,
+}
 
 
 class CloudEvent(abstract.CloudEvent):
@@ -41,11 +46,11 @@ class CloudEvent(abstract.CloudEvent):
             attributes 'specversion', 'id' or 'time', this will create
             those attributes with default values.
             e.g. {
-                "content-type": "application/cloudevents+json",
-                "id": "16fb5f0b-211e-1102-3dfe-ea6e2806f124",
-                "source": "<event-source>",
-                "type": "cloudevent.event.type",
-                "specversion": "0.2"
+                "specversion": "1.0",
+                "type": "com.github.pull_request.opened",
+                "source": "https://github.com/cloudevents/spec/pull",
+                "id": "A234-1234-1234",
+                "time": "2018-04-05T17:31:00Z",
             }
         :type attributes: typing.Dict[str, str]
         :param data: The payload of the event, as a python object
