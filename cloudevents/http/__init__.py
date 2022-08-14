@@ -13,17 +13,25 @@
 #    under the License.
 
 
-from cloudevents.http.conversion import (  # noqa
-    from_dict,
-    from_http,
-    from_json,
+from cloudevents.http.conversion import from_dict, from_http, from_json
+from cloudevents.http.event import CloudEvent
+from cloudevents.http.event_type import is_binary, is_structured  # deprecated
+from cloudevents.http.http_methods import (  # deprecated
     to_binary,
-    to_dict,
-    to_json,
+    to_binary_http,
     to_structured,
+    to_structured_http,
 )
-from cloudevents.http.event import CloudEvent  # noqa
-from cloudevents.http.http_methods import to_binary_http  # deprecated # noqa
-from cloudevents.http.http_methods import to_structured_http  # deprecated # noqa
-from cloudevents.sdk.converters.binary import is_binary  # noqa
-from cloudevents.sdk.converters.structured import is_structured  # noqa
+
+__all__ = [
+    to_binary,
+    to_structured,
+    from_json,
+    from_http,
+    from_dict,
+    CloudEvent,
+    is_binary,
+    is_structured,
+    to_binary_http,
+    to_structured_http,
+]

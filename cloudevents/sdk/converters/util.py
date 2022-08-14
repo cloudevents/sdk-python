@@ -16,6 +16,11 @@ import typing
 
 
 def has_binary_headers(headers: typing.Dict[str, str]) -> bool:
+    """Determines if all CloudEvents required headers are presents
+    in the `headers`.
+
+    :returns: True if all the headers are present, False otherwise.
+    """
     return (
         "ce-specversion" in headers
         and "ce-source" in headers

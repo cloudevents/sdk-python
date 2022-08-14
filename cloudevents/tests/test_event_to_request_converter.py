@@ -33,7 +33,7 @@ def test_binary_event_to_request_upstream(event_class):
     assert event is not None
     assert event.EventType() == data.ce_type
     assert event.EventID() == data.ce_id
-    assert event.ContentType() == data.contentType
+    assert event.ContentType() == data.content_type
 
     new_headers, _ = m.ToRequest(event, converters.TypeBinary, lambda x: x)
     assert new_headers is not None
@@ -50,7 +50,7 @@ def test_structured_event_to_request_upstream(event_class):
     assert event is not None
     assert event.EventType() == data.ce_type
     assert event.EventID() == data.ce_id
-    assert event.ContentType() == data.contentType
+    assert event.ContentType() == data.content_type
 
     new_headers, _ = m.ToRequest(event, converters.TypeStructured, lambda x: x)
     for key in new_headers:

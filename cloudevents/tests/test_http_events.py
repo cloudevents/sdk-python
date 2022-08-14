@@ -398,10 +398,10 @@ def test_cloudevent_repr(specversion):
         "ce-source": "<source-url>",
     }
     event = from_http(headers, "")
-    # Testing to make sure event is printable. I could runevent. __repr__() but
+    # Testing to make sure event is printable. I could run event. __repr__() but
     # we had issues in the past where event.__repr__() could run but
     # print(event) would fail.
-    print(event)
+    print(event)  # noqa T201
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])

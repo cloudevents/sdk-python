@@ -13,8 +13,10 @@
 #    under the License.
 
 from cloudevents.sdk.converters import binary, structured
-from cloudevents.sdk.converters.binary import is_binary  # noqa
-from cloudevents.sdk.converters.structured import is_structured  # noqa
+from cloudevents.sdk.converters.binary import is_binary
+from cloudevents.sdk.converters.structured import is_structured
 
 TypeBinary = binary.BinaryHTTPCloudEventConverter.TYPE
 TypeStructured = structured.JSONHTTPCloudEventConverter.TYPE
+
+__all__ = [binary, structured, is_binary, is_structured, TypeBinary, TypeStructured]

@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     moved under `cloudevents.http.conversion`.
 - Deprecated `cloudevents.http.util` module.
 
+### Fixed
+- Multiple PEP issues, license headers, module-level exports. ([#188])
 
 
 ## [1.5.0] — 2022-08-06
@@ -199,3 +201,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#182]: https://github.com/cloudevents/sdk-python/pull/182
 [#184]: https://github.com/cloudevents/sdk-python/pull/184
 [#186]: https://github.com/cloudevents/sdk-python/pull/186
+[#188]: https://github.com/cloudevents/sdk-python/pull/188

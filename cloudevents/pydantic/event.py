@@ -25,7 +25,6 @@ except ImportError:  # pragma: no cover # hard to test
         "Install it using pip install cloudevents[pydantic]"
     )
 
-import cloudevents.conversion
 from cloudevents import abstract, conversion, http
 from cloudevents.exceptions import IncompatibleArgumentsError
 from cloudevents.sdk.event import attribute
@@ -74,7 +73,7 @@ def _ce_json_loads(
     """
     # Using HTTP from dict due to performance issues.
     # Pydantic is known for initialization time lagging.
-    return cloudevents.conversion.to_dict(http.from_json(data))
+    return conversion.to_dict(http.from_json(data))
 
 
 class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):

@@ -13,7 +13,7 @@
 #    under the License.
 from deprecation import deprecated
 
-from cloudevents.conversion import (  # noqa
+from cloudevents.conversion import (
     _best_effort_serialize_to_json as _moved_default_marshaller,
 )
 

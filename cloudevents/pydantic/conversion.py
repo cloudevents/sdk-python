@@ -16,7 +16,6 @@ import typing
 from cloudevents.conversion import from_dict as _abstract_from_dict
 from cloudevents.conversion import from_http as _abstract_from_http
 from cloudevents.conversion import from_json as _abstract_from_json
-from cloudevents.conversion import to_binary, to_dict, to_json, to_structured  # noqa
 from cloudevents.pydantic.event import CloudEvent
 from cloudevents.sdk import types
 

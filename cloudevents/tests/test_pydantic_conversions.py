@@ -18,7 +18,8 @@ import json
 
 import pytest
 
-from cloudevents.pydantic import CloudEvent, from_dict, from_json, to_json
+from cloudevents.conversion import to_json
+from cloudevents.pydantic import CloudEvent, from_dict, from_json
 from cloudevents.sdk.event.attribute import SpecVersion
 
 test_data = json.dumps({"data-key": "val"})

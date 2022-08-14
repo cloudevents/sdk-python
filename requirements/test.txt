@@ -1,8 +1,6 @@
 flake8
 pep8-naming
-flake8-import-order
 flake8-print
-flake8-strict
 pytest
 pytest-cov
 # web app tests

@@ -14,7 +14,6 @@
 
 import typing
 from abc import abstractmethod
-from typing import TypeVar
 
 
 class CloudEvent:
@@ -134,4 +133,4 @@ class CloudEvent:
         return str({"attributes": self._get_attributes(), "data": self._get_data()})
 
 
-AnyCloudEvent = TypeVar("AnyCloudEvent", bound=CloudEvent)
+AnyCloudEvent = typing.TypeVar("AnyCloudEvent", bound=CloudEvent)

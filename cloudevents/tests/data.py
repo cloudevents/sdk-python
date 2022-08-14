@@ -14,11 +14,11 @@
 
 from cloudevents.sdk.event import v1, v03
 
-contentType = "application/json"
+content_type = "application/json"
 ce_type = "word.found.exclamation"
 ce_id = "16fb5f0b-211e-1102-3dfe-ea6e2806f124"
 source = "pytest"
-eventTime = "2018-10-23T12:28:23.3464579Z"
+event_time = "2018-10-23T12:28:23.3464579Z"
 body = '{"name":"john"}'
 
 headers = {
@@ -26,17 +26,17 @@ headers = {
         "ce-specversion": "1.0",
         "ce-type": ce_type,
         "ce-id": ce_id,
-        "ce-time": eventTime,
+        "ce-time": event_time,
         "ce-source": source,
-        "Content-Type": contentType,
+        "Content-Type": content_type,
     },
     v1.Event: {
         "ce-specversion": "1.0",
         "ce-type": ce_type,
         "ce-id": ce_id,
-        "ce-time": eventTime,
+        "ce-time": event_time,
         "ce-source": source,
-        "Content-Type": contentType,
+        "Content-Type": content_type,
     },
 }
 
@@ -45,16 +45,16 @@ json_ce = {
         "specversion": "1.0",
         "type": ce_type,
         "id": ce_id,
-        "time": eventTime,
+        "time": event_time,
         "source": source,
-        "datacontenttype": contentType,
+        "datacontenttype": content_type,
     },
     v1.Event: {
         "specversion": "1.0",
         "type": ce_type,
         "id": ce_id,
-        "time": eventTime,
+        "time": event_time,
         "source": source,
-        "datacontenttype": contentType,
+        "datacontenttype": content_type,
     },
 }

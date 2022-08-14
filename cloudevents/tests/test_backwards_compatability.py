@@ -23,7 +23,8 @@ def dummy_event():
 
 
 def test_json_methods(dummy_event):
-    from cloudevents.http import from_json, to_json
+    from cloudevents.conversion import to_json
+    from cloudevents.http.conversion import from_json
     from cloudevents.http.json_methods import from_json as deprecated_from_json
     from cloudevents.http.json_methods import to_json as deprecated_to_json
 
