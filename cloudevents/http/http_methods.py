@@ -28,7 +28,7 @@ from cloudevents.sdk import types
 
 @deprecated(
     deprecated_in="1.6.0",
-    details="Use cloudevents.http.to_binary function instead",
+    details="Use cloudevents.conversion.to_binary function instead",
 )
 def to_binary(
     event: AnyCloudEvent, data_marshaller: types.MarshallerType = None
@@ -38,7 +38,7 @@ def to_binary(
 
 @deprecated(
     deprecated_in="1.6.0",
-    details="Use cloudevents.http.to_structured function instead",
+    details="Use cloudevents.conversion.to_structured function instead",
 )
 def to_structured(
     event: AnyCloudEvent,

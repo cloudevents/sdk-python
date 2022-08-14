@@ -17,7 +17,7 @@ import typing
 from deprecation import deprecated
 
 from cloudevents.abstract import AnyCloudEvent
-from cloudevents.conversion import from_json as _moved_from_json
+from cloudevents.http.conversion import from_json as _moved_from_json
 from cloudevents.conversion import to_json as _moved_to_json
 from cloudevents.http import CloudEvent
 from cloudevents.sdk import types
@@ -27,7 +27,7 @@ from cloudevents.sdk import types
 
 @deprecated(
     deprecated_in="1.6.0",
-    details="Use cloudevents.http.to_json function instead",
+    details="Use cloudevents.conversion.to_json function instead",
 )
 def to_json(
     event: AnyCloudEvent,
