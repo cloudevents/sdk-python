@@ -20,7 +20,7 @@ import pytest
 from sanic import Sanic, response
 
 import cloudevents.exceptions as cloud_exceptions
-from cloudevents.conversion import to_structured, to_binary
+from cloudevents.conversion import to_binary, to_structured
 from cloudevents.pydantic import CloudEvent, from_http
 from cloudevents.sdk import converters
 from cloudevents.sdk.converters.binary import is_binary
