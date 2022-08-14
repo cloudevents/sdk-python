@@ -74,17 +74,17 @@ def test_object_event_v1():
 
     m = marshaller.NewDefaultHTTPMarshaller()
 
-    _, structuredBody = m.ToRequest(event)
-    assert isinstance(structuredBody, bytes)
-    structuredObj = json.loads(structuredBody)
-    errorMsg = f"Body was {structuredBody}, obj is {structuredObj}"
-    assert isinstance(structuredObj, dict), errorMsg
-    assert isinstance(structuredObj["data"], dict), errorMsg
-    assert len(structuredObj["data"]) == 1, errorMsg
-    assert structuredObj["data"]["name"] == "john", errorMsg
+    _, structured_body = m.ToRequest(event)
+    assert isinstance(structured_body, bytes)
+    structured_obj = json.loads(structured_body)
+    error_msg = f"Body was {structured_body}, obj is {structured_obj}"
+    assert isinstance(structured_obj, dict), error_msg
+    assert isinstance(structured_obj["data"], dict), error_msg
+    assert len(structured_obj["data"]) == 1, error_msg
+    assert structured_obj["data"]["name"] == "john", error_msg
 
-    headers, binaryBody = m.ToRequest(event, converters.TypeBinary)
+    headers, binary_body = m.ToRequest(event, converters.TypeBinary)
     assert isinstance(headers, dict)
-    assert isinstance(binaryBody, bytes)
+    assert isinstance(binary_body, bytes)
     assert headers["content-type"] == "application/json"
-    assert binaryBody == b'{"name": "john"}', f"Binary is {binaryBody!r}"
+    assert binary_body == b'{"name": "john"}', f"Binary is {binary_body!r}"
