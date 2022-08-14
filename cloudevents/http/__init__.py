@@ -21,6 +21,16 @@ from cloudevents.http.http_methods import to_structured_http  # deprecated
 from cloudevents.sdk.converters.binary import is_binary
 from cloudevents.sdk.converters.structured import is_structured
 
-__all__ = [to_json, to_binary, to_dict, to_structured, from_json, from_dict, CloudEvent,
-           is_binary, is_structured,
-           to_binary_http, to_structured_http]
+__all__ = [
+    to_json,
+    to_binary,
+    to_dict,
+    to_structured,
+    from_json,
+    from_dict,
+    CloudEvent,
+    is_binary,
+    is_structured,
+    to_binary_http,
+    to_structured_http,
+]
