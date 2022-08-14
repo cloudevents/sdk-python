@@ -27,6 +27,7 @@ __all__ = [
     to_dict,
     to_structured,
     from_json,
+    from_http,
     from_dict,
     CloudEvent,
     is_binary,
