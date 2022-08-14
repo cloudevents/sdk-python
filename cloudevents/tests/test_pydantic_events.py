@@ -20,7 +20,8 @@ import pytest
 from sanic import Sanic, response
 
 import cloudevents.exceptions as cloud_exceptions
-from cloudevents.pydantic import CloudEvent, from_http, to_binary, to_structured
+from cloudevents.conversion import to_structured, to_binary
+from cloudevents.pydantic import CloudEvent, from_http
 from cloudevents.sdk import converters
 from cloudevents.sdk.converters.binary import is_binary
 from cloudevents.sdk.converters.structured import is_structured
@@ -81,7 +82,6 @@ async def echo(request):
 @pytest.mark.parametrize("body", invalid_cloudevent_request_body)
 def test_missing_required_fields_structured(body):
     with pytest.raises(cloud_exceptions.MissingRequiredFields):
-
         _ = from_http(
             {"Content-Type": "application/cloudevents+json"}, json.dumps(body)
         )
@@ -186,7 +186,6 @@ def test_missing_ce_prefix_binary_event(specversion):
         "ce-specversion": specversion,
     }
     for key in headers:
-
         # breaking prefix e.g. e-id instead of ce-id
         prefixed_headers[key[1:]] = headers[key]
 
