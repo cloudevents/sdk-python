@@ -13,18 +13,18 @@
 #    under the License.
 
 
-from cloudevents.conversion import to_binary, to_dict, to_json, to_structured
 from cloudevents.http.conversion import from_dict, from_http, from_json
 from cloudevents.http.event import CloudEvent
-from cloudevents.http.http_methods import to_binary_http  # deprecated
-from cloudevents.http.http_methods import to_structured_http  # deprecated
-from cloudevents.sdk.converters.binary import is_binary
-from cloudevents.sdk.converters.structured import is_structured
+from cloudevents.http.event_type import is_binary, is_structured  # deprecated
+from cloudevents.http.http_methods import (  # deprecated
+    to_binary,
+    to_binary_http,
+    to_structured,
+    to_structured_http,
+)
 
 __all__ = [
-    to_json,
     to_binary,
-    to_dict,
     to_structured,
     from_json,
     from_http,
