@@ -29,7 +29,7 @@ def test_binary_converter_upstream(event_class):
     assert event is not None
     assert event.EventType() == data.ce_type
     assert event.EventID() == data.ce_id
-    assert event.ContentType() == data.contentType
+    assert event.ContentType() == data.content_type
 
 
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
@@ -45,7 +45,7 @@ def test_structured_converter_upstream(event_class):
     assert event is not None
     assert event.EventType() == data.ce_type
     assert event.EventID() == data.ce_id
-    assert event.ContentType() == data.contentType
+    assert event.ContentType() == data.content_type
 
 
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
@@ -61,7 +61,7 @@ def test_default_http_marshaller_with_structured(event_class):
     assert event is not None
     assert event.EventType() == data.ce_type
     assert event.EventID() == data.ce_id
-    assert event.ContentType() == data.contentType
+    assert event.ContentType() == data.content_type
 
 
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])
@@ -77,5 +77,5 @@ def test_default_http_marshaller_with_binary(event_class):
     assert event is not None
     assert event.EventType() == data.ce_type
     assert event.EventID() == data.ce_id
-    assert event.ContentType() == data.contentType
+    assert event.ContentType() == data.content_type
     assert event.Data() == data.body

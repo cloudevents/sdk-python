@@ -26,11 +26,11 @@ from cloudevents.tests import data
 def test_event_pipeline_upstream(event_class):
     event = (
         event_class()
-        .SetContentType(data.contentType)
+        .SetContentType(data.content_type)
         .SetData(data.body)
         .SetEventID(data.ce_id)
         .SetSource(data.source)
-        .SetEventTime(data.eventTime)
+        .SetEventTime(data.event_time)
         .SetEventType(data.ce_type)
     )
     m = marshaller.NewDefaultHTTPMarshaller()

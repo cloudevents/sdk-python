@@ -40,7 +40,7 @@ def test_general_binary_properties(event_class):
     assert event is not None
     assert event.type == data.ce_type
     assert event.id == data.ce_id
-    assert event.content_type == data.contentType
+    assert event.content_type == data.content_type
     assert event.source == data.source
 
     # Test setters
@@ -80,7 +80,7 @@ def test_general_structured_properties(event_class):
     assert event is not None
     assert event.type == data.ce_type
     assert event.id == data.ce_id
-    assert event.content_type == data.contentType
+    assert event.content_type == data.content_type
     assert event.source == data.source
 
     new_headers, _ = m.ToRequest(event, converters.TypeStructured, lambda x: x)
