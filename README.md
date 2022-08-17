@@ -55,8 +55,8 @@ requests.post("<some-url>", data=body, headers=headers)
 ### Structured HTTP CloudEvent
 
 ```python
-from cloudevents.http import CloudEvent
 from cloudevents.conversion import to_structured
+from cloudevents.http import CloudEvent
 import requests
 
 # Create a CloudEvent
