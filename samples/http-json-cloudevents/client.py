@@ -16,7 +16,8 @@ import sys
 
 import requests
 
-from cloudevents.http import CloudEvent, to_binary, to_structured
+from cloudevents.http import CloudEvent
+from cloudevents.conversion import to_binary, to_structured
 
 
 def send_binary_cloud_event(url):
