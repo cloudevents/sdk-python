@@ -14,7 +14,7 @@ This SDK current supports the following versions of CloudEvents:
 
 ## Python SDK
 
-Package **cloudevents** provides primitives to work with CloudEvents specification: 
+Package **cloudevents** provides primitives to work with CloudEvents specification:
 https://github.com/cloudevents/spec.
 
 ### Installing
@@ -76,7 +76,7 @@ headers, body = to_structured(event)
 requests.post("<some-url>", data=body, headers=headers)
 ```
 
-You can find a complete example of turning a CloudEvent into a HTTP request 
+You can find a complete example of turning a CloudEvent into a HTTP request
 [in the samples' directory](samples/http-json-cloudevents/client.py).
 
 ## Receiving CloudEvents
@@ -111,17 +111,17 @@ if __name__ == "__main__":
     app.run(port=3000)
 ```
 
-You can find a complete example of turning a CloudEvent into a HTTP request 
+You can find a complete example of turning a CloudEvent into a HTTP request
 [in the samples' directory](samples/http-json-cloudevents/json_sample_server.py).
 
 ## SDK versioning
 
-The goal of this package is to provide support for all released versions of CloudEvents, 
-ideally while maintaining the same API. It will use semantic versioning 
+The goal of this package is to provide support for all released versions of CloudEvents,
+ideally while maintaining the same API. It will use semantic versioning
 with following rules:
 
 - MAJOR version increments when backwards incompatible changes is introduced.
-- MINOR version increments when backwards compatible feature is introduced 
+- MINOR version increments when backwards compatible feature is introduced
   INCLUDING support for new CloudEvents version.
 - PATCH version increments when a backwards compatible bug fix is introduced.
 
@@ -151,7 +151,7 @@ information.
 
 ## Maintenance
 
-We use [black][black] and [isort][isort] for autoformatting. We set up a [tox][tox] 
+We use [black][black] and [isort][isort] for autoformatting. We set up a [tox][tox]
 environment to reformat the codebase.
 
 e.g.
