@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] — 2022-08-17
 ### Added
 - A new `CloudEvent` optional `pydantic` model class is available in the
   `cloudevents.pydantic.event` module. The new model enables the integration of
@@ -141,6 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.6.0]: https://github.com/cloudevents/sdk-python/compare/1.5.0...1.6.0
 [1.5.0]: https://github.com/cloudevents/sdk-python/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/cloudevents/sdk-python/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/cloudevents/sdk-python/compare/1.2.0...1.3.0
