@@ -22,6 +22,7 @@ from cloudevents.http.http_methods import (  # deprecated
     to_structured,
     to_structured_http,
 )
+from cloudevents.http.json_methods import to_json  # deprecated
 
 __all__ = [
     to_binary,
@@ -34,4 +35,5 @@ __all__ = [
     is_structured,
     to_binary_http,
     to_structured_http,
+    to_json,
 ]
