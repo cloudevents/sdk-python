@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Missing `to_json` import. ([#191])
+
 
 ## [1.6.0] — 2022-08-17
 ### Added
@@ -204,3 +207,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#184]: https://github.com/cloudevents/sdk-python/pull/184
 [#186]: https://github.com/cloudevents/sdk-python/pull/186
 [#188]: https://github.com/cloudevents/sdk-python/pull/188
+[#191]: https://github.com/cloudevents/sdk-python/pull/191
