@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] — 2022-08-18
+### Fixed
+- Missing `to_json` import. ([#191])
+
+
 ## [1.6.0] — 2022-08-17
 ### Added
 - A new `CloudEvent` optional `pydantic` model class is available in the
@@ -141,7 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.1] - 2018-11-19
 ### Added
 - Initial release
-
+[1.6.1]: https://github.com/cloudevents/sdk-python/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/cloudevents/sdk-python/compare/1.5.0...1.6.0
 [1.5.0]: https://github.com/cloudevents/sdk-python/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/cloudevents/sdk-python/compare/1.3.0...1.4.0
@@ -204,3 +209,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#184]: https://github.com/cloudevents/sdk-python/pull/184
 [#186]: https://github.com/cloudevents/sdk-python/pull/186
 [#188]: https://github.com/cloudevents/sdk-python/pull/188
+[#191]: https://github.com/cloudevents/sdk-python/pull/191

@@ -55,3 +55,19 @@ def test_util():
 
 def test_event_type():
     from cloudevents.http.event_type import is_binary, is_structured  # noqa
+
+
+def test_http_module_imports():
+    from cloudevents.http import (  # noqa
+        CloudEvent,
+        from_dict,
+        from_http,
+        from_json,
+        is_binary,
+        is_structured,
+        to_binary,
+        to_binary_http,
+        to_json,
+        to_structured,
+        to_structured_http,
+    )
