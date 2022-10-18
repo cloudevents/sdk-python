@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] — 2022-10-18
+### Added
+- Added `get_attributes` API to the `CloudEvent` API. The method returns a read-only
+  view on the event attributes. ([#195])
+
 ## [1.6.1] — 2022-08-18
 ### Fixed
 - Missing `to_json` import. ([#191])
@@ -146,6 +151,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.1] - 2018-11-19
 ### Added
 - Initial release
+
+[1.6.1]: https://github.com/cloudevents/sdk-python/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/cloudevents/sdk-python/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/cloudevents/sdk-python/compare/1.5.0...1.6.0
 [1.5.0]: https://github.com/cloudevents/sdk-python/compare/1.4.0...1.5.0
@@ -210,3 +217,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#186]: https://github.com/cloudevents/sdk-python/pull/186
 [#188]: https://github.com/cloudevents/sdk-python/pull/188
 [#191]: https://github.com/cloudevents/sdk-python/pull/191
+[#195]: https://github.com/cloudevents/sdk-python/pull/195
