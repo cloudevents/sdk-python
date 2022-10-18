@@ -14,6 +14,8 @@
 
 import typing
 from abc import abstractmethod
+from types import MappingProxyType
+from typing import Mapping
 
 
 class CloudEvent:
@@ -44,6 +46,14 @@ class CloudEvent:
         :returns: A new instance of the CloudEvent created from the passed arguments.
         """
         raise NotImplementedError()
+
+    def get_attributes(self) -> Mapping[str, typing.Any]:
+        """
+        Returns a read-only view on the attributes of the event.
+
+        :returns: Read-only view on the attributes of the event.
+        """
+        return MappingProxyType(self._get_attributes())
 
     @abstractmethod
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:

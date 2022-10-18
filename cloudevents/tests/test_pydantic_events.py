@@ -15,6 +15,7 @@
 import bz2
 import io
 import json
+import typing
 
 import pytest
 from sanic import Sanic, response
@@ -240,6 +241,25 @@ def test_structured_to_request(specversion):
     for key in attributes:
         assert body[key] == attributes[key]
     assert body["data"] == data, f"|{body_bytes}|| {body}"
+
+
+@pytest.mark.parametrize("specversion", ["1.0", "0.3"])
+def test_attributes_view_accessor(specversion: str):
+    attributes: dict[str, typing.Any] = {
+        "specversion": specversion,
+        "type": "word.found.name",
+        "id": "96fb5f0b-001e-0108-6dfe-da6e2806f124",
+        "source": "pytest",
+    }
+    data = {"message": "Hello World!"}
+
+    event: CloudEvent = CloudEvent(attributes, data)
+    event_attributes: typing.Mapping[str, typing.Any] = event.get_attributes()
+    assert event_attributes["specversion"] == attributes["specversion"]
+    assert event_attributes["type"] == attributes["type"]
+    assert event_attributes["id"] == attributes["id"]
+    assert event_attributes["source"] == attributes["source"]
+    assert event_attributes["time"]
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
