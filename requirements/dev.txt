@@ -5,3 +5,5 @@ pep8-naming
 flake8-print
 tox
 pre-commit
+protobuf
+grpcio-tools
