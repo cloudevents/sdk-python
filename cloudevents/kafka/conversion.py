@@ -16,8 +16,9 @@ import json
 import typing
 
 from cloudevents import exceptions as cloud_exceptions
-from cloudevents.kafka.event import CloudEvent
+from cloudevents.abstract import AnyCloudEvent
 from cloudevents.sdk import types
+from cloudevents import http
 
 DEFAULT_MARSHALLER = json.dumps
 DEFAULT_UNMARSHALLER = json.loads
@@ -35,7 +36,7 @@ class ProtocolMessage(typing.NamedTuple):
 
 
 def to_binary(
-    event: CloudEvent, data_marshaller: types.MarshallerType = None
+    event: AnyCloudEvent, data_marshaller: types.MarshallerType = None
 ) -> ProtocolMessage:
     """
     Returns a Kafka ProtocolMessage in binary format representing this Cloud Event.
@@ -62,21 +63,26 @@ def to_binary(
         )
     if isinstance(data, str):  # Convenience method for json.dumps
         data = data.encode("utf-8")
-    return ProtocolMessage(headers, event.key, data)
+
+    return ProtocolMessage(headers, event.get("key"), data)
 
 
 def from_binary(
-    message: ProtocolMessage, data_unmarshaller: types.MarshallerType = None
-) -> CloudEvent:
+    message: ProtocolMessage,
+    event_type: typing.Type[AnyCloudEvent] = None,
+    data_unmarshaller: types.MarshallerType = None,
+) -> AnyCloudEvent:
     """
     Returns a CloudEvent from a Kafka ProtocolMessage in binary format.
 
     :param message: The ProtocolMessage to be converted.
+    :param event_type:  The type of CloudEvent to create.  Defaults to http.CloudEvent.
     :param data_unmarshaller: Callable function to map data to a python object
     :returns: CloudEvent
     """
 
     data_unmarshaller = data_unmarshaller or DEFAULT_UNMARSHALLER
+    event_type = event_type or http.CloudEvent
 
     attributes = {}
 
@@ -97,11 +103,11 @@ def from_binary(
             f"Failed to unmarshall data with error: {type(e).__name__}('{e}')"
         )
 
-    return CloudEvent.create(attributes, data)
+    return event_type(attributes, data)
 
 
 def to_structured(
-    event: CloudEvent,
+    event: AnyCloudEvent,
     data_marshaller: types.MarshallerType = None,
     envelope_marshaller: types.MarshallerType = None,
 ) -> ProtocolMessage:
@@ -135,20 +141,27 @@ def to_structured(
     if "content-type" in attrs:
         headers["content-type"] = attrs.pop("content-type").encode("utf-8")
 
+    if "key" in attrs:
+        key = attrs.pop("key")
+    else:
+        key = None
+
     value = envelope_marshaller(attrs)
 
-    return ProtocolMessage(headers, event.key, value)
+    return ProtocolMessage(headers, key, value)
 
 
 def from_structured(
     message: ProtocolMessage,
+    event_type: typing.Type[AnyCloudEvent] = None,
     data_unmarshaller: types.MarshallerType = None,
     envelope_unmarshaller: types.MarshallerType = None,
-) -> CloudEvent:
+) -> AnyCloudEvent:
     """
     Returns a CloudEvent from a Kafka ProtocolMessage in structured format.
 
     :param message: The ProtocolMessage to be converted.
+    :param event_type:  The type of CloudEvent to create.  Defaults to http.CloudEvent.
     :param data_unmarshaller: Callable function to map data to a python object
     :param envelope_unmarshaller: Callable function to map the event envelope to a python object
     :returns: CloudEvent
@@ -156,6 +169,7 @@ def from_structured(
 
     data_unmarshaller = data_unmarshaller or DEFAULT_EMBEDDED_DATA_MARSHALLER
     envelope_unmarshaller = envelope_unmarshaller or DEFAULT_UNMARSHALLER
+    event_type = event_type or http.CloudEvent
 
     structure = envelope_unmarshaller(message.value)
 
@@ -183,4 +197,4 @@ def from_structured(
     for header, val in message.headers.items():
         attributes[header.lower()] = val.decode()
 
-    return CloudEvent.create(attributes, data)
+    return event_type(attributes, data)

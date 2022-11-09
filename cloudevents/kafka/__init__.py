@@ -19,10 +19,8 @@ from cloudevents.kafka.conversion import (
     to_binary,
     to_structured,
 )
-from cloudevents.kafka.event import CloudEvent
 
 __all__ = [
-    CloudEvent,
     to_binary,
     from_binary,
     to_structured,
