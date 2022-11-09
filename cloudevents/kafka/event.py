@@ -34,9 +34,7 @@ class CloudEvent(abstract.CloudEvent):
 
     @classmethod
     def create(
-        cls,
-        attributes: typing.Dict[str, typing.Any],
-        data: typing.Optional[typing.Any]
+        cls, attributes: typing.Dict[str, typing.Any], data: typing.Optional[typing.Any]
     ) -> "CloudEvent":
         return cls(attributes, data)
 
