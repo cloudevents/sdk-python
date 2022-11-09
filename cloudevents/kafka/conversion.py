@@ -16,9 +16,9 @@ import json
 import typing
 
 from cloudevents import exceptions as cloud_exceptions
+from cloudevents import http
 from cloudevents.abstract import AnyCloudEvent
 from cloudevents.sdk import types
-from cloudevents import http
 
 DEFAULT_MARSHALLER = json.dumps
 DEFAULT_UNMARSHALLER = json.loads
