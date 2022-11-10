@@ -16,9 +16,9 @@ import json
 import typing
 
 from cloudevents import exceptions as cloud_exceptions
+from cloudevents import http
 from cloudevents.abstract import AnyCloudEvent
 from cloudevents.sdk import types
-from cloudevents import http
 
 DEFAULT_MARSHALLER = json.dumps
 DEFAULT_UNMARSHALLER = json.loads
@@ -162,8 +162,9 @@ def from_structured(
 
     :param message: The ProtocolMessage to be converted.
     :param event_type:  The type of CloudEvent to create.  Defaults to http.CloudEvent.
-    :param data_unmarshaller: Callable function to map data to a python object
-    :param envelope_unmarshaller: Callable function to map the event envelope to a python object
+    :param data_unmarshaller: Callable function to map the data to a python object.
+    :param envelope_unmarshaller: Callable functionto map the envelope to a python
+    object.
     :returns: CloudEvent
     """
 
