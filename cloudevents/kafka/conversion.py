@@ -61,7 +61,7 @@ def to_binary(
         raise cloud_exceptions.DataMarshallerError(
             f"Failed to marshall data with error: {type(e).__name__}('{e}')"
         )
-    if isinstance(data, str):  # Convenience method for json.dumps
+    if isinstance(data, str):
         data = data.encode("utf-8")
 
     return ProtocolMessage(headers, event.get("key"), data)
@@ -146,7 +146,15 @@ def to_structured(
     else:
         key = None
 
-    value = envelope_marshaller(attrs)
+    try:
+        value = envelope_marshaller(attrs)
+    except Exception as e:
+        raise cloud_exceptions.DataMarshallerError(
+            f"Failed to marshall event with error: {type(e).__name__}('{e}')"
+        )
+
+    if isinstance(value, str):
+        value = value.encode("utf-8")
 
     return ProtocolMessage(headers, key, value)
 
@@ -172,7 +180,12 @@ def from_structured(
     envelope_unmarshaller = envelope_unmarshaller or DEFAULT_UNMARSHALLER
     event_type = event_type or http.CloudEvent
 
-    structure = envelope_unmarshaller(message.value)
+    try:
+        structure = envelope_unmarshaller(message.value)
+    except Exception as e:
+        raise cloud_exceptions.DataUnmarshallerError(
+            "Failed to unmarshall message with error: " f"{type(e).__name__}('{e}')"
+        )
 
     attributes = {"key": message.key}
 
