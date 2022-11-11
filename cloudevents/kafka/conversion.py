@@ -116,7 +116,7 @@ def from_binary(
             f"Failed to unmarshall data with error: {type(e).__name__}('{e}')"
         )
 
-    return event_type(attributes, data)
+    return event_type.create(attributes, data)
 
 
 def to_structured(
@@ -224,4 +224,4 @@ def from_structured(
     for header, val in message.headers.items():
         attributes[header.lower()] = val.decode()
 
-    return event_type(attributes, data)
+    return event_type.create(attributes, data)
