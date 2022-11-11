@@ -13,7 +13,7 @@
 #    under the License.
 
 from cloudevents.kafka.conversion import (
-    ProtocolMessage,
+    KafkaMessage,
     from_binary,
     from_structured,
     to_binary,
@@ -25,5 +25,5 @@ __all__ = [
     from_binary,
     to_structured,
     from_structured,
-    ProtocolMessage,
+    KafkaMessage,
 ]

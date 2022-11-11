@@ -21,7 +21,7 @@ import pytest
 from cloudevents import exceptions as cloud_exceptions
 from cloudevents.http import CloudEvent
 from cloudevents.kafka.conversion import (
-    ProtocolMessage,
+    KafkaMessage,
     from_binary,
     from_structured,
     to_binary,
@@ -58,8 +58,8 @@ def source_event() -> CloudEvent:
 
 
 @pytest.fixture
-def source_binary_json_message() -> ProtocolMessage:
-    return ProtocolMessage(
+def source_binary_json_message() -> KafkaMessage:
+    return KafkaMessage(
         headers={
             "ce_specversion": "1.0".encode("utf-8"),
             "ce_id": "1234-1234-1234".encode("utf-8"),
@@ -76,8 +76,8 @@ def source_binary_json_message() -> ProtocolMessage:
 
 
 @pytest.fixture
-def source_binary_bytes_message() -> ProtocolMessage:
-    return ProtocolMessage(
+def source_binary_bytes_message() -> KafkaMessage:
+    return KafkaMessage(
         headers={
             "ce_specversion": "1.0".encode("utf-8"),
             "ce_id": "1234-1234-1234".encode("utf-8"),
@@ -94,8 +94,8 @@ def source_binary_bytes_message() -> ProtocolMessage:
 
 
 @pytest.fixture
-def source_structured_json_message() -> ProtocolMessage:
-    return ProtocolMessage(
+def source_structured_json_message() -> KafkaMessage:
+    return KafkaMessage(
         headers={
             "content-type": "foo".encode("utf-8"),
         },
@@ -114,8 +114,8 @@ def source_structured_json_message() -> ProtocolMessage:
 
 
 @pytest.fixture
-def source_structured_json_bytes_message() -> ProtocolMessage:
-    return ProtocolMessage(
+def source_structured_json_bytes_message() -> KafkaMessage:
+    return KafkaMessage(
         headers={
             "content-type": "foo".encode("utf-8"),
         },
@@ -136,8 +136,8 @@ def source_structured_json_bytes_message() -> ProtocolMessage:
 
 
 @pytest.fixture
-def source_structured_bytes_bytes_message() -> ProtocolMessage:
-    return ProtocolMessage(
+def source_structured_bytes_bytes_message() -> KafkaMessage:
+    return KafkaMessage(
         headers={
             "content-type": "foo".encode("utf-8"),
         },
@@ -258,7 +258,7 @@ def test_from_binary_sets_key(source_binary_json_message):
 
 
 def test_from_binary_no_key(source_binary_json_message):
-    keyless_message = ProtocolMessage(
+    keyless_message = KafkaMessage(
         headers=source_binary_json_message.headers,
         key=None,
         value=source_binary_json_message.value,

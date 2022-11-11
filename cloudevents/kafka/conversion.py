@@ -25,26 +25,39 @@ DEFAULT_UNMARSHALLER = json.loads
 DEFAULT_EMBEDDED_DATA_MARSHALLER = lambda x: x
 
 
-class ProtocolMessage(typing.NamedTuple):
+class KafkaMessage(typing.NamedTuple):
     """
-    A raw kafka-protocol message.
+    Represents the elements of a message sent or received through the Kafka protocol.
+    Callers can map their client-specific message representation to and from this
+    type in order to use the cloudevents.kafka conversion functions.
     """
 
     headers: typing.Dict[str, bytes]
-    key: typing.Union[bytes, str]
+    """
+    The dictionary of message headers key/values.
+    """
+
+    key: typing.Optional[typing.Union[bytes, str]]
+    """
+    The message key.
+    """
+
     value: typing.Union[bytes, str]
+    """
+    The message value.
+    """
 
 
 def to_binary(
     event: AnyCloudEvent, data_marshaller: types.MarshallerType = None
-) -> ProtocolMessage:
+) -> KafkaMessage:
     """
-    Returns a Kafka ProtocolMessage in binary format representing this Cloud Event.
+    Returns a KafkaMessage in binary format representing this Cloud Event.
 
     :param event: The event to be converted.
     :param data_marshaller: Callable function to cast event.data into
         either a string or bytes.
-    :returns: ProtocolMessage
+    :returns: KafkaMessage
     """
     data_marshaller = data_marshaller or DEFAULT_MARSHALLER
     headers = {}
@@ -64,18 +77,18 @@ def to_binary(
     if isinstance(data, str):
         data = data.encode("utf-8")
 
-    return ProtocolMessage(headers, event.get("key"), data)
+    return KafkaMessage(headers, event.get("key"), data)
 
 
 def from_binary(
-    message: ProtocolMessage,
+    message: KafkaMessage,
     event_type: typing.Type[AnyCloudEvent] = None,
     data_unmarshaller: types.MarshallerType = None,
 ) -> AnyCloudEvent:
     """
-    Returns a CloudEvent from a Kafka ProtocolMessage in binary format.
+    Returns a CloudEvent from a KafkaMessage in binary format.
 
-    :param message: The ProtocolMessage to be converted.
+    :param message: The KafkaMessage to be converted.
     :param event_type: The type of CloudEvent to create.  Defaults to http.CloudEvent.
     :param data_unmarshaller: Callable function to map data to a python object
     :returns: CloudEvent
@@ -110,16 +123,16 @@ def to_structured(
     event: AnyCloudEvent,
     data_marshaller: types.MarshallerType = None,
     envelope_marshaller: types.MarshallerType = None,
-) -> ProtocolMessage:
+) -> KafkaMessage:
     """
-    Returns a Kafka ProtocolMessage in structured format representing this Cloud Event.
+    Returns a KafkaMessage in structured format representing this Cloud Event.
 
     :param event: The event to be converted.
     :param data_marshaller: Callable function to cast event.data into
         either a string or bytes.
     :param envelope_marshaller: Callable function to cast event envelope into
         either a string or bytes.
-    :returns: ProtocolMessage
+    :returns: KafkaMessage
     """
     data_marshaller = data_marshaller or DEFAULT_EMBEDDED_DATA_MARSHALLER
     envelope_marshaller = envelope_marshaller or DEFAULT_MARSHALLER
@@ -156,19 +169,19 @@ def to_structured(
     if isinstance(value, str):
         value = value.encode("utf-8")
 
-    return ProtocolMessage(headers, key, value)
+    return KafkaMessage(headers, key, value)
 
 
 def from_structured(
-    message: ProtocolMessage,
+    message: KafkaMessage,
     event_type: typing.Type[AnyCloudEvent] = None,
     data_unmarshaller: types.MarshallerType = None,
     envelope_unmarshaller: types.MarshallerType = None,
 ) -> AnyCloudEvent:
     """
-    Returns a CloudEvent from a Kafka ProtocolMessage in structured format.
+    Returns a CloudEvent from a KafkaMessage in structured format.
 
-    :param message: The ProtocolMessage to be converted.
+    :param message: The KafkaMessage to be converted.
     :param event_type: The type of CloudEvent to create. Defaults to http.CloudEvent.
     :param data_unmarshaller: Callable function to map the data to a python object.
     :param envelope_unmarshaller: Callable function to map the envelope to a python
