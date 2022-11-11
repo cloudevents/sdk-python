@@ -54,7 +54,8 @@ def to_binary(
     """
     Returns a KafkaMessage in binary format representing this Cloud Event.
 
-    :param event: The event to be converted.
+    :param event: The event to be converted. To specify the Kafka message KEY, set
+        the `partitionkey` attribute of the event.
     :param data_marshaller: Callable function to cast event.data into
         either a string or bytes.
     :returns: KafkaMessage
@@ -64,7 +65,7 @@ def to_binary(
     if event["content-type"]:
         headers["content-type"] = event["content-type"].encode("utf-8")
     for attr, value in event.get_attributes().items():
-        if attr not in ["data", "key", "content-type"]:
+        if attr not in ["data", "partitionkey", "content-type"]:
             if value is not None:
                 headers["ce_{0}".format(attr)] = value.encode("utf-8")
 
@@ -77,7 +78,7 @@ def to_binary(
     if isinstance(data, str):
         data = data.encode("utf-8")
 
-    return KafkaMessage(headers, event.get("key"), data)
+    return KafkaMessage(headers, event.get("partitionkey"), data)
 
 
 def from_binary(
@@ -107,7 +108,7 @@ def from_binary(
             attributes[header[3:]] = value.decode()
 
     if message.key is not None:
-        attributes["key"] = message.key
+        attributes["partitionkey"] = message.key
 
     try:
         data = data_unmarshaller(message.value)
@@ -127,7 +128,8 @@ def to_structured(
     """
     Returns a KafkaMessage in structured format representing this Cloud Event.
 
-    :param event: The event to be converted.
+    :param event: The event to be converted. To specify the Kafka message KEY, set
+        the `partitionkey` attribute of the event.
     :param data_marshaller: Callable function to cast event.data into
         either a string or bytes.
     :param envelope_marshaller: Callable function to cast event envelope into
@@ -154,11 +156,6 @@ def to_structured(
     if "content-type" in attrs:
         headers["content-type"] = attrs.pop("content-type").encode("utf-8")
 
-    if "key" in attrs:
-        key = attrs.pop("key")
-    else:
-        key = None
-
     try:
         value = envelope_marshaller(attrs)
     except Exception as e:
@@ -168,6 +165,8 @@ def to_structured(
 
     if isinstance(value, str):
         value = value.encode("utf-8")
+
+    key = attrs.get("partitionkey")
 
     return KafkaMessage(headers, key, value)
 
@@ -200,7 +199,9 @@ def from_structured(
             "Failed to unmarshall message with error: " f"{type(e).__name__}('{e}')"
         )
 
-    attributes = {"key": message.key}
+    attributes = {}
+    if message.key is not None:
+        attributes["partitionkey"] = message.key
 
     for name, value in structure.items():
         decoder = lambda x: x

@@ -55,7 +55,7 @@ def source_event() -> CloudEvent:
             "type": "com.pytest.test",
             "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
             "content-type": "foo",
-            "key": "test_key_123",
+            "partitionkey": "test_key_123",
         },
         data=expected_data,
     )
@@ -91,15 +91,15 @@ class TestToBinary:
 
     def test_sets_key(self, source_event):
         result = to_binary(source_event)
-        assert result.key == source_event["key"]
+        assert result.key == source_event["partitionkey"]
 
     def test_none_key(self, source_event):
-        source_event["key"] = None
+        source_event["partitionkey"] = None
         result = to_binary(source_event)
         assert result.key is None
 
     def test_no_key(self, source_event):
-        del source_event["key"]
+        del source_event["partitionkey"]
         result = to_binary(source_event)
         assert result.key is None
 
@@ -116,7 +116,7 @@ class TestToBinary:
             "utf-8"
         )
         assert "data" not in result.headers
-        assert "key" not in result.headers
+        assert "partitionkey" not in result.headers
 
     def test_raise_marshaller_exception(self, source_event):
         with pytest.raises(cloud_exceptions.DataMarshallerError):
@@ -170,7 +170,7 @@ class TestFromBinary:
 
     def test_sets_key(self, source_binary_json_message):
         result = from_binary(source_binary_json_message)
-        assert result["key"] == source_binary_json_message.key
+        assert result["partitionkey"] == source_binary_json_message.key
 
     def test_no_key(self, source_binary_json_message):
         keyless_message = KafkaMessage(
@@ -179,7 +179,7 @@ class TestFromBinary:
             value=source_binary_json_message.value,
         )
         result = from_binary(keyless_message)
-        assert "key" not in result.get_attributes()
+        assert "partitionkey" not in result.get_attributes()
 
     def test_sets_attrs_from_headers(self, source_binary_json_message):
         result = from_binary(source_binary_json_message)
@@ -233,6 +233,7 @@ class TestToStructured:
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "partitionkey": source_event["partitionkey"],
                 "data": expected_data,
             }
         ).encode("utf-8")
@@ -248,6 +249,7 @@ class TestToStructured:
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "partitionkey": source_event["partitionkey"],
                 "data_base64": base64.b64encode(
                     custom_marshaller(expected_data)
                 ).decode("ascii"),
@@ -265,6 +267,7 @@ class TestToStructured:
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "partitionkey": source_event["partitionkey"],
                 "data": expected_data,
             }
         )
@@ -282,6 +285,7 @@ class TestToStructured:
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "partitionkey": source_event["partitionkey"],
                 "data_base64": base64.b64encode(
                     custom_marshaller(expected_data)
                 ).decode("ascii"),
@@ -290,15 +294,15 @@ class TestToStructured:
 
     def test_sets_key(self, source_event):
         result = to_structured(source_event)
-        assert result.key == source_event["key"]
+        assert result.key == source_event["partitionkey"]
 
     def test_none_key(self, source_event):
-        source_event["key"] = None
+        source_event["partitionkey"] = None
         result = to_structured(source_event)
         assert result.key is None
 
     def test_no_key(self, source_event):
-        del source_event["key"]
+        del source_event["partitionkey"]
         result = to_structured(source_event)
         assert result.key is None
 
@@ -342,6 +346,7 @@ class TestFromStructured:
                     "source": "pytest",
                     "type": "com.pytest.test",
                     "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
+                    "partitionkey": "test_key_123",
                     "data": expected_data,
                 }
             ).encode("utf-8"),
@@ -361,6 +366,7 @@ class TestFromStructured:
                     "source": "pytest",
                     "type": "com.pytest.test",
                     "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
+                    "partitionkey": "test_key_123",
                     "data_base64": base64.b64encode(_serialize(expected_data)).decode(
                         "ascii"
                     ),
@@ -382,6 +388,7 @@ class TestFromStructured:
                     "source": "pytest",
                     "type": "com.pytest.test",
                     "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
+                    "partitionkey": "test_key_123",
                     "data_base64": base64.b64encode(_serialize(expected_data)).decode(
                         "ascii"
                     ),
