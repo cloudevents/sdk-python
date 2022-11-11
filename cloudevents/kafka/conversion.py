@@ -49,7 +49,7 @@ class KafkaMessage(typing.NamedTuple):
 
 
 def to_binary(
-    event: AnyCloudEvent, data_marshaller: types.MarshallerType = None
+    event: AnyCloudEvent, data_marshaller: typing.Optional[types.MarshallerType] = None
 ) -> KafkaMessage:
     """
     Returns a KafkaMessage in binary format representing this Cloud Event.
@@ -82,8 +82,8 @@ def to_binary(
 
 def from_binary(
     message: KafkaMessage,
-    event_type: typing.Type[AnyCloudEvent] = None,
-    data_unmarshaller: types.MarshallerType = None,
+    event_type: typing.Optional[typing.Type[AnyCloudEvent]] = None,
+    data_unmarshaller: typing.Optional[types.MarshallerType] = None,
 ) -> AnyCloudEvent:
     """
     Returns a CloudEvent from a KafkaMessage in binary format.
@@ -121,8 +121,8 @@ def from_binary(
 
 def to_structured(
     event: AnyCloudEvent,
-    data_marshaller: types.MarshallerType = None,
-    envelope_marshaller: types.MarshallerType = None,
+    data_marshaller: typing.Optional[types.MarshallerType] = None,
+    envelope_marshaller: typing.Optional[types.MarshallerType] = None,
 ) -> KafkaMessage:
     """
     Returns a KafkaMessage in structured format representing this Cloud Event.
@@ -174,9 +174,9 @@ def to_structured(
 
 def from_structured(
     message: KafkaMessage,
-    event_type: typing.Type[AnyCloudEvent] = None,
-    data_unmarshaller: types.MarshallerType = None,
-    envelope_unmarshaller: types.MarshallerType = None,
+    event_type: typing.Optional[typing.Type[AnyCloudEvent]] = None,
+    data_unmarshaller: typing.Optional[types.MarshallerType] = None,
+    envelope_unmarshaller: typing.Optional[types.MarshallerType] = None,
 ) -> AnyCloudEvent:
     """
     Returns a CloudEvent from a KafkaMessage in structured format.
