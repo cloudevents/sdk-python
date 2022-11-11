@@ -76,7 +76,7 @@ def from_binary(
     Returns a CloudEvent from a Kafka ProtocolMessage in binary format.
 
     :param message: The ProtocolMessage to be converted.
-    :param event_type:  The type of CloudEvent to create.  Defaults to http.CloudEvent.
+    :param event_type: The type of CloudEvent to create.  Defaults to http.CloudEvent.
     :param data_unmarshaller: Callable function to map data to a python object
     :returns: CloudEvent
     """
@@ -169,9 +169,9 @@ def from_structured(
     Returns a CloudEvent from a Kafka ProtocolMessage in structured format.
 
     :param message: The ProtocolMessage to be converted.
-    :param event_type:  The type of CloudEvent to create.  Defaults to http.CloudEvent.
+    :param event_type: The type of CloudEvent to create. Defaults to http.CloudEvent.
     :param data_unmarshaller: Callable function to map the data to a python object.
-    :param envelope_unmarshaller: Callable functionto map the envelope to a python
+    :param envelope_unmarshaller: Callable function to map the envelope to a python
     object.
     :returns: CloudEvent
     """
