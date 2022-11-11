@@ -41,6 +41,10 @@ def _deserialize(data: bytes) -> dict:
     return json.loads(data.decode())
 
 
+def _fail_serdes(*args):
+    raise Exception("fail")
+
+
 @pytest.fixture
 def source_event() -> CloudEvent:
     return CloudEvent.create(
@@ -167,15 +171,6 @@ def custom_unmarshaller() -> types.MarshallerType:
     return _deserialize
 
 
-def _throw():
-    raise Exception("fail")
-
-
-@pytest.fixture
-def bad_marshaller() -> types.MarshallerType:
-    return _throw
-
-
 # sanity check for tests that use custom marshalling
 def test_custom_marshaller_can_talk_to_itself(custom_marshaller, custom_unmarshaller):
     data = expected_data
@@ -183,11 +178,6 @@ def test_custom_marshaller_can_talk_to_itself(custom_marshaller, custom_unmarsha
     unmarshalled = custom_unmarshaller(marshalled)
     for k, v in data.items():
         assert unmarshalled[k] == v
-
-
-def test_throw_raises():
-    with pytest.raises(Exception):
-        _throw()
 
 
 def test_to_binary_sets_value_default_marshaller(source_event):
@@ -233,9 +223,9 @@ def test_to_binary_sets_headers(source_event):
     assert "key" not in result.headers
 
 
-def test_to_binary_raise_marshaller_exception(source_event, bad_marshaller):
+def test_to_binary_raise_marshaller_exception(source_event):
     with pytest.raises(cloud_exceptions.DataMarshallerError):
-        to_binary(source_event, data_marshaller=bad_marshaller)
+        to_binary(source_event, data_marshaller=_fail_serdes)
 
 
 def test_from_binary_default_marshaller(source_binary_json_message):
@@ -283,9 +273,9 @@ def test_from_binary_sets_attrs_from_headers(source_binary_json_message):
     )
 
 
-def test_from_binary_unmarshaller_exception(source_binary_json_message, bad_marshaller):
+def test_from_binary_unmarshaller_exception(source_binary_json_message):
     with pytest.raises(cloud_exceptions.DataUnmarshallerError):
-        from_binary(source_binary_json_message, data_unmarshaller=bad_marshaller)
+        from_binary(source_binary_json_message, data_unmarshaller=_fail_serdes)
 
 
 def test_binary_can_talk_to_itself(source_event):
@@ -401,14 +391,14 @@ def test_to_structured_sets_headers(source_event):
     )
 
 
-def test_to_structured_datamarshaller_exception(source_event, bad_marshaller):
+def test_to_structured_datamarshaller_exception(source_event):
     with pytest.raises(cloud_exceptions.DataMarshallerError):
-        to_structured(source_event, data_marshaller=bad_marshaller)
+        to_structured(source_event, data_marshaller=_fail_serdes)
 
 
-def test_to_structured_envelope_datamarshaller_exception(source_event, bad_marshaller):
+def test_to_structured_envelope_datamarshaller_exception(source_event):
     with pytest.raises(cloud_exceptions.DataMarshallerError):
-        to_structured(source_event, envelope_marshaller=bad_marshaller)
+        to_structured(source_event, envelope_marshaller=_fail_serdes)
 
 
 def test_structured_can_talk_to_itself(source_event):
@@ -497,21 +487,21 @@ def test_from_structured_sets_content_type_custom_envelope_unmarshaller(
 
 
 def test_from_structured_data_unmarshaller_exception(
-    source_structured_bytes_bytes_message, custom_unmarshaller, bad_marshaller
+    source_structured_bytes_bytes_message, custom_unmarshaller
 ):
     with pytest.raises(cloud_exceptions.DataUnmarshallerError):
         from_structured(
             source_structured_bytes_bytes_message,
-            data_unmarshaller=bad_marshaller,
+            data_unmarshaller=_fail_serdes,
             envelope_unmarshaller=custom_unmarshaller,
         )
 
 
 def test_from_structured_envelope_unmarshaller_exception(
-    source_structured_bytes_bytes_message, bad_marshaller
+    source_structured_bytes_bytes_message,
 ):
     with pytest.raises(cloud_exceptions.DataUnmarshallerError):
         from_structured(
             source_structured_bytes_bytes_message,
-            envelope_unmarshaller=bad_marshaller,
+            envelope_unmarshaller=_fail_serdes,
         )
