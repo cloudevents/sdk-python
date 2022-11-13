@@ -18,6 +18,7 @@ import typing
 from cloudevents import exceptions as cloud_exceptions
 from cloudevents import http
 from cloudevents.abstract import AnyCloudEvent
+from cloudevents.kafka.exceptions import KeyMapperError
 from cloudevents.sdk import types
 
 DEFAULT_MARSHALLER: types.MarshallerType = json.dumps
@@ -77,6 +78,14 @@ def to_binary(
     """
     data_marshaller = data_marshaller or DEFAULT_MARSHALLER
     key_mapper = key_mapper or DEFAULT_KEY_MAPPER
+
+    try:
+        message_key = key_mapper(event)
+    except Exception as e:
+        raise KeyMapperError(
+            f"Failed to map message key with error: {type(e).__name__}('{e}')"
+        )
+
     headers = {}
     if event["content-type"]:
         headers["content-type"] = event["content-type"].encode("utf-8")
@@ -94,9 +103,7 @@ def to_binary(
     if isinstance(data, str):
         data = data.encode("utf-8")
 
-    key = key_mapper(event)
-
-    return KafkaMessage(headers, key, data)
+    return KafkaMessage(headers, message_key, data)
 
 
 def from_binary(
@@ -160,6 +167,13 @@ def to_structured(
     envelope_marshaller = envelope_marshaller or DEFAULT_MARSHALLER
     key_mapper = key_mapper or DEFAULT_KEY_MAPPER
 
+    try:
+        message_key = key_mapper(event)
+    except Exception as e:
+        raise KeyMapperError(
+            f"Failed to map message key with error: {type(e).__name__}('{e}')"
+        )
+
     attrs = event.get_attributes().copy()
 
     try:
@@ -187,9 +201,7 @@ def to_structured(
     if isinstance(value, str):
         value = value.encode("utf-8")
 
-    key = key_mapper(event)
-
-    return KafkaMessage(headers, key, value)
+    return KafkaMessage(headers, message_key, value)
 
 
 def from_structured(

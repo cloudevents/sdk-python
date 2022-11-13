@@ -22,70 +22,69 @@ from cloudevents import exceptions as cloud_exceptions
 from cloudevents.http import CloudEvent
 from cloudevents.kafka.conversion import (
     KafkaMessage,
-    KeyMapper,
     from_binary,
     from_structured,
     to_binary,
     to_structured,
 )
+from cloudevents.kafka.exceptions import KeyMapperError
 from cloudevents.sdk import types
 
-expected_data = {"name": "test", "amount": 1}
 
-
-# simple serdes for testing marshallers
-def _serialize(data: dict) -> bytes:
+def simple_serialize(data: dict) -> bytes:
     return bytes(json.dumps(data).encode("utf-8"))
 
 
-def _deserialize(data: bytes) -> dict:
+def simple_deserialize(data: bytes) -> dict:
     return json.loads(data.decode())
 
 
-def _fail_serdes(*args):
+def failing_func(*args):
     raise Exception("fail")
 
 
-@pytest.fixture
-def source_event() -> CloudEvent:
-    return CloudEvent.create(
-        attributes={
-            "specversion": "1.0",
-            "id": "1234-1234-1234",
-            "source": "pytest",
-            "type": "com.pytest.test",
-            "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
-            "content-type": "foo",
-            "partitionkey": "test_key_123",
-        },
-        data=expected_data,
-    )
+class KafkaConversionTestBase:
+
+    expected_data = {"name": "test", "amount": 1}
+    expected_custom_mapped_key = "custom-key"
+
+    def custom_key_mapper(self, _) -> str:
+        return self.expected_custom_mapped_key
+
+    @pytest.fixture
+    def source_event(self) -> CloudEvent:
+        return CloudEvent.create(
+            attributes={
+                "specversion": "1.0",
+                "id": "1234-1234-1234",
+                "source": "pytest",
+                "type": "com.pytest.test",
+                "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
+                "content-type": "foo",
+                "partitionkey": "test_key_123",
+            },
+            data=self.expected_data,
+        )
+
+    @pytest.fixture
+    def custom_marshaller(self) -> types.MarshallerType:
+        return simple_serialize
+
+    @pytest.fixture
+    def custom_unmarshaller(self) -> types.MarshallerType:
+        return simple_deserialize
+
+    def test_custom_marshaller_can_talk_to_itself(
+        self, custom_marshaller, custom_unmarshaller
+    ):
+        data = self.expected_data
+        marshalled = custom_marshaller(data)
+        unmarshalled = custom_unmarshaller(marshalled)
+        for k, v in data.items():
+            assert unmarshalled[k] == v
 
 
-@pytest.fixture
-def custom_marshaller() -> types.MarshallerType:
-    return _serialize
-
-
-@pytest.fixture
-def custom_unmarshaller() -> types.MarshallerType:
-    return _deserialize
-
-
-expected_custom_mapped_key = "custom-key"
-custom_key_mapper: KeyMapper = lambda _: expected_custom_mapped_key
-
-
-# sanity check for tests that use custom marshalling
-def test_custom_marshaller_can_talk_to_itself(custom_marshaller, custom_unmarshaller):
-    data = expected_data
-    marshalled = custom_marshaller(data)
-    unmarshalled = custom_unmarshaller(marshalled)
-    for k, v in data.items():
-        assert unmarshalled[k] == v
-
-
-class TestToBinary:
+class TestToBinary(KafkaConversionTestBase):
     def test_sets_value_default_marshaller(self, source_event):
         result = to_binary(source_event)
         assert result.value == json.dumps(source_event.data).encode("utf-8")
@@ -99,8 +98,12 @@ class TestToBinary:
         assert result.key == source_event["partitionkey"]
 
     def test_key_mapper(self, source_event):
-        result = to_binary(source_event, key_mapper=custom_key_mapper)
-        assert result.key == expected_custom_mapped_key
+        result = to_binary(source_event, key_mapper=self.custom_key_mapper)
+        assert result.key == self.expected_custom_mapped_key
+
+    def test_key_mapper_error(self, source_event):
+        with pytest.raises(KeyMapperError):
+            to_binary(source_event, key_mapper=failing_func)
 
     def test_none_key(self, source_event):
         source_event["partitionkey"] = None
@@ -129,10 +132,10 @@ class TestToBinary:
 
     def test_raise_marshaller_exception(self, source_event):
         with pytest.raises(cloud_exceptions.DataMarshallerError):
-            to_binary(source_event, data_marshaller=_fail_serdes)
+            to_binary(source_event, data_marshaller=failing_func)
 
 
-class TestFromBinary:
+class TestFromBinary(KafkaConversionTestBase):
     @pytest.fixture
     def source_binary_json_message(self) -> KafkaMessage:
         return KafkaMessage(
@@ -146,7 +149,7 @@ class TestFromBinary:
                 .encode("utf-8"),
                 "content-type": "foo".encode("utf-8"),
             },
-            value=json.dumps(expected_data).encode("utf-8"),
+            value=json.dumps(self.expected_data).encode("utf-8"),
             key="test_key_123",
         )
 
@@ -163,7 +166,7 @@ class TestFromBinary:
                 .encode("utf-8"),
                 "content-type": "foo".encode("utf-8"),
             },
-            value=_serialize(expected_data),
+            value=simple_serialize(self.expected_data),
             key="test_key_123",
         )
 
@@ -209,10 +212,10 @@ class TestFromBinary:
 
     def test_unmarshaller_exception(self, source_binary_json_message):
         with pytest.raises(cloud_exceptions.DataUnmarshallerError):
-            from_binary(source_binary_json_message, data_unmarshaller=_fail_serdes)
+            from_binary(source_binary_json_message, data_unmarshaller=failing_func)
 
 
-class TestToFromBinary:
+class TestToFromBinary(KafkaConversionTestBase):
     def test_can_talk_to_itself(self, source_event):
         message = to_binary(source_event)
         event = from_binary(message)
@@ -232,7 +235,7 @@ class TestToFromBinary:
             assert event.data[key] == val
 
 
-class TestToStructured:
+class TestToStructured(KafkaConversionTestBase):
     def test_sets_value_default_marshallers(self, source_event):
         result = to_structured(source_event)
         assert result.value == json.dumps(
@@ -243,7 +246,7 @@ class TestToStructured:
                 "type": source_event["type"],
                 "time": source_event["time"],
                 "partitionkey": source_event["partitionkey"],
-                "data": expected_data,
+                "data": self.expected_data,
             }
         ).encode("utf-8")
 
@@ -260,7 +263,7 @@ class TestToStructured:
                 "time": source_event["time"],
                 "partitionkey": source_event["partitionkey"],
                 "data_base64": base64.b64encode(
-                    custom_marshaller(expected_data)
+                    custom_marshaller(self.expected_data)
                 ).decode("ascii"),
             }
         ).encode("utf-8")
@@ -277,7 +280,7 @@ class TestToStructured:
                 "type": source_event["type"],
                 "time": source_event["time"],
                 "partitionkey": source_event["partitionkey"],
-                "data": expected_data,
+                "data": self.expected_data,
             }
         )
 
@@ -296,7 +299,7 @@ class TestToStructured:
                 "time": source_event["time"],
                 "partitionkey": source_event["partitionkey"],
                 "data_base64": base64.b64encode(
-                    custom_marshaller(expected_data)
+                    custom_marshaller(self.expected_data)
                 ).decode("ascii"),
             }
         )
@@ -306,8 +309,12 @@ class TestToStructured:
         assert result.key == source_event["partitionkey"]
 
     def test_key_mapper(self, source_event):
-        result = to_structured(source_event, key_mapper=custom_key_mapper)
-        assert result.key == expected_custom_mapped_key
+        result = to_structured(source_event, key_mapper=self.custom_key_mapper)
+        assert result.key == self.expected_custom_mapped_key
+
+    def test_key_mapper_error(self, source_event):
+        with pytest.raises(KeyMapperError):
+            to_structured(source_event, key_mapper=failing_func)
 
     def test_none_key(self, source_event):
         source_event["partitionkey"] = None
@@ -328,14 +335,14 @@ class TestToStructured:
 
     def test_datamarshaller_exception(self, source_event):
         with pytest.raises(cloud_exceptions.DataMarshallerError):
-            to_structured(source_event, data_marshaller=_fail_serdes)
+            to_structured(source_event, data_marshaller=failing_func)
 
     def test_envelope_datamarshaller_exception(self, source_event):
         with pytest.raises(cloud_exceptions.DataMarshallerError):
-            to_structured(source_event, envelope_marshaller=_fail_serdes)
+            to_structured(source_event, envelope_marshaller=failing_func)
 
 
-class TestToFromStructured:
+class TestToFromStructured(KafkaConversionTestBase):
     def test_can_talk_to_itself(self, source_event):
         message = to_structured(source_event)
         event = from_structured(message)
@@ -345,7 +352,7 @@ class TestToFromStructured:
             assert event.data[key] == val
 
 
-class TestFromStructured:
+class TestFromStructured(KafkaConversionTestBase):
     @pytest.fixture
     def source_structured_json_message(self) -> KafkaMessage:
         return KafkaMessage(
@@ -360,7 +367,7 @@ class TestFromStructured:
                     "type": "com.pytest.test",
                     "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
                     "partitionkey": "test_key_123",
-                    "data": expected_data,
+                    "data": self.expected_data,
                 }
             ).encode("utf-8"),
             key="test_key_123",
@@ -380,9 +387,9 @@ class TestFromStructured:
                     "type": "com.pytest.test",
                     "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
                     "partitionkey": "test_key_123",
-                    "data_base64": base64.b64encode(_serialize(expected_data)).decode(
-                        "ascii"
-                    ),
+                    "data_base64": base64.b64encode(
+                        simple_serialize(self.expected_data)
+                    ).decode("ascii"),
                 }
             ).encode("utf-8"),
             key="test_key_123",
@@ -394,7 +401,7 @@ class TestFromStructured:
             headers={
                 "content-type": "foo".encode("utf-8"),
             },
-            value=_serialize(
+            value=simple_serialize(
                 {
                     "specversion": "1.0",
                     "id": "1234-1234-1234",
@@ -402,9 +409,9 @@ class TestFromStructured:
                     "type": "com.pytest.test",
                     "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
                     "partitionkey": "test_key_123",
-                    "data_base64": base64.b64encode(_serialize(expected_data)).decode(
-                        "ascii"
-                    ),
+                    "data_base64": base64.b64encode(
+                        simple_serialize(self.expected_data)
+                    ).decode("ascii"),
                 }
             ),
             key="test_key_123",
@@ -415,7 +422,7 @@ class TestFromStructured:
         source_structured_json_message,
     ):
         result = from_structured(source_structured_json_message)
-        assert result.data == expected_data
+        assert result.data == self.expected_data
 
     def test_sets_data_custom_data_unmarshaller(
         self, source_structured_json_bytes_message, custom_unmarshaller
@@ -423,7 +430,7 @@ class TestFromStructured:
         result = from_structured(
             source_structured_json_bytes_message, data_unmarshaller=custom_unmarshaller
         )
-        assert result.data == expected_data
+        assert result.data == self.expected_data
 
     def test_sets_data_custom_unmarshallers(
         self, source_structured_bytes_bytes_message, custom_unmarshaller
@@ -433,7 +440,7 @@ class TestFromStructured:
             data_unmarshaller=custom_unmarshaller,
             envelope_unmarshaller=custom_unmarshaller,
         )
-        assert result.data == expected_data
+        assert result.data == self.expected_data
 
     def test_sets_attrs_default_enveloper_unmarshaller(
         self,
@@ -491,7 +498,7 @@ class TestFromStructured:
         with pytest.raises(cloud_exceptions.DataUnmarshallerError):
             from_structured(
                 source_structured_bytes_bytes_message,
-                data_unmarshaller=_fail_serdes,
+                data_unmarshaller=failing_func,
                 envelope_unmarshaller=custom_unmarshaller,
             )
 
@@ -502,5 +509,5 @@ class TestFromStructured:
         with pytest.raises(cloud_exceptions.DataUnmarshallerError):
             from_structured(
                 source_structured_bytes_bytes_message,
-                envelope_unmarshaller=_fail_serdes,
+                envelope_unmarshaller=failing_func,
             )
