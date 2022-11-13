@@ -22,6 +22,7 @@ from cloudevents import exceptions as cloud_exceptions
 from cloudevents.http import CloudEvent
 from cloudevents.kafka.conversion import (
     KafkaMessage,
+    KeyMapper,
     from_binary,
     from_structured,
     to_binary,
@@ -71,6 +72,10 @@ def custom_unmarshaller() -> types.MarshallerType:
     return _deserialize
 
 
+expected_custom_mapped_key = "custom-key"
+custom_key_mapper: KeyMapper = lambda _: expected_custom_mapped_key
+
+
 # sanity check for tests that use custom marshalling
 def test_custom_marshaller_can_talk_to_itself(custom_marshaller, custom_unmarshaller):
     data = expected_data
@@ -92,6 +97,10 @@ class TestToBinary:
     def test_sets_key(self, source_event):
         result = to_binary(source_event)
         assert result.key == source_event["partitionkey"]
+
+    def test_key_mapper(self, source_event):
+        result = to_binary(source_event, key_mapper=custom_key_mapper)
+        assert result.key == expected_custom_mapped_key
 
     def test_none_key(self, source_event):
         source_event["partitionkey"] = None
@@ -295,6 +304,10 @@ class TestToStructured:
     def test_sets_key(self, source_event):
         result = to_structured(source_event)
         assert result.key == source_event["partitionkey"]
+
+    def test_key_mapper(self, source_event):
+        result = to_structured(source_event, key_mapper=custom_key_mapper)
+        assert result.key == expected_custom_mapped_key
 
     def test_none_key(self, source_event):
         source_event["partitionkey"] = None

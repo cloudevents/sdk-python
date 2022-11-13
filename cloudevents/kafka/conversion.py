@@ -20,9 +20,9 @@ from cloudevents import http
 from cloudevents.abstract import AnyCloudEvent
 from cloudevents.sdk import types
 
-DEFAULT_MARSHALLER = json.dumps
-DEFAULT_UNMARSHALLER = json.loads
-DEFAULT_EMBEDDED_DATA_MARSHALLER = lambda x: x
+DEFAULT_MARSHALLER: types.MarshallerType = json.dumps
+DEFAULT_UNMARSHALLER: types.MarshallerType = json.loads
+DEFAULT_EMBEDDED_DATA_MARSHALLER: types.MarshallerType = lambda x: x
 
 
 class KafkaMessage(typing.NamedTuple):
@@ -48,19 +48,35 @@ class KafkaMessage(typing.NamedTuple):
     """
 
 
+KeyMapper = typing.Optional[typing.Callable[[AnyCloudEvent], typing.Union[bytes, str]]]
+"""
+A callable function that creates a Kafka message key, given a CloudEvent instance.
+"""
+
+DEFAULT_KEY_MAPPER: KeyMapper = lambda event: event.get("partitionkey")
+"""
+The default KeyMapper which maps the user provided `partitionkey` attribute value
+    to the `key` of the Kafka message as-is, if present.
+"""
+
+
 def to_binary(
-    event: AnyCloudEvent, data_marshaller: typing.Optional[types.MarshallerType] = None
+    event: AnyCloudEvent,
+    data_marshaller: typing.Optional[types.MarshallerType] = None,
+    key_mapper: typing.Optional[KeyMapper] = None,
 ) -> KafkaMessage:
     """
     Returns a KafkaMessage in binary format representing this Cloud Event.
 
-    :param event: The event to be converted. To specify the Kafka message KEY, set
-        the `partitionkey` attribute of the event.
+    :param event: The event to be converted. To specify the Kafka messaage Key, set
+        the `partitionkey` attribute of the event, or provide a KeyMapper.
     :param data_marshaller: Callable function to cast event.data into
         either a string or bytes.
+    :param key_mapper: Callable function to get the Kafka message key.
     :returns: KafkaMessage
     """
     data_marshaller = data_marshaller or DEFAULT_MARSHALLER
+    key_mapper = key_mapper or DEFAULT_KEY_MAPPER
     headers = {}
     if event["content-type"]:
         headers["content-type"] = event["content-type"].encode("utf-8")
@@ -78,7 +94,9 @@ def to_binary(
     if isinstance(data, str):
         data = data.encode("utf-8")
 
-    return KafkaMessage(headers, event.get("partitionkey"), data)
+    key = key_mapper(event)
+
+    return KafkaMessage(headers, key, data)
 
 
 def from_binary(
@@ -124,6 +142,7 @@ def to_structured(
     event: AnyCloudEvent,
     data_marshaller: typing.Optional[types.MarshallerType] = None,
     envelope_marshaller: typing.Optional[types.MarshallerType] = None,
+    key_mapper: typing.Optional[KeyMapper] = None,
 ) -> KafkaMessage:
     """
     Returns a KafkaMessage in structured format representing this Cloud Event.
@@ -134,10 +153,12 @@ def to_structured(
         either a string or bytes.
     :param envelope_marshaller: Callable function to cast event envelope into
         either a string or bytes.
+    :param key_mapper: Callable function to get the Kafka message key.
     :returns: KafkaMessage
     """
     data_marshaller = data_marshaller or DEFAULT_EMBEDDED_DATA_MARSHALLER
     envelope_marshaller = envelope_marshaller or DEFAULT_MARSHALLER
+    key_mapper = key_mapper or DEFAULT_KEY_MAPPER
 
     attrs = event.get_attributes().copy()
 
@@ -166,7 +187,7 @@ def to_structured(
     if isinstance(value, str):
         value = value.encode("utf-8")
 
-    key = attrs.get("partitionkey")
+    key = key_mapper(event)
 
     return KafkaMessage(headers, key, value)
 
@@ -184,7 +205,7 @@ def from_structured(
     :param event_type: The type of CloudEvent to create. Defaults to http.CloudEvent.
     :param data_unmarshaller: Callable function to map the data to a python object.
     :param envelope_unmarshaller: Callable function to map the envelope to a python
-    object.
+        object.
     :returns: CloudEvent
     """
 
