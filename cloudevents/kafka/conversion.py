@@ -49,7 +49,7 @@ class KafkaMessage(typing.NamedTuple):
     """
 
 
-KeyMapper = typing.Optional[typing.Callable[[AnyCloudEvent], typing.Union[bytes, str]]]
+KeyMapper = typing.Callable[[AnyCloudEvent], typing.Union[bytes, str]]
 """
 A callable function that creates a Kafka message key, given a CloudEvent instance.
 """
