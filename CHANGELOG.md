@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.7.0] — 2022-11-17
 ### Added
-- Added [Kafka](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/kafka-protocol-binding.md) 
+- Added [Kafka](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/kafka-protocol-binding.md)
   support ([#197], thanks [David Martines](https://github.com/davidwmartines))
 
 ## [1.6.2] — 2022-10-18
