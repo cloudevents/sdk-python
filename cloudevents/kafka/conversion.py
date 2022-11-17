@@ -38,18 +38,18 @@ class KafkaMessage(typing.NamedTuple):
     The dictionary of message headers key/values.
     """
 
-    key: typing.Optional[typing.Union[bytes, str]]
+    key: typing.Optional[typing.AnyStr]
     """
     The message key.
     """
 
-    value: typing.Union[bytes, str]
+    value: typing.AnyStr
     """
     The message value.
     """
 
 
-KeyMapper = typing.Callable[[AnyCloudEvent], typing.Union[bytes, str]]
+KeyMapper = typing.Callable[[AnyCloudEvent], typing.AnyStr]
 """
 A callable function that creates a Kafka message key, given a CloudEvent instance.
 """
