@@ -71,7 +71,7 @@ class KafkaConversionTestBase:
         return simple_serialize
 
     @pytest.fixture
-    def custom_unmarshaller(self) -> types.MarshallerType:
+    def custom_unmarshaller(self) -> types.UnmarshallerType:
         return simple_deserialize
 
     def test_custom_marshaller_can_talk_to_itself(
