@@ -38,18 +38,18 @@ class KafkaMessage(typing.NamedTuple):
     The dictionary of message headers key/values.
     """
 
-    key: typing.Optional[typing.Union[bytes, str]]
+    key: typing.Optional[typing.AnyStr]
     """
     The message key.
     """
 
-    value: typing.Union[bytes, str]
+    value: typing.AnyStr
     """
     The message value.
     """
 
 
-KeyMapper = typing.Callable[[AnyCloudEvent], typing.Union[bytes, str]]
+KeyMapper = typing.Callable[[AnyCloudEvent], typing.AnyStr]
 """
 A callable function that creates a Kafka message key, given a CloudEvent instance.
 """
@@ -174,7 +174,7 @@ def to_structured(
             f"Failed to map message key with error: {type(e).__name__}('{e}')"
         )
 
-    attrs = event.get_attributes().copy()
+    attrs: dict[str, typing.Any] = dict(event.get_attributes())
 
     try:
         data = data_marshaller(event.data)
@@ -208,7 +208,7 @@ def from_structured(
     message: KafkaMessage,
     event_type: typing.Optional[typing.Type[AnyCloudEvent]] = None,
     data_unmarshaller: typing.Optional[types.MarshallerType] = None,
-    envelope_unmarshaller: typing.Optional[types.MarshallerType] = None,
+    envelope_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> AnyCloudEvent:
     """
     Returns a CloudEvent from a KafkaMessage in structured format.
@@ -232,20 +232,20 @@ def from_structured(
             "Failed to unmarshall message with error: " f"{type(e).__name__}('{e}')"
         )
 
-    attributes = {}
+    attributes: dict[str, typing.Any] = {}
     if message.key is not None:
         attributes["partitionkey"] = message.key
 
+    data: typing.Optional[typing.Any] = None
     for name, value in structure.items():
-        decoder = lambda x: x
-        if name == "data":
-            decoder = lambda v: data_unmarshaller(v)
-        if name == "data_base64":
-            decoder = lambda v: data_unmarshaller(base64.b64decode(v))
-            name = "data"
-
         try:
-            decoded_value = decoder(value)
+            if name == "data":
+                decoded_value = data_unmarshaller(value)
+            elif name == "data_base64":
+                decoded_value = data_unmarshaller(base64.b64decode(value))
+                name = "data"
+            else:
+                decoded_value = value
         except Exception as e:
             raise cloud_exceptions.DataUnmarshallerError(
                 "Failed to unmarshall data with error: " f"{type(e).__name__}('{e}')"

@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] — 2022-11-17
+### Added
+- Added [Kafka](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/kafka-protocol-binding.md)
+  support ([#197], thanks [David Martines](https://github.com/davidwmartines))
+
 ## [1.6.2] — 2022-10-18
 ### Added
 - Added `get_attributes` API to the `CloudEvent` API. The method returns a read-only
@@ -152,6 +157,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.7.0]: https://github.com/cloudevents/sdk-python/compare/1.6.0...1.7.0
 [1.6.2]: https://github.com/cloudevents/sdk-python/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/cloudevents/sdk-python/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/cloudevents/sdk-python/compare/1.5.0...1.6.0
@@ -218,3 +224,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#188]: https://github.com/cloudevents/sdk-python/pull/188
 [#191]: https://github.com/cloudevents/sdk-python/pull/191
 [#195]: https://github.com/cloudevents/sdk-python/pull/195
+[#197]: https://github.com/cloudevents/sdk-python/pull/197
