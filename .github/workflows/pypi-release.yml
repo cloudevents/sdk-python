@@ -8,39 +8,27 @@ on:
       - main
 
 jobs:
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-22.04, windows-2022, macos-12 ]
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.2
-
-      - uses: actions/upload-artifact@v3
-        with:
-          path: ./wheelhouse/*.whl
-
-  build_sdist:
+  build_dist:
     name: Build source distribution
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - name: Build sdist
-        run: pipx run build --sdist
+      - name: Build SDist and wheel
+        run: pipx run build
 
       - uses: actions/upload-artifact@v3
         with:
-          path: dist/*.tar.gz
+          path: dist/*
+
+      - name: Check metadata
+        run: pipx run twine check dist/*
   publish:
     runs-on: ubuntu-22.04
     if: github.event_name == 'push'
-    needs: [ build_wheels, build_sdist ]
+    needs: [ build_dist ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
