@@ -1,13 +1,45 @@
 name: PyPI-Release
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
 
 jobs:
-  build-and-publish:
-    runs-on: ubuntu-latest
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, windows-2022, macos-12 ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.11.2
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist/*.tar.gz
+  publish:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push'
+    needs: [ build_wheels, build_sdist ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -17,11 +49,16 @@ jobs:
           cache: 'pip'
       - name: Install build dependencies
         run: pip install -U setuptools wheel build
-      - name: Build
-        run: python -m build .
+      - uses: actions/download-artifact@v3
+        with:
+          # unpacks default artifact into dist/
+          # if `name: artifact` is omitted, the action will create extra parent dir
+          name: artifact
+          path: dist
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
+          user: __token__
           password: ${{ secrets.pypi_password }}
       - name: Install GitPython and cloudevents for pypi_packaging
         run: pip install -U -r requirements/publish.txt
