@@ -28,11 +28,11 @@ class BinaryHTTPCloudEventConverter(base.Converter):
     def can_read(
         self,
         content_type: typing.Optional[str] = None,
-        headers: typing.Optional[typing.Mapping[str, typing.Optional[str]]] = None,
+        headers: typing.Optional[typing.Mapping[str, str]] = None,
     ) -> bool:
 
         if headers is None:
-            headers = {"ce-specversion": None}
+            headers = {"ce-specversion": ""}
         return has_binary_headers(headers)
 
     def event_supported(self, event: object) -> bool:
@@ -41,8 +41,8 @@ class BinaryHTTPCloudEventConverter(base.Converter):
     def read(
         self,
         event: event_base.BaseEvent,
-        headers: dict,
-        body: typing.AnyStr,
+        headers: typing.Mapping[str, str],
+        body: typing.Union[str, bytes],
         data_unmarshaller: types.UnmarshallerType,
     ) -> event_base.BaseEvent:
         if type(event) not in self.SUPPORTED_VERSIONS:
@@ -51,8 +51,10 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         return event
 
     def write(
-        self, event: event_base.BaseEvent, data_marshaller: types.MarshallerType
-    ) -> typing.Tuple[dict, bytes]:
+        self,
+        event: event_base.BaseEvent,
+        data_marshaller: typing.Optional[types.MarshallerType],
+    ) -> typing.Tuple[dict[str, str], bytes]:
         return event.MarshalBinary(data_marshaller)
 
 
@@ -60,7 +62,7 @@ def NewBinaryHTTPCloudEventConverter() -> BinaryHTTPCloudEventConverter:
     return BinaryHTTPCloudEventConverter()
 
 
-def is_binary(headers: typing.Mapping[str, typing.Optional[str]]) -> bool:
+def is_binary(headers: typing.Mapping[str, str]) -> bool:
     """
     Determines whether an event with the supplied `headers` is in binary format.
 

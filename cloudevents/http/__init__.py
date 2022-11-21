@@ -25,15 +25,15 @@ from cloudevents.http.http_methods import (  # deprecated
 from cloudevents.http.json_methods import to_json  # deprecated
 
 __all__ = [
-    to_binary,
-    to_structured,
-    from_json,
-    from_http,
-    from_dict,
-    CloudEvent,
-    is_binary,
-    is_structured,
-    to_binary_http,
-    to_structured_http,
-    to_json,
+    "to_binary",
+    "to_structured",
+    "from_json",
+    "from_http",
+    "from_dict",
+    "CloudEvent",
+    "is_binary",
+    "is_structured",
+    "to_binary_http",
+    "to_structured_http",
+    "to_json",
 ]

@@ -23,8 +23,8 @@ class Converter(object):
     def read(
         self,
         event: typing.Any,
-        headers: dict,
-        body: typing.AnyStr,
+        headers: typing.Mapping[str, str],
+        body: typing.Union[str, bytes],
         data_unmarshaller: typing.Callable,
     ) -> base.BaseEvent:
         raise Exception("not implemented")
@@ -35,11 +35,11 @@ class Converter(object):
     def can_read(
         self,
         content_type: typing.Optional[str],
-        headers: typing.Optional[typing.Mapping[str, typing.Optional[str]]] = None,
+        headers: typing.Optional[typing.Mapping[str, str]] = None,
     ) -> bool:
         raise Exception("not implemented")
 
     def write(
-        self, event: base.BaseEvent, data_marshaller: typing.Callable
-    ) -> typing.Tuple[dict, bytes]:
+        self, event: base.BaseEvent, data_marshaller: typing.Optional[typing.Callable]
+    ) -> typing.Tuple[typing.Dict[str, str], bytes]:
         raise Exception("not implemented")

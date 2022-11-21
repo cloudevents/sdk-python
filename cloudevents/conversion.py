@@ -23,7 +23,7 @@ from cloudevents.sdk.converters import is_binary
 from cloudevents.sdk.event import v1, v03
 
 
-def _best_effort_serialize_to_json(
+def _best_effort_serialize_to_json(  # type: ignore[no-untyped-def]
     value: typing.Any, *args, **kwargs
 ) -> typing.Optional[typing.Union[bytes, str, typing.Any]]:
     """
@@ -43,10 +43,10 @@ def _best_effort_serialize_to_json(
         return value
 
 
-_default_marshaller_by_format = {
+_default_marshaller_by_format: typing.Dict[str, types.MarshallerType] = {
     converters.TypeStructured: lambda x: x,
     converters.TypeBinary: _best_effort_serialize_to_json,
-}  # type: typing.Dict[str, types.MarshallerType]
+}
 
 _obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
 
@@ -54,7 +54,7 @@ _obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
 def to_json(
     event: AnyCloudEvent,
     data_marshaller: typing.Optional[types.MarshallerType] = None,
-) -> typing.AnyStr:
+) -> bytes:
     """
     Converts given `event` to a JSON string.
 
@@ -68,7 +68,7 @@ def to_json(
 
 def from_json(
     event_type: typing.Type[AnyCloudEvent],
-    data: typing.AnyStr,
+    data: typing.Union[str, bytes],
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> AnyCloudEvent:
     """
@@ -91,8 +91,8 @@ def from_json(
 
 def from_http(
     event_type: typing.Type[AnyCloudEvent],
-    headers: typing.Dict[str, str],
-    data: typing.Optional[typing.AnyStr],
+    headers: typing.Mapping[str, str],
+    data: typing.Optional[typing.Union[str, bytes]],
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> AnyCloudEvent:
     """
@@ -176,7 +176,7 @@ def _to_http(
     event: AnyCloudEvent,
     format: str = converters.TypeStructured,
     data_marshaller: typing.Optional[types.MarshallerType] = None,
-) -> typing.Tuple[dict, typing.AnyStr]:
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     """
     Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
 
@@ -206,7 +206,7 @@ def _to_http(
 def to_structured(
     event: AnyCloudEvent,
     data_marshaller: typing.Optional[types.MarshallerType] = None,
-) -> typing.Tuple[dict, typing.AnyStr]:
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     """
     Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
 
@@ -223,7 +223,7 @@ def to_structured(
 
 def to_binary(
     event: AnyCloudEvent, data_marshaller: typing.Optional[types.MarshallerType] = None
-) -> typing.Tuple[dict, typing.AnyStr]:
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     """
     Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
 
@@ -292,14 +292,8 @@ def to_dict(event: AnyCloudEvent) -> typing.Dict[str, typing.Any]:
 
 
 def _json_or_string(
-    content: typing.Optional[typing.AnyStr],
-) -> typing.Optional[
-    typing.Union[
-        typing.Dict[typing.Any, typing.Any],
-        typing.List[typing.Any],
-        typing.AnyStr,
-    ]
-]:
+    content: typing.Optional[typing.Union[str, bytes]],
+) -> typing.Any:
     """
     Returns a JSON-decoded dictionary or a list of dictionaries if
     a valid JSON string is provided.

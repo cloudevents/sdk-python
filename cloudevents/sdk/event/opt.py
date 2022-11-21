@@ -13,7 +13,7 @@
 #    under the License.
 
 
-class Option(object):
+class Option:
     def __init__(self, name, value, is_required):
         self.name = name
         self.value = value

@@ -22,7 +22,7 @@ from cloudevents.sdk import types
 
 
 def from_json(
-    data: typing.AnyStr,
+    data: typing.Union[str, bytes],
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> CloudEvent:
     """
@@ -38,7 +38,7 @@ def from_json(
 
 def from_http(
     headers: typing.Dict[str, str],
-    data: typing.Optional[typing.AnyStr],
+    data: typing.Optional[typing.Union[str, bytes]],
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> CloudEvent:
     """

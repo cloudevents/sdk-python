@@ -22,10 +22,10 @@ from cloudevents.kafka.conversion import (
 )
 
 __all__ = [
-    KafkaMessage,
-    KeyMapper,
-    from_binary,
-    from_structured,
-    to_binary,
-    to_structured,
+    "KafkaMessage",
+    "KeyMapper",
+    "from_binary",
+    "from_structured",
+    "to_binary",
+    "to_structured",
 ]

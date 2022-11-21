@@ -41,25 +41,25 @@ class Event(base.BaseEvent):
         self.ce__extensions = opt.Option("extensions", dict(), False)
 
     def CloudEventVersion(self) -> str:
-        return self.ce__specversion.get()
+        return str(self.ce__specversion.get())
 
     def EventType(self) -> str:
-        return self.ce__type.get()
+        return str(self.ce__type.get())
 
     def Source(self) -> str:
-        return self.ce__source.get()
+        return str(self.ce__source.get())
 
     def EventID(self) -> str:
-        return self.ce__id.get()
+        return str(self.ce__id.get())
 
     def EventTime(self) -> str:
-        return self.ce__time.get()
+        return str(self.ce__time.get())
 
     def Subject(self) -> str:
-        return self.ce__subject.get()
+        return str(self.ce__subject.get())
 
     def SchemaURL(self) -> str:
-        return self.ce__schemaurl.get()
+        return str(self.ce__schemaurl.get())
 
     def Data(self) -> object:
         return self.ce__data.get()
@@ -118,7 +118,7 @@ class Event(base.BaseEvent):
         return self.ContentEncoding()
 
     @datacontentencoding.setter
-    def datacontentencoding(self, value: str):
+    def datacontentencoding(self, value: str) -> None:
         self.SetContentEncoding(value)
 
     @property
@@ -126,7 +126,7 @@ class Event(base.BaseEvent):
         return self.Subject()
 
     @subject.setter
-    def subject(self, value: str):
+    def subject(self, value: str) -> None:
         self.SetSubject(value)
 
     @property
@@ -134,5 +134,5 @@ class Event(base.BaseEvent):
         return self.SchemaURL()
 
     @schema_url.setter
-    def schema_url(self, value: str):
+    def schema_url(self, value: str) -> None:
         self.SetSchemaURL(value)

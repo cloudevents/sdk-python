@@ -30,17 +30,26 @@ from cloudevents.exceptions import IncompatibleArgumentsError
 from cloudevents.sdk.event import attribute
 
 
-def _ce_json_dumps(obj: typing.Dict[str, typing.Any], *args, **kwargs) -> str:
-    """
+def _ce_json_dumps(  # type: ignore[no-untyped-def]
+    obj: typing.Dict[str, typing.Any],
+    *args,
+    **kwargs,
+) -> str:
+    """Performs Pydantic-specific serialization of the event.
+
     Needed by the pydantic base-model to serialize the event correctly to json.
     Without this function the data will be incorrectly serialized.
+
     :param obj: CloudEvent represented as a dict.
     :param args: User arguments which will be passed to json.dumps function.
     :param kwargs: User arguments which will be passed to json.dumps function.
+
     :return: Event serialized as a standard JSON CloudEvent with user specific
     parameters.
     """
     # Using HTTP from dict due to performance issues.
+    event = http.from_dict(obj)
+    event_json = conversion.to_json(event)
     # Pydantic is known for initialization time lagging.
     return json.dumps(
         # We SHOULD de-serialize the value, to serialize it back with
@@ -48,27 +57,26 @@ def _ce_json_dumps(obj: typing.Dict[str, typing.Any], *args, **kwargs) -> str:
         # This MAY cause performance issues in the future.
         # When that issue will cause real problem you MAY add a special keyword
         # argument that disabled this conversion
-        json.loads(
-            conversion.to_json(
-                http.from_dict(obj),
-            ).decode("utf-8")
-        ),
+        json.loads(event_json),
         *args,
-        **kwargs
+        **kwargs,
     )
 
 
-def _ce_json_loads(
+def _ce_json_loads(  # type: ignore[no-untyped-def]
     data: typing.AnyStr, *args, **kwargs  # noqa
 ) -> typing.Dict[typing.Any, typing.Any]:
-    """
+    """Perforns Pydantic-specific deserialization of the event.
+
     Needed by the pydantic base-model to de-serialize the event correctly from json.
     Without this function the data will be incorrectly de-serialized.
+
     :param obj: CloudEvent encoded as a json string.
     :param args: These arguments SHOULD NOT be passed by pydantic.
         Located here for fail-safe reasons, in-case it does.
     :param kwargs: These arguments SHOULD NOT be passed by pydantic.
         Located here for fail-safe reasons, in-case it does.
+
     :return: CloudEvent in a dict representation.
     """
     # Using HTTP from dict due to performance issues.
@@ -211,11 +219,11 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):
         ),
     )
 
-    def __init__(
+    def __init__(  # type: ignore[no-untyped-def]
         self,
         attributes: typing.Optional[typing.Dict[str, typing.Any]] = None,
         data: typing.Optional[typing.Any] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         :param attributes: A dict with CloudEvent attributes.

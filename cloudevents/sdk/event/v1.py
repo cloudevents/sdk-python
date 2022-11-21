@@ -104,7 +104,7 @@ class Event(base.BaseEvent):
         return self.Schema()
 
     @schema.setter
-    def schema(self, value: str):
+    def schema(self, value: str) -> None:
         self.SetSchema(value)
 
     @property
@@ -112,5 +112,5 @@ class Event(base.BaseEvent):
         return self.Subject()
 
     @subject.setter
-    def subject(self, value: str):
+    def subject(self, value: str) -> None:
         self.SetSubject(value)

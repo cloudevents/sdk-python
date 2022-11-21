@@ -34,7 +34,7 @@ class EventGetterSetter(object):  # pragma: no cover
         return self.CloudEventVersion()
 
     @specversion.setter
-    def specversion(self, value: str):
+    def specversion(self, value: str) -> None:
         self.SetCloudEventVersion(value)
 
     def SetCloudEventVersion(self, specversion: str) -> object:
@@ -49,7 +49,7 @@ class EventGetterSetter(object):  # pragma: no cover
         return self.EventType()
 
     @type.setter
-    def type(self, value: str):
+    def type(self, value: str) -> None:
         self.SetEventType(value)
 
     def SetEventType(self, eventType: str) -> object:
@@ -64,7 +64,7 @@ class EventGetterSetter(object):  # pragma: no cover
         return self.Source()
 
     @source.setter
-    def source(self, value: str):
+    def source(self, value: str) -> None:
         self.SetSource(value)
 
     def SetSource(self, source: str) -> object:
@@ -79,7 +79,7 @@ class EventGetterSetter(object):  # pragma: no cover
         return self.EventID()
 
     @id.setter
-    def id(self, value: str):
+    def id(self, value: str) -> None:
         self.SetEventID(value)
 
     def SetEventID(self, eventID: str) -> object:
@@ -94,7 +94,7 @@ class EventGetterSetter(object):  # pragma: no cover
         return self.EventTime()
 
     @time.setter
-    def time(self, value: str):
+    def time(self, value: str) -> None:
         self.SetEventTime(value)
 
     def SetEventTime(self, eventTime: str) -> object:
@@ -109,7 +109,7 @@ class EventGetterSetter(object):  # pragma: no cover
         return self.SchemaURL()
 
     @schema.setter
-    def schema(self, value: str):
+    def schema(self, value: str) -> None:
         self.SetSchemaURL(value)
 
     def SetSchemaURL(self, schemaURL: str) -> object:
@@ -124,7 +124,7 @@ class EventGetterSetter(object):  # pragma: no cover
         return self.Data()
 
     @data.setter
-    def data(self, value: object):
+    def data(self, value: object) -> None:
         self.SetData(value)
 
     def SetData(self, data: object) -> object:
@@ -139,7 +139,7 @@ class EventGetterSetter(object):  # pragma: no cover
         return self.Extensions()
 
     @extensions.setter
-    def extensions(self, value: dict):
+    def extensions(self, value: dict) -> None:
         self.SetExtensions(value)
 
     def SetExtensions(self, extensions: dict) -> object:
@@ -154,7 +154,7 @@ class EventGetterSetter(object):  # pragma: no cover
         return self.ContentType()
 
     @content_type.setter
-    def content_type(self, value: str):
+    def content_type(self, value: str) -> None:
         self.SetContentType(value)
 
     def SetContentType(self, contentType: str) -> object:
@@ -169,7 +169,7 @@ class BaseEvent(EventGetterSetter):
     _ce_optional_fields: Set[str] = set()
     """A set of optional CloudEvent field names."""
 
-    def Properties(self, with_nullable=False) -> dict:
+    def Properties(self, with_nullable: bool = False) -> dict:
         props = dict()
         for name, value in self.__dict__.items():
             if str(name).startswith("ce__"):
@@ -188,7 +188,7 @@ class BaseEvent(EventGetterSetter):
         value: typing.Any = getattr(self, formatted_key)
         return value.get(), key_exists
 
-    def Set(self, key: str, value: object):
+    def Set(self, key: str, value: object) -> None:
         formatted_key: str = "ce__{0}".format(key)
         key_exists: bool = hasattr(self, formatted_key)
         if key_exists:
@@ -200,19 +200,20 @@ class BaseEvent(EventGetterSetter):
         exts.update({key: value})
         self.Set("extensions", exts)
 
-    def MarshalJSON(self, data_marshaller: types.MarshallerType) -> str:
-        if data_marshaller is None:
-            data_marshaller = lambda x: x  # noqa: E731
+    def MarshalJSON(
+        self, data_marshaller: typing.Optional[types.MarshallerType]
+    ) -> str:
         props = self.Properties()
         if "data" in props:
             data = props.pop("data")
             try:
-                data = data_marshaller(data)
+                if data_marshaller:
+                    data = data_marshaller(data)
             except Exception as e:
                 raise cloud_exceptions.DataMarshallerError(
                     f"Failed to marshall data with error: {type(e).__name__}('{e}')"
                 )
-            if isinstance(data, (bytes, bytes, memoryview)):
+            if isinstance(data, (bytes, bytearray, memoryview)):
                 props["data_base64"] = base64.b64encode(data).decode("ascii")
             else:
                 props["data"] = data
@@ -223,9 +224,9 @@ class BaseEvent(EventGetterSetter):
 
     def UnmarshalJSON(
         self,
-        b: typing.AnyStr,
+        b: typing.Union[str, bytes],
         data_unmarshaller: types.UnmarshallerType,
-    ):
+    ) -> None:
         raw_ce = json.loads(b)
 
         missing_fields = self._ce_required_fields - raw_ce.keys()
@@ -252,10 +253,10 @@ class BaseEvent(EventGetterSetter):
 
     def UnmarshalBinary(
         self,
-        headers: dict,
-        body: typing.AnyStr,
+        headers: typing.Mapping[str, str],
+        body: typing.Union[str, bytes],
         data_unmarshaller: types.UnmarshallerType,
-    ):
+    ) -> None:
         required_binary_fields = {f"ce-{field}" for field in self._ce_required_fields}
         missing_fields = required_binary_fields - headers.keys()
 
@@ -280,9 +281,9 @@ class BaseEvent(EventGetterSetter):
         self.Set("data", raw_ce)
 
     def MarshalBinary(
-        self, data_marshaller: types.MarshallerType
-    ) -> typing.Tuple[dict, bytes]:
-        if data_marshaller is None:
+        self, data_marshaller: typing.Optional[types.MarshallerType]
+    ) -> typing.Tuple[dict[str, str], bytes]:
+        if not data_marshaller:
             data_marshaller = json.dumps
         headers: dict[str, str] = {}
         if self.ContentType():

@@ -28,7 +28,7 @@ class JSONHTTPCloudEventConverter(base.Converter):
     def can_read(
         self,
         content_type: typing.Optional[str] = None,
-        headers: typing.Optional[typing.Mapping[str, typing.Optional[str]]] = None,
+        headers: typing.Optional[typing.Mapping[str, str]] = None,
     ) -> bool:
         if headers is None:
             headers = {}
@@ -45,16 +45,18 @@ class JSONHTTPCloudEventConverter(base.Converter):
     def read(
         self,
         event: event_base.BaseEvent,
-        headers: dict,
-        body: typing.AnyStr,
+        headers: typing.Mapping[str, str],
+        body: typing.Union[str, bytes],
         data_unmarshaller: types.UnmarshallerType,
     ) -> event_base.BaseEvent:
         event.UnmarshalJSON(body, data_unmarshaller)
         return event
 
     def write(
-        self, event: event_base.BaseEvent, data_marshaller: types.MarshallerType
-    ) -> typing.Tuple[dict, bytes]:
+        self,
+        event: event_base.BaseEvent,
+        data_marshaller: typing.Optional[types.MarshallerType],
+    ) -> typing.Tuple[dict[str, str], bytes]:
         http_headers = {"content-type": self.MIME_TYPE}
         return http_headers, event.MarshalJSON(data_marshaller).encode("utf-8")
 

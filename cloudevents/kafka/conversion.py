@@ -17,7 +17,7 @@ import typing
 
 from cloudevents import exceptions as cloud_exceptions
 from cloudevents import http
-from cloudevents.abstract import AnyCloudEvent
+from cloudevents.abstract import AnyCloudEvent, CloudEvent
 from cloudevents.kafka.exceptions import KeyMapperError
 from cloudevents.sdk import types
 
@@ -38,12 +38,12 @@ class KafkaMessage(typing.NamedTuple):
     The dictionary of message headers key/values.
     """
 
-    key: typing.Optional[typing.AnyStr]
+    key: typing.Optional[typing.Union[str, bytes]]
     """
     The message key.
     """
 
-    value: typing.AnyStr
+    value: typing.Union[str, bytes]
     """
     The message value.
     """
@@ -110,7 +110,7 @@ def from_binary(
     message: KafkaMessage,
     event_type: typing.Optional[typing.Type[AnyCloudEvent]] = None,
     data_unmarshaller: typing.Optional[types.MarshallerType] = None,
-) -> AnyCloudEvent:
+) -> CloudEvent:
     """
     Returns a CloudEvent from a KafkaMessage in binary format.
 
@@ -121,9 +121,7 @@ def from_binary(
     """
 
     data_unmarshaller = data_unmarshaller or DEFAULT_UNMARSHALLER
-    event_type = event_type or http.CloudEvent
-
-    attributes = {}
+    attributes: dict[str, typing.Any] = {}
 
     for header, value in message.headers.items():
         header = header.lower()
@@ -141,8 +139,11 @@ def from_binary(
         raise cloud_exceptions.DataUnmarshallerError(
             f"Failed to unmarshall data with error: {type(e).__name__}('{e}')"
         )
-
-    return event_type.create(attributes, data)
+    if event_type:
+        result = event_type.create(attributes, data)
+    else:
+        result = http.CloudEvent.create(attributes, data)
+    return result
 
 
 def to_structured(
@@ -209,7 +210,7 @@ def from_structured(
     event_type: typing.Optional[typing.Type[AnyCloudEvent]] = None,
     data_unmarshaller: typing.Optional[types.MarshallerType] = None,
     envelope_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
-) -> AnyCloudEvent:
+) -> CloudEvent:
     """
     Returns a CloudEvent from a KafkaMessage in structured format.
 
@@ -223,8 +224,6 @@ def from_structured(
 
     data_unmarshaller = data_unmarshaller or DEFAULT_EMBEDDED_DATA_MARSHALLER
     envelope_unmarshaller = envelope_unmarshaller or DEFAULT_UNMARSHALLER
-    event_type = event_type or http.CloudEvent
-
     try:
         structure = envelope_unmarshaller(message.value)
     except Exception as e:
@@ -257,5 +256,8 @@ def from_structured(
 
     for header, val in message.headers.items():
         attributes[header.lower()] = val.decode()
-
-    return event_type.create(attributes, data)
+    if event_type:
+        result = event_type.create(attributes, data)
+    else:
+        result = http.CloudEvent.create(attributes, data)
+    return result

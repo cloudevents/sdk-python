@@ -32,7 +32,7 @@ from cloudevents.sdk import types
 )
 def to_binary(
     event: AnyCloudEvent, data_marshaller: typing.Optional[types.MarshallerType] = None
-) -> typing.Tuple[dict, typing.AnyStr]:
+) -> typing.Tuple[dict[str, str], bytes]:
     return _moved_to_binary(event, data_marshaller)
 
 
@@ -43,7 +43,7 @@ def to_binary(
 def to_structured(
     event: AnyCloudEvent,
     data_marshaller: typing.Optional[types.MarshallerType] = None,
-) -> typing.Tuple[dict, typing.AnyStr]:
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     return _moved_to_structured(event, data_marshaller)
 
 
@@ -62,12 +62,12 @@ def from_http(
 @deprecated(deprecated_in="1.0.2", details="Use to_binary function instead")
 def to_binary_http(
     event: CloudEvent, data_marshaller: typing.Optional[types.MarshallerType] = None
-) -> typing.Tuple[dict, typing.AnyStr]:
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     return _moved_to_binary(event, data_marshaller)
 
 
 @deprecated(deprecated_in="1.0.2", details="Use to_structured function instead")
 def to_structured_http(
     event: CloudEvent, data_marshaller: typing.Optional[types.MarshallerType] = None
-) -> typing.Tuple[dict, typing.AnyStr]:
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     return _moved_to_structured(event, data_marshaller)
