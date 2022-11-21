@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.3] — 2022-11-21
+### Fixed
+- Fixed Pydantic extras dependency constraint.
+
 ## [1.6.2] — 2022-10-18
 ### Added
 - Added `get_attributes` API to the `CloudEvent` API. The method returns a read-only
