@@ -59,7 +59,7 @@ def _ce_json_dumps(obj: typing.Dict[str, typing.Any], *args, **kwargs) -> str:
 
 
 def _ce_json_loads(
-    data: typing.Union[str, bytes], *args, **kwargs  # noqa
+    data: typing.AnyStr, *args, **kwargs  # noqa
 ) -> typing.Dict[typing.Any, typing.Any]:
     """
     Needed by the pydantic base-model to de-serialize the event correctly from json.

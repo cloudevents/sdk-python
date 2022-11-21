@@ -53,8 +53,8 @@ _obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
 
 def to_json(
     event: AnyCloudEvent,
-    data_marshaller: types.MarshallerType = None,
-) -> typing.Union[str, bytes]:
+    data_marshaller: typing.Optional[types.MarshallerType] = None,
+) -> typing.AnyStr:
     """
     Converts given `event` to a JSON string.
 
@@ -68,8 +68,8 @@ def to_json(
 
 def from_json(
     event_type: typing.Type[AnyCloudEvent],
-    data: typing.Union[str, bytes],
-    data_unmarshaller: types.UnmarshallerType = None,
+    data: typing.AnyStr,
+    data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> AnyCloudEvent:
     """
     Parses JSON string `data` into a CloudEvent.
@@ -92,8 +92,8 @@ def from_json(
 def from_http(
     event_type: typing.Type[AnyCloudEvent],
     headers: typing.Dict[str, str],
-    data: typing.Union[str, bytes, None],
-    data_unmarshaller: types.UnmarshallerType = None,
+    data: typing.Optional[typing.AnyStr],
+    data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> AnyCloudEvent:
     """
     Parses CloudEvent `data` and `headers` into an instance of a given `event_type`.
@@ -175,8 +175,8 @@ def from_http(
 def _to_http(
     event: AnyCloudEvent,
     format: str = converters.TypeStructured,
-    data_marshaller: types.MarshallerType = None,
-) -> typing.Tuple[dict, typing.Union[bytes, str]]:
+    data_marshaller: typing.Optional[types.MarshallerType] = None,
+) -> typing.Tuple[dict, typing.AnyStr]:
     """
     Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
 
@@ -205,8 +205,8 @@ def _to_http(
 
 def to_structured(
     event: AnyCloudEvent,
-    data_marshaller: types.MarshallerType = None,
-) -> typing.Tuple[dict, typing.Union[bytes, str]]:
+    data_marshaller: typing.Optional[types.MarshallerType] = None,
+) -> typing.Tuple[dict, typing.AnyStr]:
     """
     Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
 
@@ -222,8 +222,8 @@ def to_structured(
 
 
 def to_binary(
-    event: AnyCloudEvent, data_marshaller: types.MarshallerType = None
-) -> typing.Tuple[dict, typing.Union[bytes, str]]:
+    event: AnyCloudEvent, data_marshaller: typing.Optional[types.MarshallerType] = None
+) -> typing.Tuple[dict, typing.AnyStr]:
     """
     Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
 

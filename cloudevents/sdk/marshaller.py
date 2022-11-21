@@ -32,15 +32,17 @@ class HTTPMarshaller(object):
         :param converters: a list of HTTP-to-CloudEvent-to-HTTP constructors
         :type converters: typing.List[base.Converter]
         """
-        self.http_converters = [c for c in converters]
-        self.http_converters_by_type = {c.TYPE: c for c in converters}
+        self.http_converters: typing.List[base.Converter] = [c for c in converters]
+        self.http_converters_by_type: dict[str, base.Converter] = {
+            c.TYPE: c for c in converters
+        }
 
     def FromRequest(
         self,
         event: event_base.BaseEvent,
         headers: dict,
-        body: typing.Union[str, bytes],
-        data_unmarshaller: types.UnmarshallerType = json.loads,
+        body: typing.AnyStr,
+        data_unmarshaller: typing.Optional[types.UnmarshallerType] = json.loads,
     ) -> event_base.BaseEvent:
         """
         Reads a CloudEvent from an HTTP headers and request body
@@ -49,7 +51,7 @@ class HTTPMarshaller(object):
         :param headers: a dict-like HTTP headers
         :type headers: dict
         :param body: an HTTP request body as a string or bytes
-        :type body: typing.Union[str, bytes]
+        :type body: typing.AnyStr
         :param data_unmarshaller: a callable-like
                                   unmarshaller the CloudEvent data
         :return: a CloudEvent
@@ -77,9 +79,9 @@ class HTTPMarshaller(object):
     def ToRequest(
         self,
         event: event_base.BaseEvent,
-        converter_type: str = None,
-        data_marshaller: types.MarshallerType = None,
-    ) -> (dict, bytes):
+        converter_type: typing.Optional[str] = None,
+        data_marshaller: typing.Optional[types.MarshallerType] = None,
+    ) -> typing.Tuple[dict, bytes]:
         """
         Writes a CloudEvent into a HTTP-ready form of headers and request body
         :param event: CloudEvent

@@ -22,16 +22,17 @@ from cloudevents.sdk.event import v1, v03
 
 
 class BinaryHTTPCloudEventConverter(base.Converter):
-
-    TYPE = "binary"
+    TYPE: str = "binary"
     SUPPORTED_VERSIONS = [v03.Event, v1.Event]
 
     def can_read(
         self,
-        content_type: str = None,
-        headers: typing.Dict[str, str] = {"ce-specversion": None},
+        content_type: typing.Optional[str] = None,
+        headers: typing.Optional[typing.Mapping[str, typing.Optional[str]]] = None,
     ) -> bool:
 
+        if headers is None:
+            headers = {"ce-specversion": None}
         return has_binary_headers(headers)
 
     def event_supported(self, event: object) -> bool:
@@ -41,7 +42,7 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         self,
         event: event_base.BaseEvent,
         headers: dict,
-        body: typing.IO,
+        body: typing.AnyStr,
         data_unmarshaller: types.UnmarshallerType,
     ) -> event_base.BaseEvent:
         if type(event) not in self.SUPPORTED_VERSIONS:
@@ -59,7 +60,7 @@ def NewBinaryHTTPCloudEventConverter() -> BinaryHTTPCloudEventConverter:
     return BinaryHTTPCloudEventConverter()
 
 
-def is_binary(headers: typing.Dict[str, str]) -> bool:
+def is_binary(headers: typing.Mapping[str, typing.Optional[str]]) -> bool:
     """
     Determines whether an event with the supplied `headers` is in binary format.
 

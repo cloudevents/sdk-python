@@ -18,14 +18,13 @@ from cloudevents.sdk.event import base
 
 
 class Converter(object):
-
-    TYPE = None
+    TYPE: str = ""
 
     def read(
         self,
-        event,
+        event: typing.Any,
         headers: dict,
-        body: typing.IO,
+        body: typing.AnyStr,
         data_unmarshaller: typing.Callable,
     ) -> base.BaseEvent:
         raise Exception("not implemented")
@@ -33,10 +32,14 @@ class Converter(object):
     def event_supported(self, event: object) -> bool:
         raise Exception("not implemented")
 
-    def can_read(self, content_type: str) -> bool:
+    def can_read(
+        self,
+        content_type: typing.Optional[str],
+        headers: typing.Optional[typing.Mapping[str, typing.Optional[str]]] = None,
+    ) -> bool:
         raise Exception("not implemented")
 
     def write(
         self, event: base.BaseEvent, data_marshaller: typing.Callable
-    ) -> (dict, object):
+    ) -> typing.Tuple[dict, bytes]:
         raise Exception("not implemented")

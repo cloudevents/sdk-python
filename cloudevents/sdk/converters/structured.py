@@ -22,11 +22,16 @@ from cloudevents.sdk.event import base as event_base
 
 # TODO: Singleton?
 class JSONHTTPCloudEventConverter(base.Converter):
+    TYPE: str = "structured"
+    MIME_TYPE: typing.Final[str] = "application/cloudevents+json"
 
-    TYPE = "structured"
-    MIME_TYPE = "application/cloudevents+json"
-
-    def can_read(self, content_type: str, headers: typing.Dict[str, str] = {}) -> bool:
+    def can_read(
+        self,
+        content_type: typing.Optional[str] = None,
+        headers: typing.Optional[typing.Mapping[str, typing.Optional[str]]] = None,
+    ) -> bool:
+        if headers is None:
+            headers = {}
         return (
             isinstance(content_type, str)
             and content_type.startswith(self.MIME_TYPE)
@@ -41,7 +46,7 @@ class JSONHTTPCloudEventConverter(base.Converter):
         self,
         event: event_base.BaseEvent,
         headers: dict,
-        body: typing.IO,
+        body: typing.AnyStr,
         data_unmarshaller: types.UnmarshallerType,
     ) -> event_base.BaseEvent:
         event.UnmarshalJSON(body, data_unmarshaller)
@@ -58,7 +63,7 @@ def NewJSONHTTPCloudEventConverter() -> JSONHTTPCloudEventConverter:
     return JSONHTTPCloudEventConverter()
 
 
-def is_structured(headers: typing.Dict[str, str]) -> bool:
+def is_structured(headers: typing.Mapping[str, str]) -> bool:
     """
     Determines whether an event with the supplied `headers` is in a structured format.
 

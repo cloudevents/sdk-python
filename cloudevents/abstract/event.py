@@ -32,7 +32,7 @@ class CloudEvent:
         cls,
         attributes: typing.Dict[str, typing.Any],
         data: typing.Optional[typing.Any],
-    ) -> "AnyCloudEvent":
+    ) -> "CloudEvent":
         """
         Creates a new instance of the CloudEvent using supplied `attributes`
         and `data`.
