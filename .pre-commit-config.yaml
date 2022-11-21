@@ -23,3 +23,5 @@ repos:
         exclude: ^(cloudevents/tests/)
         types: [ python ]
         args: [ ]
+        additional_dependencies:
+          - 'pydantic'
