@@ -6,10 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.1] — 2022-11-21
+### Fixed
+- Fixed Pydantic extras dependency constraint (backport of v1.6.3, [#204])
+
+### Changed
+- Refined build and publishing process. Added SDist to the released package ([#202])
+
 ## [1.7.0] — 2022-11-17
 ### Added
 - Added [Kafka](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/kafka-protocol-binding.md)
   support ([#197], thanks [David Martines](https://github.com/davidwmartines))
+
+## [1.6.3] — 2022-11-21
+### Fixed
+- Fixed Pydantic extras dependency constraint ([#204])
 
 ## [1.6.2] — 2022-10-18
 ### Added
@@ -157,7 +168,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.7.1]: https://github.com/cloudevents/sdk-python/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/cloudevents/sdk-python/compare/1.6.0...1.7.0
+[1.6.3]: https://github.com/cloudevents/sdk-python/compare/1.6.2...1.6.3
 [1.6.2]: https://github.com/cloudevents/sdk-python/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/cloudevents/sdk-python/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/cloudevents/sdk-python/compare/1.5.0...1.6.0
@@ -225,3 +238,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#191]: https://github.com/cloudevents/sdk-python/pull/191
 [#195]: https://github.com/cloudevents/sdk-python/pull/195
 [#197]: https://github.com/cloudevents/sdk-python/pull/197
+[#202]: https://github.com/cloudevents/sdk-python/pull/202
+[#204]: https://github.com/cloudevents/sdk-python/pull/204

@@ -1,15 +1,38 @@
 name: PyPI-Release
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
+      - 'tag/v**'
 
 jobs:
-  build-and-publish:
-    runs-on: ubuntu-latest
+  build_dist:
+    name: Build source distribution
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Build SDist and wheel
+        run: pipx run build
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist/*
+
+      - name: Check metadata
+        run: pipx run twine check dist/*
+  publish:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push'
+    needs: [ build_dist ]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -17,11 +40,16 @@ jobs:
           cache: 'pip'
       - name: Install build dependencies
         run: pip install -U setuptools wheel build
-      - name: Build
-        run: python -m build .
+      - uses: actions/download-artifact@v3
+        with:
+          # unpacks default artifact into dist/
+          # if `name: artifact` is omitted, the action will create extra parent dir
+          name: artifact
+          path: dist
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
+          user: __token__
           password: ${{ secrets.pypi_password }}
       - name: Install GitPython and cloudevents for pypi_packaging
         run: pip install -U -r requirements/publish.txt

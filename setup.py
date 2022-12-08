@@ -71,8 +71,8 @@ if __name__ == "__main__":
         install_requires=["deprecation>=2.0,<3.0"],
         extras_require={
             "pydantic": [
-                "pydantic>=1.0.0<1.9.0; python_version <= '3.6'",
-                "pydantic>=1.0.0<2.0; python_version > '3.6'",
+                "pydantic>=1.0.0,<1.9.0;python_version<'3.7'",
+                "pydantic>=1.0.0,<2.0;python_version>='3.7'",
             ],
         },
     )
