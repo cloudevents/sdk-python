@@ -30,7 +30,7 @@ class EventGetterSetter(object):  # pragma: no cover
         raise Exception("not implemented")
 
     @property
-    def specversion(self):
+    def specversion(self) -> str:
         return self.CloudEventVersion()
 
     @specversion.setter
@@ -45,7 +45,7 @@ class EventGetterSetter(object):  # pragma: no cover
         raise Exception("not implemented")
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self.EventType()
 
     @type.setter
@@ -60,7 +60,7 @@ class EventGetterSetter(object):  # pragma: no cover
         raise Exception("not implemented")
 
     @property
-    def source(self):
+    def source(self) -> str:
         return self.Source()
 
     @source.setter
@@ -75,7 +75,7 @@ class EventGetterSetter(object):  # pragma: no cover
         raise Exception("not implemented")
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self.EventID()
 
     @id.setter
@@ -86,48 +86,48 @@ class EventGetterSetter(object):  # pragma: no cover
         raise Exception("not implemented")
 
     # ce-time
-    def EventTime(self) -> str:
+    def EventTime(self) -> typing.Optional[str]:
         raise Exception("not implemented")
 
     @property
-    def time(self):
+    def time(self) -> typing.Optional[str]:
         return self.EventTime()
 
     @time.setter
-    def time(self, value: str) -> None:
+    def time(self, value: typing.Optional[str]) -> None:
         self.SetEventTime(value)
 
-    def SetEventTime(self, eventTime: str) -> object:
+    def SetEventTime(self, eventTime: typing.Optional[str]) -> object:
         raise Exception("not implemented")
 
     # ce-schema
-    def SchemaURL(self) -> str:
+    def SchemaURL(self) -> typing.Optional[str]:
         raise Exception("not implemented")
 
     @property
-    def schema(self) -> str:
+    def schema(self) -> typing.Optional[str]:
         return self.SchemaURL()
 
     @schema.setter
-    def schema(self, value: str) -> None:
+    def schema(self, value: typing.Optional[str]) -> None:
         self.SetSchemaURL(value)
 
-    def SetSchemaURL(self, schemaURL: str) -> object:
+    def SetSchemaURL(self, schemaURL: typing.Optional[str]) -> object:
         raise Exception("not implemented")
 
     # data
-    def Data(self) -> object:
+    def Data(self) -> typing.Optional[object]:
         raise Exception("not implemented")
 
     @property
-    def data(self) -> object:
+    def data(self) -> typing.Optional[object]:
         return self.Data()
 
     @data.setter
-    def data(self, value: object) -> None:
+    def data(self, value: typing.Optional[object]) -> None:
         self.SetData(value)
 
-    def SetData(self, data: object) -> object:
+    def SetData(self, data: typing.Optional[object]) -> object:
         raise Exception("not implemented")
 
     # ce-extensions
@@ -146,18 +146,18 @@ class EventGetterSetter(object):  # pragma: no cover
         raise Exception("not implemented")
 
     # Content-Type
-    def ContentType(self) -> str:
+    def ContentType(self) -> typing.Optional[str]:
         raise Exception("not implemented")
 
     @property
-    def content_type(self) -> str:
+    def content_type(self) -> typing.Optional[str]:
         return self.ContentType()
 
     @content_type.setter
-    def content_type(self, value: str) -> None:
+    def content_type(self, value: typing.Optional[str]) -> None:
         self.SetContentType(value)
 
-    def SetContentType(self, contentType: str) -> object:
+    def SetContentType(self, contentType: typing.Optional[str]) -> object:
         raise Exception("not implemented")
 
 
@@ -179,7 +179,7 @@ class BaseEvent(EventGetterSetter):
 
         return props
 
-    def Get(self, key: str) -> typing.Tuple[object, bool]:
+    def Get(self, key: str) -> typing.Tuple[typing.Optional[object], bool]:
         formatted_key: str = "ce__{0}".format(key.lower())
         key_exists: bool = hasattr(self, formatted_key)
         if not key_exists:
@@ -188,7 +188,7 @@ class BaseEvent(EventGetterSetter):
         value: typing.Any = getattr(self, formatted_key)
         return value.get(), key_exists
 
-    def Set(self, key: str, value: object) -> None:
+    def Set(self, key: str, value: typing.Optional[object]) -> None:
         formatted_key: str = "ce__{0}".format(key)
         key_exists: bool = hasattr(self, formatted_key)
         if key_exists:
@@ -286,8 +286,9 @@ class BaseEvent(EventGetterSetter):
         if not data_marshaller:
             data_marshaller = json.dumps
         headers: dict[str, str] = {}
-        if self.ContentType():
-            headers["content-type"] = self.ContentType()
+        content_type = self.ContentType()
+        if content_type:
+            headers["content-type"] = content_type
         props: dict = self.Properties()
         for key, value in props.items():
             if key not in ["data", "extensions", "datacontenttype"]:
