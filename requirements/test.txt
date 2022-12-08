@@ -10,4 +10,4 @@ aiohttp
 Pillow
 requests
 flask
-pydantic>=1.0.0<2.0
+pydantic>=1.0.0,<2.0
