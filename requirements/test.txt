@@ -4,12 +4,10 @@ flake8-print
 pytest
 pytest-cov
 # web app tests
-sanic<=20.12.7; python_version <= '3.6'
-sanic; python_version > '3.6'
-sanic-testing; python_version > '3.6'
+sanic
+sanic-testing
 aiohttp
 Pillow
 requests
 flask
-pydantic>=1.0.0<1.9.0; python_version <= '3.6'
-pydantic>=1.0.0<2.0; python_version > '3.6'
+pydantic>=1.0.0<2.0;
