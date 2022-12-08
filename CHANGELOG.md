@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] — 2022-12-08
+### Changed
+- Dropped support of Python 3.6 that has reached EOL almost a year ago.
+  [v1.7.1](https://pypi.org/project/cloudevents/1.7.1/) is the last
+  one to support Python 3.6 ([#208])
+
 ## [1.7.1] — 2022-11-21
 ### Fixed
 - Fixed Pydantic extras dependency constraint (backport of v1.6.3, [#204])
@@ -168,6 +174,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.8.0]: https://github.com/cloudevents/sdk-python/compare/1.7.0...1.8.0
 [1.7.1]: https://github.com/cloudevents/sdk-python/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/cloudevents/sdk-python/compare/1.6.0...1.7.0
 [1.6.3]: https://github.com/cloudevents/sdk-python/compare/1.6.2...1.6.3
@@ -240,3 +247,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#197]: https://github.com/cloudevents/sdk-python/pull/197
 [#202]: https://github.com/cloudevents/sdk-python/pull/202
 [#204]: https://github.com/cloudevents/sdk-python/pull/204
+[#208]: https://github.com/cloudevents/sdk-python/pull/208
