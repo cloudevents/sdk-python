@@ -17,7 +17,7 @@ import typing
 
 from cloudevents import exceptions as cloud_exceptions
 from cloudevents import http
-from cloudevents.abstract import AnyCloudEvent, CloudEvent
+from cloudevents.abstract import AnyCloudEvent
 from cloudevents.kafka.exceptions import KeyMapperError
 from cloudevents.sdk import types
 
@@ -110,7 +110,7 @@ def from_binary(
     message: KafkaMessage,
     event_type: typing.Optional[typing.Type[AnyCloudEvent]] = None,
     data_unmarshaller: typing.Optional[types.MarshallerType] = None,
-) -> CloudEvent:
+) -> AnyCloudEvent:
     """
     Returns a CloudEvent from a KafkaMessage in binary format.
 
@@ -142,7 +142,7 @@ def from_binary(
     if event_type:
         result = event_type.create(attributes, data)
     else:
-        result = http.CloudEvent.create(attributes, data)
+        result = http.CloudEvent.create(attributes, data)  # type: ignore
     return result
 
 
@@ -210,7 +210,7 @@ def from_structured(
     event_type: typing.Optional[typing.Type[AnyCloudEvent]] = None,
     data_unmarshaller: typing.Optional[types.MarshallerType] = None,
     envelope_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
-) -> CloudEvent:
+) -> AnyCloudEvent:
     """
     Returns a CloudEvent from a KafkaMessage in structured format.
 
@@ -259,5 +259,5 @@ def from_structured(
     if event_type:
         result = event_type.create(attributes, data)
     else:
-        result = http.CloudEvent.create(attributes, data)
+        result = http.CloudEvent.create(attributes, data)  # type: ignore
     return result

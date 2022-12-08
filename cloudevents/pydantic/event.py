@@ -84,7 +84,7 @@ def _ce_json_loads(  # type: ignore[no-untyped-def]
     return conversion.to_dict(http.from_json(data))
 
 
-class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):
+class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
     """
     A Python-friendly CloudEvent representation backed by Pydantic-modeled fields.
 

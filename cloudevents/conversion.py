@@ -133,7 +133,7 @@ def from_http(
         except json.decoder.JSONDecodeError:
             raise cloud_exceptions.MissingRequiredFields(
                 "Failed to read specversion from both headers and data. "
-                "The following can not be parsed as json: {}".format(data)
+                "The following can not be parsed as json: {!r}".format(data)
             )
         if hasattr(raw_ce, "get"):
             specversion = raw_ce.get("specversion", None)

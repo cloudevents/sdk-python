@@ -17,6 +17,8 @@ from abc import abstractmethod
 from types import MappingProxyType
 from typing import Mapping
 
+AnyCloudEvent = typing.TypeVar("AnyCloudEvent", bound="CloudEvent")
+
 
 class CloudEvent:
     """
@@ -29,10 +31,10 @@ class CloudEvent:
 
     @classmethod
     def create(
-        cls,
+        cls: typing.Type[AnyCloudEvent],
         attributes: typing.Dict[str, typing.Any],
         data: typing.Optional[typing.Any],
-    ) -> "CloudEvent":
+    ) -> AnyCloudEvent:
         """
         Creates a new instance of the CloudEvent using supplied `attributes`
         and `data`.
@@ -141,6 +143,3 @@ class CloudEvent:
 
     def __repr__(self) -> str:
         return str({"attributes": self._get_attributes(), "data": self.get_data()})
-
-
-AnyCloudEvent = typing.TypeVar("AnyCloudEvent", bound=CloudEvent)
