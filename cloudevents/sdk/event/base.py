@@ -282,14 +282,14 @@ class BaseEvent(EventGetterSetter):
 
     def MarshalBinary(
         self, data_marshaller: typing.Optional[types.MarshallerType]
-    ) -> typing.Tuple[dict[str, str], bytes]:
+    ) -> typing.Tuple[typing.Dict[str, str], bytes]:
         if not data_marshaller:
             data_marshaller = json.dumps
-        headers: dict[str, str] = {}
+        headers: typing.Dict[str, str] = {}
         content_type = self.ContentType()
         if content_type:
             headers["content-type"] = content_type
-        props: dict = self.Properties()
+        props: typing.Dict = self.Properties()
         for key, value in props.items():
             if key not in ["data", "extensions", "datacontenttype"]:
                 if value is not None:

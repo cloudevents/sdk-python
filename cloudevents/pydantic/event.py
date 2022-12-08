@@ -280,7 +280,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):
             if key != "data"
         }
 
-    def _get_data(self) -> typing.Optional[typing.Any]:
+    def get_data(self) -> typing.Optional[typing.Any]:
         return self.data
 
     def __setitem__(self, key: str, value: typing.Any) -> None:

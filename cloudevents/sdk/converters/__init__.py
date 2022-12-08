@@ -11,14 +11,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from typing import Final
 
 from cloudevents.sdk.converters import binary, structured
 from cloudevents.sdk.converters.binary import is_binary
 from cloudevents.sdk.converters.structured import is_structured
 
-TypeBinary: Final[str] = binary.BinaryHTTPCloudEventConverter.TYPE
-TypeStructured: Final[str] = structured.JSONHTTPCloudEventConverter.TYPE
+TypeBinary: str = binary.BinaryHTTPCloudEventConverter.TYPE
+TypeStructured: str = structured.JSONHTTPCloudEventConverter.TYPE
 
 __all__ = [
     "binary",

@@ -32,7 +32,7 @@ from cloudevents.sdk import types
 )
 def to_binary(
     event: AnyCloudEvent, data_marshaller: typing.Optional[types.MarshallerType] = None
-) -> typing.Tuple[dict[str, str], bytes]:
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     return _moved_to_binary(event, data_marshaller)
 
 

@@ -23,7 +23,7 @@ from cloudevents.sdk.event import base as event_base
 # TODO: Singleton?
 class JSONHTTPCloudEventConverter(base.Converter):
     TYPE: str = "structured"
-    MIME_TYPE: typing.Final[str] = "application/cloudevents+json"
+    MIME_TYPE: str = "application/cloudevents+json"
 
     def can_read(
         self,
@@ -56,7 +56,7 @@ class JSONHTTPCloudEventConverter(base.Converter):
         self,
         event: event_base.BaseEvent,
         data_marshaller: typing.Optional[types.MarshallerType],
-    ) -> typing.Tuple[dict[str, str], bytes]:
+    ) -> typing.Tuple[typing.Dict[str, str], bytes]:
         http_headers = {"content-type": self.MIME_TYPE}
         return http_headers, event.MarshalJSON(data_marshaller).encode("utf-8")
 

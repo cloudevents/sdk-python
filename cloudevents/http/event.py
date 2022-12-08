@@ -82,7 +82,7 @@ class CloudEvent(abstract.CloudEvent):
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
         return self._attributes
 
-    def _get_data(self) -> typing.Optional[typing.Any]:
+    def get_data(self) -> typing.Optional[typing.Any]:
         return self.data
 
     def __setitem__(self, key: str, value: typing.Any) -> None:

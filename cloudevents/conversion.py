@@ -133,14 +133,14 @@ def from_http(
         except json.decoder.JSONDecodeError:
             raise cloud_exceptions.MissingRequiredFields(
                 "Failed to read specversion from both headers and data. "
-                f"The following can not be parsed as json: {data}"
+                "The following can not be parsed as json: {}".format(data)
             )
         if hasattr(raw_ce, "get"):
             specversion = raw_ce.get("specversion", None)
         else:
             raise cloud_exceptions.MissingRequiredFields(
                 "Failed to read specversion from both headers and data. "
-                f"The following deserialized data has no 'get' method: {raw_ce}"
+                "The following deserialized data has no 'get' method: {}".format(raw_ce)
             )
 
     if specversion is None:
@@ -152,7 +152,7 @@ def from_http(
 
     if event_handler is None:
         raise cloud_exceptions.InvalidRequiredFields(
-            f"Found invalid specversion {specversion}"
+            "Found invalid specversion {}".format(specversion)
         )
 
     event = marshall.FromRequest(
@@ -163,13 +163,12 @@ def from_http(
     attrs.pop("extensions", None)
     attrs.update(**event.extensions)
 
+    result_data: typing.Optional[typing.Any] = event.data
     if event.data == "" or event.data == b"":
         # TODO: Check binary unmarshallers to debug why setting data to ""
-        # returns an event with data set to None, but structured will return ""
-        data = None
-    else:
-        data = event.data
-    return event_type.create(attrs, data)
+        #  returns an event with data set to None, but structured will return ""
+        result_data = None
+    return event_type.create(attrs, result_data)
 
 
 def _to_http(
@@ -196,7 +195,7 @@ def _to_http(
     event_handler = _obj_by_version[event["specversion"]]()
     for attribute_name in event:
         event_handler.Set(attribute_name, event[attribute_name])
-    event_handler.data = event.data
+    event_handler.data = event.get_data()
 
     return marshaller.NewDefaultHTTPMarshaller().ToRequest(
         event_handler, format, data_marshaller=data_marshaller
@@ -287,7 +286,7 @@ def to_dict(event: AnyCloudEvent) -> typing.Dict[str, typing.Any]:
     :returns: The canonical dict representation of the event.
     """
     result = {attribute_name: event.get(attribute_name) for attribute_name in event}
-    result["data"] = event.data
+    result["data"] = event.get_data()
     return result
 
 

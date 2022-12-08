@@ -95,7 +95,7 @@ def to_binary(
                 headers["ce_{0}".format(attr)] = value.encode("utf-8")
 
     try:
-        data = data_marshaller(event.data)
+        data = data_marshaller(event.get_data())
     except Exception as e:
         raise cloud_exceptions.DataMarshallerError(
             f"Failed to marshall data with error: {type(e).__name__}('{e}')"
@@ -121,7 +121,7 @@ def from_binary(
     """
 
     data_unmarshaller = data_unmarshaller or DEFAULT_UNMARSHALLER
-    attributes: dict[str, typing.Any] = {}
+    attributes: typing.Dict[str, typing.Any] = {}
 
     for header, value in message.headers.items():
         header = header.lower()
@@ -175,10 +175,10 @@ def to_structured(
             f"Failed to map message key with error: {type(e).__name__}('{e}')"
         )
 
-    attrs: dict[str, typing.Any] = dict(event.get_attributes())
+    attrs: typing.Dict[str, typing.Any] = dict(event.get_attributes())
 
     try:
-        data = data_marshaller(event.data)
+        data = data_marshaller(event.get_data())
     except Exception as e:
         raise cloud_exceptions.DataMarshallerError(
             f"Failed to marshall data with error: {type(e).__name__}('{e}')"
@@ -231,7 +231,7 @@ def from_structured(
             "Failed to unmarshall message with error: " f"{type(e).__name__}('{e}')"
         )
 
-    attributes: dict[str, typing.Any] = {}
+    attributes: typing.Dict[str, typing.Any] = {}
     if message.key is not None:
         attributes["partitionkey"] = message.key
 
