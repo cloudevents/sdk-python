@@ -60,7 +60,6 @@ if __name__ == "__main__":
             "Development Status :: 5 - Production/Stable",
             "Operating System :: POSIX :: Linux",
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
@@ -69,10 +68,5 @@ if __name__ == "__main__":
         packages=find_packages(exclude=["cloudevents.tests"]),
         version=pypi_config["version_target"],
         install_requires=["deprecation>=2.0,<3.0"],
-        extras_require={
-            "pydantic": [
-                "pydantic>=1.0.0,<1.9.0;python_version<'3.7'",
-                "pydantic>=1.0.0,<2.0;python_version>='3.7'",
-            ],
-        },
+        extras_require={"pydantic": "pydantic>=1.0.0,<2.0"},
     )
