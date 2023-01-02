@@ -295,7 +295,7 @@ class BaseEvent(EventGetterSetter):
                 if value is not None:
                     headers["ce-{0}".format(key)] = value
         extensions = props.get("extensions")
-        if not extensions or not isinstance(extensions, typing.Mapping):
+        if extensions is None or not isinstance(extensions, typing.Mapping):
             raise cloud_exceptions.DataMarshallerError(
                 "No extensions are available in the binary event."
             )
