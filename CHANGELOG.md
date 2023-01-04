@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added typings to the codebase. ([#207])
+
+
 ## [1.8.0] — 2022-12-08
 ### Changed
 - Dropped support of Python 3.6 that has reached EOL almost a year ago.
@@ -247,4 +251,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#197]: https://github.com/cloudevents/sdk-python/pull/197
 [#202]: https://github.com/cloudevents/sdk-python/pull/202
 [#204]: https://github.com/cloudevents/sdk-python/pull/204
+[#207]: https://github.com/cloudevents/sdk-python/pull/207
 [#208]: https://github.com/cloudevents/sdk-python/pull/208
