@@ -14,4 +14,4 @@
 
 from cloudevents.abstract.event import AnyCloudEvent, CloudEvent
 
-__all__ = [AnyCloudEvent, CloudEvent]
+__all__ = ["AnyCloudEvent", "CloudEvent"]

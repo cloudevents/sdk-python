@@ -22,11 +22,16 @@ from cloudevents.sdk.event import base as event_base
 
 # TODO: Singleton?
 class JSONHTTPCloudEventConverter(base.Converter):
+    TYPE: str = "structured"
+    MIME_TYPE: str = "application/cloudevents+json"
 
-    TYPE = "structured"
-    MIME_TYPE = "application/cloudevents+json"
-
-    def can_read(self, content_type: str, headers: typing.Dict[str, str] = {}) -> bool:
+    def can_read(
+        self,
+        content_type: typing.Optional[str] = None,
+        headers: typing.Optional[typing.Mapping[str, str]] = None,
+    ) -> bool:
+        if headers is None:
+            headers = {}
         return (
             isinstance(content_type, str)
             and content_type.startswith(self.MIME_TYPE)
@@ -40,16 +45,18 @@ class JSONHTTPCloudEventConverter(base.Converter):
     def read(
         self,
         event: event_base.BaseEvent,
-        headers: dict,
-        body: typing.IO,
+        headers: typing.Mapping[str, str],
+        body: typing.Union[str, bytes],
         data_unmarshaller: types.UnmarshallerType,
     ) -> event_base.BaseEvent:
         event.UnmarshalJSON(body, data_unmarshaller)
         return event
 
     def write(
-        self, event: event_base.BaseEvent, data_marshaller: types.MarshallerType
-    ) -> typing.Tuple[dict, bytes]:
+        self,
+        event: event_base.BaseEvent,
+        data_marshaller: typing.Optional[types.MarshallerType],
+    ) -> typing.Tuple[typing.Dict[str, str], bytes]:
         http_headers = {"content-type": self.MIME_TYPE}
         return http_headers, event.MarshalJSON(data_marshaller).encode("utf-8")
 
@@ -58,7 +65,7 @@ def NewJSONHTTPCloudEventConverter() -> JSONHTTPCloudEventConverter:
     return JSONHTTPCloudEventConverter()
 
 
-def is_structured(headers: typing.Dict[str, str]) -> bool:
+def is_structured(headers: typing.Mapping[str, str]) -> bool:
     """
     Determines whether an event with the supplied `headers` is in a structured format.
 

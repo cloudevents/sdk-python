@@ -15,6 +15,7 @@
 import base64
 import json
 import typing
+from typing import Set
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.sdk import types
@@ -29,105 +30,105 @@ class EventGetterSetter(object):  # pragma: no cover
         raise Exception("not implemented")
 
     @property
-    def specversion(self):
+    def specversion(self) -> str:
         return self.CloudEventVersion()
+
+    @specversion.setter
+    def specversion(self, value: str) -> None:
+        self.SetCloudEventVersion(value)
 
     def SetCloudEventVersion(self, specversion: str) -> object:
         raise Exception("not implemented")
-
-    @specversion.setter
-    def specversion(self, value: str):
-        self.SetCloudEventVersion(value)
 
     # ce-type
     def EventType(self) -> str:
         raise Exception("not implemented")
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self.EventType()
+
+    @type.setter
+    def type(self, value: str) -> None:
+        self.SetEventType(value)
 
     def SetEventType(self, eventType: str) -> object:
         raise Exception("not implemented")
-
-    @type.setter
-    def type(self, value: str):
-        self.SetEventType(value)
 
     # ce-source
     def Source(self) -> str:
         raise Exception("not implemented")
 
     @property
-    def source(self):
+    def source(self) -> str:
         return self.Source()
+
+    @source.setter
+    def source(self, value: str) -> None:
+        self.SetSource(value)
 
     def SetSource(self, source: str) -> object:
         raise Exception("not implemented")
-
-    @source.setter
-    def source(self, value: str):
-        self.SetSource(value)
 
     # ce-id
     def EventID(self) -> str:
         raise Exception("not implemented")
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self.EventID()
+
+    @id.setter
+    def id(self, value: str) -> None:
+        self.SetEventID(value)
 
     def SetEventID(self, eventID: str) -> object:
         raise Exception("not implemented")
 
-    @id.setter
-    def id(self, value: str):
-        self.SetEventID(value)
-
     # ce-time
-    def EventTime(self) -> str:
+    def EventTime(self) -> typing.Optional[str]:
         raise Exception("not implemented")
 
     @property
-    def time(self):
+    def time(self) -> typing.Optional[str]:
         return self.EventTime()
 
-    def SetEventTime(self, eventTime: str) -> object:
-        raise Exception("not implemented")
-
     @time.setter
-    def time(self, value: str):
+    def time(self, value: typing.Optional[str]) -> None:
         self.SetEventTime(value)
 
+    def SetEventTime(self, eventTime: typing.Optional[str]) -> object:
+        raise Exception("not implemented")
+
     # ce-schema
-    def SchemaURL(self) -> str:
+    def SchemaURL(self) -> typing.Optional[str]:
         raise Exception("not implemented")
 
     @property
-    def schema(self) -> str:
+    def schema(self) -> typing.Optional[str]:
         return self.SchemaURL()
 
-    def SetSchemaURL(self, schemaURL: str) -> object:
-        raise Exception("not implemented")
-
     @schema.setter
-    def schema(self, value: str):
+    def schema(self, value: typing.Optional[str]) -> None:
         self.SetSchemaURL(value)
 
+    def SetSchemaURL(self, schemaURL: typing.Optional[str]) -> object:
+        raise Exception("not implemented")
+
     # data
-    def Data(self) -> object:
+    def Data(self) -> typing.Optional[object]:
         raise Exception("not implemented")
 
     @property
-    def data(self) -> object:
+    def data(self) -> typing.Optional[object]:
         return self.Data()
 
-    def SetData(self, data: object) -> object:
-        raise Exception("not implemented")
-
     @data.setter
-    def data(self, value: object):
+    def data(self, value: typing.Optional[object]) -> None:
         self.SetData(value)
+
+    def SetData(self, data: typing.Optional[object]) -> object:
+        raise Exception("not implemented")
 
     # ce-extensions
     def Extensions(self) -> dict:
@@ -137,34 +138,38 @@ class EventGetterSetter(object):  # pragma: no cover
     def extensions(self) -> dict:
         return self.Extensions()
 
+    @extensions.setter
+    def extensions(self, value: dict) -> None:
+        self.SetExtensions(value)
+
     def SetExtensions(self, extensions: dict) -> object:
         raise Exception("not implemented")
 
-    @extensions.setter
-    def extensions(self, value: dict):
-        self.SetExtensions(value)
-
     # Content-Type
-    def ContentType(self) -> str:
+    def ContentType(self) -> typing.Optional[str]:
         raise Exception("not implemented")
 
     @property
-    def content_type(self) -> str:
+    def content_type(self) -> typing.Optional[str]:
         return self.ContentType()
 
-    def SetContentType(self, contentType: str) -> object:
-        raise Exception("not implemented")
-
     @content_type.setter
-    def content_type(self, value: str):
+    def content_type(self, value: typing.Optional[str]) -> None:
         self.SetContentType(value)
+
+    def SetContentType(self, contentType: typing.Optional[str]) -> object:
+        raise Exception("not implemented")
 
 
 class BaseEvent(EventGetterSetter):
-    _ce_required_fields = set()
-    _ce_optional_fields = set()
+    """Base implementation of the CloudEvent."""
 
-    def Properties(self, with_nullable=False) -> dict:
+    _ce_required_fields: Set[str] = set()
+    """A set of required CloudEvent field names."""
+    _ce_optional_fields: Set[str] = set()
+    """A set of optional CloudEvent field names."""
+
+    def Properties(self, with_nullable: bool = False) -> dict:
         props = dict()
         for name, value in self.__dict__.items():
             if str(name).startswith("ce__"):
@@ -174,19 +179,18 @@ class BaseEvent(EventGetterSetter):
 
         return props
 
-    def Get(self, key: str) -> typing.Tuple[object, bool]:
-        formatted_key = "ce__{0}".format(key.lower())
-        ok = hasattr(self, formatted_key)
-        value = getattr(self, formatted_key, None)
-        if not ok:
+    def Get(self, key: str) -> typing.Tuple[typing.Optional[object], bool]:
+        formatted_key: str = "ce__{0}".format(key.lower())
+        key_exists: bool = hasattr(self, formatted_key)
+        if not key_exists:
             exts = self.Extensions()
             return exts.get(key), key in exts
+        value: typing.Any = getattr(self, formatted_key)
+        return value.get(), key_exists
 
-        return value.get(), ok
-
-    def Set(self, key: str, value: object):
-        formatted_key = "ce__{0}".format(key)
-        key_exists = hasattr(self, formatted_key)
+    def Set(self, key: str, value: typing.Optional[object]) -> None:
+        formatted_key: str = "ce__{0}".format(key)
+        key_exists: bool = hasattr(self, formatted_key)
         if key_exists:
             attr = getattr(self, formatted_key)
             attr.set(value)
@@ -196,19 +200,20 @@ class BaseEvent(EventGetterSetter):
         exts.update({key: value})
         self.Set("extensions", exts)
 
-    def MarshalJSON(self, data_marshaller: types.MarshallerType) -> str:
-        if data_marshaller is None:
-            data_marshaller = lambda x: x  # noqa: E731
+    def MarshalJSON(
+        self, data_marshaller: typing.Optional[types.MarshallerType]
+    ) -> str:
         props = self.Properties()
         if "data" in props:
             data = props.pop("data")
             try:
-                data = data_marshaller(data)
+                if data_marshaller:
+                    data = data_marshaller(data)
             except Exception as e:
                 raise cloud_exceptions.DataMarshallerError(
                     f"Failed to marshall data with error: {type(e).__name__}('{e}')"
                 )
-            if isinstance(data, (bytes, bytes, memoryview)):
+            if isinstance(data, (bytes, bytearray, memoryview)):
                 props["data_base64"] = base64.b64encode(data).decode("ascii")
             else:
                 props["data"] = data
@@ -221,7 +226,7 @@ class BaseEvent(EventGetterSetter):
         self,
         b: typing.Union[str, bytes],
         data_unmarshaller: types.UnmarshallerType,
-    ):
+    ) -> None:
         raw_ce = json.loads(b)
 
         missing_fields = self._ce_required_fields - raw_ce.keys()
@@ -231,30 +236,27 @@ class BaseEvent(EventGetterSetter):
             )
 
         for name, value in raw_ce.items():
-            decoder = lambda x: x
-            if name == "data":
-                # Use the user-provided serializer, which may have customized
-                # JSON decoding
-                decoder = lambda v: data_unmarshaller(json.dumps(v))
-            if name == "data_base64":
-                decoder = lambda v: data_unmarshaller(base64.b64decode(v))
-                name = "data"
-
             try:
-                set_value = decoder(value)
+                if name == "data":
+                    decoded_value = data_unmarshaller(json.dumps(value))
+                elif name == "data_base64":
+                    decoded_value = data_unmarshaller(base64.b64decode(value))
+                    name = "data"
+                else:
+                    decoded_value = value
             except Exception as e:
                 raise cloud_exceptions.DataUnmarshallerError(
                     "Failed to unmarshall data with error: "
                     f"{type(e).__name__}('{e}')"
                 )
-            self.Set(name, set_value)
+            self.Set(name, decoded_value)
 
     def UnmarshalBinary(
         self,
-        headers: dict,
-        body: typing.Union[bytes, str],
+        headers: typing.Mapping[str, str],
+        body: typing.Union[str, bytes],
         data_unmarshaller: types.UnmarshallerType,
-    ):
+    ) -> None:
         required_binary_fields = {f"ce-{field}" for field in self._ce_required_fields}
         missing_fields = required_binary_fields - headers.keys()
 
@@ -279,20 +281,25 @@ class BaseEvent(EventGetterSetter):
         self.Set("data", raw_ce)
 
     def MarshalBinary(
-        self, data_marshaller: types.MarshallerType
-    ) -> typing.Tuple[dict, bytes]:
-        if data_marshaller is None:
+        self, data_marshaller: typing.Optional[types.MarshallerType]
+    ) -> typing.Tuple[typing.Dict[str, str], bytes]:
+        if not data_marshaller:
             data_marshaller = json.dumps
-        headers = {}
-        if self.ContentType():
-            headers["content-type"] = self.ContentType()
-        props = self.Properties()
+        headers: typing.Dict[str, str] = {}
+        content_type = self.ContentType()
+        if content_type:
+            headers["content-type"] = content_type
+        props: typing.Dict = self.Properties()
         for key, value in props.items():
             if key not in ["data", "extensions", "datacontenttype"]:
                 if value is not None:
                     headers["ce-{0}".format(key)] = value
-
-        for key, value in props.get("extensions").items():
+        extensions = props.get("extensions")
+        if extensions is None or not isinstance(extensions, typing.Mapping):
+            raise cloud_exceptions.DataMarshallerError(
+                "No extensions are available in the binary event."
+            )
+        for key, value in extensions.items():
             headers["ce-{0}".format(key)] = value
 
         data, _ = self.Get("data")

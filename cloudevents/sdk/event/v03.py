@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import typing
 
 from cloudevents.sdk.event import base, opt
 
@@ -41,37 +42,55 @@ class Event(base.BaseEvent):
         self.ce__extensions = opt.Option("extensions", dict(), False)
 
     def CloudEventVersion(self) -> str:
-        return self.ce__specversion.get()
+        return str(self.ce__specversion.get())
 
     def EventType(self) -> str:
-        return self.ce__type.get()
+        return str(self.ce__type.get())
 
     def Source(self) -> str:
-        return self.ce__source.get()
+        return str(self.ce__source.get())
 
     def EventID(self) -> str:
-        return self.ce__id.get()
+        return str(self.ce__id.get())
 
-    def EventTime(self) -> str:
-        return self.ce__time.get()
+    def EventTime(self) -> typing.Optional[str]:
+        result = self.ce__time.get()
+        if result is None:
+            return None
+        return str(result)
 
-    def Subject(self) -> str:
-        return self.ce__subject.get()
+    def Subject(self) -> typing.Optional[str]:
+        result = self.ce__subject.get()
+        if result is None:
+            return None
+        return str(result)
 
-    def SchemaURL(self) -> str:
-        return self.ce__schemaurl.get()
+    def SchemaURL(self) -> typing.Optional[str]:
+        result = self.ce__schemaurl.get()
+        if result is None:
+            return None
+        return str(result)
 
-    def Data(self) -> object:
+    def Data(self) -> typing.Optional[object]:
         return self.ce__data.get()
 
     def Extensions(self) -> dict:
-        return self.ce__extensions.get()
+        result = self.ce__extensions.get()
+        if result is None:
+            return {}
+        return dict(result)
 
-    def ContentType(self) -> str:
-        return self.ce__datacontenttype.get()
+    def ContentType(self) -> typing.Optional[str]:
+        result = self.ce__datacontenttype.get()
+        if result is None:
+            return None
+        return str(result)
 
-    def ContentEncoding(self) -> str:
-        return self.ce__datacontentencoding.get()
+    def ContentEncoding(self) -> typing.Optional[str]:
+        result = self.ce__datacontentencoding.get()
+        if result is None:
+            return None
+        return str(result)
 
     def SetEventType(self, eventType: str) -> base.BaseEvent:
         self.Set("type", eventType)
@@ -85,54 +104,56 @@ class Event(base.BaseEvent):
         self.Set("id", eventID)
         return self
 
-    def SetEventTime(self, eventTime: str) -> base.BaseEvent:
+    def SetEventTime(self, eventTime: typing.Optional[str]) -> base.BaseEvent:
         self.Set("time", eventTime)
         return self
 
-    def SetSubject(self, subject: str) -> base.BaseEvent:
+    def SetSubject(self, subject: typing.Optional[str]) -> base.BaseEvent:
         self.Set("subject", subject)
         return self
 
-    def SetSchemaURL(self, schemaURL: str) -> base.BaseEvent:
+    def SetSchemaURL(self, schemaURL: typing.Optional[str]) -> base.BaseEvent:
         self.Set("schemaurl", schemaURL)
         return self
 
-    def SetData(self, data: object) -> base.BaseEvent:
+    def SetData(self, data: typing.Optional[object]) -> base.BaseEvent:
         self.Set("data", data)
         return self
 
-    def SetExtensions(self, extensions: dict) -> base.BaseEvent:
+    def SetExtensions(self, extensions: typing.Optional[dict]) -> base.BaseEvent:
         self.Set("extensions", extensions)
         return self
 
-    def SetContentType(self, contentType: str) -> base.BaseEvent:
+    def SetContentType(self, contentType: typing.Optional[str]) -> base.BaseEvent:
         self.Set("datacontenttype", contentType)
         return self
 
-    def SetContentEncoding(self, contentEncoding: str) -> base.BaseEvent:
+    def SetContentEncoding(
+        self, contentEncoding: typing.Optional[str]
+    ) -> base.BaseEvent:
         self.Set("datacontentencoding", contentEncoding)
         return self
 
     @property
-    def datacontentencoding(self):
+    def datacontentencoding(self) -> typing.Optional[str]:
         return self.ContentEncoding()
 
     @datacontentencoding.setter
-    def datacontentencoding(self, value: str):
+    def datacontentencoding(self, value: typing.Optional[str]) -> None:
         self.SetContentEncoding(value)
 
     @property
-    def subject(self) -> str:
+    def subject(self) -> typing.Optional[str]:
         return self.Subject()
 
     @subject.setter
-    def subject(self, value: str):
+    def subject(self, value: typing.Optional[str]) -> None:
         self.SetSubject(value)
 
     @property
-    def schema_url(self) -> str:
+    def schema_url(self) -> typing.Optional[str]:
         return self.SchemaURL()
 
     @schema_url.setter
-    def schema_url(self, value: str):
+    def schema_url(self, value: typing.Optional[str]) -> None:
         self.SetSchemaURL(value)

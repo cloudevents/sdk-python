@@ -38,12 +38,12 @@ class KafkaMessage(typing.NamedTuple):
     The dictionary of message headers key/values.
     """
 
-    key: typing.Optional[typing.AnyStr]
+    key: typing.Optional[typing.Union[str, bytes]]
     """
     The message key.
     """
 
-    value: typing.AnyStr
+    value: typing.Union[str, bytes]
     """
     The message value.
     """
@@ -95,7 +95,7 @@ def to_binary(
                 headers["ce_{0}".format(attr)] = value.encode("utf-8")
 
     try:
-        data = data_marshaller(event.data)
+        data = data_marshaller(event.get_data())
     except Exception as e:
         raise cloud_exceptions.DataMarshallerError(
             f"Failed to marshall data with error: {type(e).__name__}('{e}')"
@@ -121,9 +121,7 @@ def from_binary(
     """
 
     data_unmarshaller = data_unmarshaller or DEFAULT_UNMARSHALLER
-    event_type = event_type or http.CloudEvent
-
-    attributes = {}
+    attributes: typing.Dict[str, typing.Any] = {}
 
     for header, value in message.headers.items():
         header = header.lower()
@@ -141,8 +139,11 @@ def from_binary(
         raise cloud_exceptions.DataUnmarshallerError(
             f"Failed to unmarshall data with error: {type(e).__name__}('{e}')"
         )
-
-    return event_type.create(attributes, data)
+    if event_type:
+        result = event_type.create(attributes, data)
+    else:
+        result = http.CloudEvent.create(attributes, data)  # type: ignore
+    return result
 
 
 def to_structured(
@@ -174,10 +175,10 @@ def to_structured(
             f"Failed to map message key with error: {type(e).__name__}('{e}')"
         )
 
-    attrs: dict[str, typing.Any] = dict(event.get_attributes())
+    attrs: typing.Dict[str, typing.Any] = dict(event.get_attributes())
 
     try:
-        data = data_marshaller(event.data)
+        data = data_marshaller(event.get_data())
     except Exception as e:
         raise cloud_exceptions.DataMarshallerError(
             f"Failed to marshall data with error: {type(e).__name__}('{e}')"
@@ -223,8 +224,6 @@ def from_structured(
 
     data_unmarshaller = data_unmarshaller or DEFAULT_EMBEDDED_DATA_MARSHALLER
     envelope_unmarshaller = envelope_unmarshaller or DEFAULT_UNMARSHALLER
-    event_type = event_type or http.CloudEvent
-
     try:
         structure = envelope_unmarshaller(message.value)
     except Exception as e:
@@ -232,7 +231,7 @@ def from_structured(
             "Failed to unmarshall message with error: " f"{type(e).__name__}('{e}')"
         )
 
-    attributes: dict[str, typing.Any] = {}
+    attributes: typing.Dict[str, typing.Any] = {}
     if message.key is not None:
         attributes["partitionkey"] = message.key
 
@@ -257,5 +256,8 @@ def from_structured(
 
     for header, val in message.headers.items():
         attributes[header.lower()] = val.decode()
-
-    return event_type.create(attributes, data)
+    if event_type:
+        result = event_type.create(attributes, data)
+    else:
+        result = http.CloudEvent.create(attributes, data)  # type: ignore
+    return result

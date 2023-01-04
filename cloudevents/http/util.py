@@ -11,6 +11,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import typing
+
 from deprecation import deprecated
 
 from cloudevents.conversion import (
@@ -24,5 +26,7 @@ from cloudevents.conversion import (
     deprecated_in="1.6.0",
     details="You SHOULD NOT use the default marshaller",
 )
-def default_marshaller(content: any):
+def default_marshaller(
+    content: typing.Any,
+) -> typing.Optional[typing.Union[bytes, str, typing.Any]]:
     return _moved_default_marshaller(content)

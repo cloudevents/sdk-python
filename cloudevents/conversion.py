@@ -23,7 +23,7 @@ from cloudevents.sdk.converters import is_binary
 from cloudevents.sdk.event import v1, v03
 
 
-def _best_effort_serialize_to_json(
+def _best_effort_serialize_to_json(  # type: ignore[no-untyped-def]
     value: typing.Any, *args, **kwargs
 ) -> typing.Optional[typing.Union[bytes, str, typing.Any]]:
     """
@@ -43,18 +43,18 @@ def _best_effort_serialize_to_json(
         return value
 
 
-_default_marshaller_by_format = {
+_default_marshaller_by_format: typing.Dict[str, types.MarshallerType] = {
     converters.TypeStructured: lambda x: x,
     converters.TypeBinary: _best_effort_serialize_to_json,
-}  # type: typing.Dict[str, types.MarshallerType]
+}
 
 _obj_by_version = {"1.0": v1.Event, "0.3": v03.Event}
 
 
 def to_json(
     event: AnyCloudEvent,
-    data_marshaller: types.MarshallerType = None,
-) -> typing.Union[str, bytes]:
+    data_marshaller: typing.Optional[types.MarshallerType] = None,
+) -> bytes:
     """
     Converts given `event` to a JSON string.
 
@@ -69,7 +69,7 @@ def to_json(
 def from_json(
     event_type: typing.Type[AnyCloudEvent],
     data: typing.Union[str, bytes],
-    data_unmarshaller: types.UnmarshallerType = None,
+    data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> AnyCloudEvent:
     """
     Parses JSON string `data` into a CloudEvent.
@@ -91,9 +91,9 @@ def from_json(
 
 def from_http(
     event_type: typing.Type[AnyCloudEvent],
-    headers: typing.Dict[str, str],
-    data: typing.Union[str, bytes, None],
-    data_unmarshaller: types.UnmarshallerType = None,
+    headers: typing.Mapping[str, str],
+    data: typing.Optional[typing.Union[str, bytes]],
+    data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> AnyCloudEvent:
     """
     Parses CloudEvent `data` and `headers` into an instance of a given `event_type`.
@@ -133,14 +133,14 @@ def from_http(
         except json.decoder.JSONDecodeError:
             raise cloud_exceptions.MissingRequiredFields(
                 "Failed to read specversion from both headers and data. "
-                f"The following can not be parsed as json: {data}"
+                "The following can not be parsed as json: {!r}".format(data)
             )
         if hasattr(raw_ce, "get"):
             specversion = raw_ce.get("specversion", None)
         else:
             raise cloud_exceptions.MissingRequiredFields(
                 "Failed to read specversion from both headers and data. "
-                f"The following deserialized data has no 'get' method: {raw_ce}"
+                "The following deserialized data has no 'get' method: {}".format(raw_ce)
             )
 
     if specversion is None:
@@ -152,7 +152,7 @@ def from_http(
 
     if event_handler is None:
         raise cloud_exceptions.InvalidRequiredFields(
-            f"Found invalid specversion {specversion}"
+            "Found invalid specversion {}".format(specversion)
         )
 
     event = marshall.FromRequest(
@@ -163,20 +163,19 @@ def from_http(
     attrs.pop("extensions", None)
     attrs.update(**event.extensions)
 
+    result_data: typing.Optional[typing.Any] = event.data
     if event.data == "" or event.data == b"":
         # TODO: Check binary unmarshallers to debug why setting data to ""
-        # returns an event with data set to None, but structured will return ""
-        data = None
-    else:
-        data = event.data
-    return event_type.create(attrs, data)
+        #  returns an event with data set to None, but structured will return ""
+        result_data = None
+    return event_type.create(attrs, result_data)
 
 
 def _to_http(
     event: AnyCloudEvent,
     format: str = converters.TypeStructured,
-    data_marshaller: types.MarshallerType = None,
-) -> typing.Tuple[dict, typing.Union[bytes, str]]:
+    data_marshaller: typing.Optional[types.MarshallerType] = None,
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     """
     Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
 
@@ -196,7 +195,7 @@ def _to_http(
     event_handler = _obj_by_version[event["specversion"]]()
     for attribute_name in event:
         event_handler.Set(attribute_name, event[attribute_name])
-    event_handler.data = event.data
+    event_handler.data = event.get_data()
 
     return marshaller.NewDefaultHTTPMarshaller().ToRequest(
         event_handler, format, data_marshaller=data_marshaller
@@ -205,8 +204,8 @@ def _to_http(
 
 def to_structured(
     event: AnyCloudEvent,
-    data_marshaller: types.MarshallerType = None,
-) -> typing.Tuple[dict, typing.Union[bytes, str]]:
+    data_marshaller: typing.Optional[types.MarshallerType] = None,
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     """
     Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
 
@@ -222,8 +221,8 @@ def to_structured(
 
 
 def to_binary(
-    event: AnyCloudEvent, data_marshaller: types.MarshallerType = None
-) -> typing.Tuple[dict, typing.Union[bytes, str]]:
+    event: AnyCloudEvent, data_marshaller: typing.Optional[types.MarshallerType] = None
+) -> typing.Tuple[typing.Dict[str, str], bytes]:
     """
     Returns a tuple of HTTP headers/body dicts representing this Cloud Event.
 
@@ -287,19 +286,13 @@ def to_dict(event: AnyCloudEvent) -> typing.Dict[str, typing.Any]:
     :returns: The canonical dict representation of the event.
     """
     result = {attribute_name: event.get(attribute_name) for attribute_name in event}
-    result["data"] = event.data
+    result["data"] = event.get_data()
     return result
 
 
 def _json_or_string(
-    content: typing.Optional[typing.AnyStr],
-) -> typing.Optional[
-    typing.Union[
-        typing.Dict[typing.Any, typing.Any],
-        typing.List[typing.Any],
-        typing.AnyStr,
-    ]
-]:
+    content: typing.Optional[typing.Union[str, bytes]],
+) -> typing.Any:
     """
     Returns a JSON-decoded dictionary or a list of dictionaries if
     a valid JSON string is provided.

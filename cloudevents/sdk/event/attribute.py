@@ -34,7 +34,7 @@ class SpecVersion(str, Enum):
 DEFAULT_SPECVERSION = SpecVersion.v1_0
 
 
-def default_time_selection_algorithm() -> datetime:
+def default_time_selection_algorithm() -> datetime.datetime:
     """
     :return: A time value which will be used as CloudEvent time attribute value.
     """

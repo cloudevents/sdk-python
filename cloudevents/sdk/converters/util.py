@@ -15,7 +15,7 @@
 import typing
 
 
-def has_binary_headers(headers: typing.Dict[str, str]) -> bool:
+def has_binary_headers(headers: typing.Mapping[str, str]) -> bool:
     """Determines if all CloudEvents required headers are presents
     in the `headers`.
 

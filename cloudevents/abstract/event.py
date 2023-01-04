@@ -17,6 +17,8 @@ from abc import abstractmethod
 from types import MappingProxyType
 from typing import Mapping
 
+AnyCloudEvent = typing.TypeVar("AnyCloudEvent", bound="CloudEvent")
+
 
 class CloudEvent:
     """
@@ -29,10 +31,10 @@ class CloudEvent:
 
     @classmethod
     def create(
-        cls,
+        cls: typing.Type[AnyCloudEvent],
         attributes: typing.Dict[str, typing.Any],
         data: typing.Optional[typing.Any],
-    ) -> "AnyCloudEvent":
+    ) -> AnyCloudEvent:
         """
         Creates a new instance of the CloudEvent using supplied `attributes`
         and `data`.
@@ -70,7 +72,7 @@ class CloudEvent:
         raise NotImplementedError()
 
     @abstractmethod
-    def _get_data(self) -> typing.Optional[typing.Any]:
+    def get_data(self) -> typing.Optional[typing.Any]:
         """
         Returns the data of the event.
 
@@ -85,7 +87,7 @@ class CloudEvent:
 
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, CloudEvent):
-            same_data = self._get_data() == other._get_data()
+            same_data = self.get_data() == other.get_data()
             same_attributes = self._get_attributes() == other._get_attributes()
             return same_data and same_attributes
         return False
@@ -140,7 +142,4 @@ class CloudEvent:
         return key in self._get_attributes()
 
     def __repr__(self) -> str:
-        return str({"attributes": self._get_attributes(), "data": self._get_data()})
-
-
-AnyCloudEvent = typing.TypeVar("AnyCloudEvent", bound=CloudEvent)
+        return str({"attributes": self._get_attributes(), "data": self.get_data()})

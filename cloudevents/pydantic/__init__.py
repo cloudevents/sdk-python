@@ -14,4 +14,4 @@
 from cloudevents.pydantic.conversion import from_dict, from_http, from_json
 from cloudevents.pydantic.event import CloudEvent
 
-__all__ = [CloudEvent, from_json, from_dict, from_http]
+__all__ = ["CloudEvent", "from_json", "from_dict", "from_http"]

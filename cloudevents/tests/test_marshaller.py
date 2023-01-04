@@ -49,7 +49,9 @@ def structured_data():
 def test_from_request_wrong_unmarshaller():
     with pytest.raises(exceptions.InvalidDataUnmarshaller):
         m = marshaller.NewDefaultHTTPMarshaller()
-        _ = m.FromRequest(v1.Event(), {}, "", None)
+        _ = m.FromRequest(
+            event=v1.Event(), headers={}, body="", data_unmarshaller=object()
+        )
 
 
 def test_to_request_wrong_marshaller():

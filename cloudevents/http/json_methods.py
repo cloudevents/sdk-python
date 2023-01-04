@@ -31,8 +31,8 @@ from cloudevents.sdk import types
 )
 def to_json(
     event: AnyCloudEvent,
-    data_marshaller: types.MarshallerType = None,
-) -> typing.Union[str, bytes]:
+    data_marshaller: typing.Optional[types.MarshallerType] = None,
+) -> bytes:
     return _moved_to_json(event, data_marshaller)
 
 
@@ -42,6 +42,6 @@ def to_json(
 )
 def from_json(
     data: typing.Union[str, bytes],
-    data_unmarshaller: types.UnmarshallerType = None,
+    data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> CloudEvent:
     return _moved_from_json(data, data_unmarshaller)

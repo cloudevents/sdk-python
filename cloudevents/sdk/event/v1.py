@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import typing
 
 from cloudevents.sdk.event import base, opt
 
@@ -34,34 +35,49 @@ class Event(base.BaseEvent):
         self.ce__extensions = opt.Option("extensions", dict(), False)
 
     def CloudEventVersion(self) -> str:
-        return self.ce__specversion.get()
+        return str(self.ce__specversion.get())
 
     def EventType(self) -> str:
-        return self.ce__type.get()
+        return str(self.ce__type.get())
 
     def Source(self) -> str:
-        return self.ce__source.get()
+        return str(self.ce__source.get())
 
     def EventID(self) -> str:
-        return self.ce__id.get()
+        return str(self.ce__id.get())
 
-    def EventTime(self) -> str:
-        return self.ce__time.get()
+    def EventTime(self) -> typing.Optional[str]:
+        result = self.ce__time.get()
+        if result is None:
+            return None
+        return str(result)
 
-    def Subject(self) -> str:
-        return self.ce__subject.get()
+    def Subject(self) -> typing.Optional[str]:
+        result = self.ce__subject.get()
+        if result is None:
+            return None
+        return str(result)
 
-    def Schema(self) -> str:
-        return self.ce__dataschema.get()
+    def Schema(self) -> typing.Optional[str]:
+        result = self.ce__dataschema.get()
+        if result is None:
+            return None
+        return str(result)
 
-    def ContentType(self) -> str:
-        return self.ce__datacontenttype.get()
+    def ContentType(self) -> typing.Optional[str]:
+        result = self.ce__datacontenttype.get()
+        if result is None:
+            return None
+        return str(result)
 
-    def Data(self) -> object:
+    def Data(self) -> typing.Optional[object]:
         return self.ce__data.get()
 
     def Extensions(self) -> dict:
-        return self.ce__extensions.get()
+        result = self.ce__extensions.get()
+        if result is None:
+            return {}
+        return dict(result)
 
     def SetEventType(self, eventType: str) -> base.BaseEvent:
         self.Set("type", eventType)
@@ -75,42 +91,42 @@ class Event(base.BaseEvent):
         self.Set("id", eventID)
         return self
 
-    def SetEventTime(self, eventTime: str) -> base.BaseEvent:
+    def SetEventTime(self, eventTime: typing.Optional[str]) -> base.BaseEvent:
         self.Set("time", eventTime)
         return self
 
-    def SetSubject(self, subject: str) -> base.BaseEvent:
+    def SetSubject(self, subject: typing.Optional[str]) -> base.BaseEvent:
         self.Set("subject", subject)
         return self
 
-    def SetSchema(self, schema: str) -> base.BaseEvent:
+    def SetSchema(self, schema: typing.Optional[str]) -> base.BaseEvent:
         self.Set("dataschema", schema)
         return self
 
-    def SetContentType(self, contentType: str) -> base.BaseEvent:
+    def SetContentType(self, contentType: typing.Optional[str]) -> base.BaseEvent:
         self.Set("datacontenttype", contentType)
         return self
 
-    def SetData(self, data: object) -> base.BaseEvent:
+    def SetData(self, data: typing.Optional[object]) -> base.BaseEvent:
         self.Set("data", data)
         return self
 
-    def SetExtensions(self, extensions: dict) -> base.BaseEvent:
+    def SetExtensions(self, extensions: typing.Optional[dict]) -> base.BaseEvent:
         self.Set("extensions", extensions)
         return self
 
     @property
-    def schema(self) -> str:
+    def schema(self) -> typing.Optional[str]:
         return self.Schema()
 
     @schema.setter
-    def schema(self, value: str):
+    def schema(self, value: typing.Optional[str]) -> None:
         self.SetSchema(value)
 
     @property
-    def subject(self) -> str:
+    def subject(self) -> typing.Optional[str]:
         return self.Subject()
 
     @subject.setter
-    def subject(self, value: str):
+    def subject(self, value: typing.Optional[str]) -> None:
         self.SetSubject(value)
