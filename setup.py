@@ -66,6 +66,7 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.10",
         ],
         packages=find_packages(exclude=["cloudevents.tests"]),
+        include_package_data=True,
         version=pypi_config["version_target"],
         install_requires=["deprecation>=2.0,<3.0"],
         extras_require={"pydantic": "pydantic>=1.0.0,<2.0"},
