@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] — 2023-01-04
+### Added
+- Added typings to the codebase. ([#207])
+- Added Python3.11 support. ([#209])
+
 ## [1.8.0] — 2022-12-08
 ### Changed
 - Dropped support of Python 3.6 that has reached EOL almost a year ago.
@@ -174,6 +179,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.9.0]: https://github.com/cloudevents/sdk-python/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/cloudevents/sdk-python/compare/1.7.0...1.8.0
 [1.7.1]: https://github.com/cloudevents/sdk-python/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/cloudevents/sdk-python/compare/1.6.0...1.7.0
@@ -247,4 +253,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#197]: https://github.com/cloudevents/sdk-python/pull/197
 [#202]: https://github.com/cloudevents/sdk-python/pull/202
 [#204]: https://github.com/cloudevents/sdk-python/pull/204
+[#207]: https://github.com/cloudevents/sdk-python/pull/207
 [#208]: https://github.com/cloudevents/sdk-python/pull/208
+[#209]: https://github.com/cloudevents/sdk-python/pull/209
