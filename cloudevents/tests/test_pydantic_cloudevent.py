@@ -239,7 +239,12 @@ def test_json_data_serialization_with_explicit_json_content_type(
     dummy_attributes, json_content_type
 ):
     dummy_attributes["datacontenttype"] = json_content_type
-    assert loads(CloudEvent(dummy_attributes, data='{"hello": "world"}',).json())[
+    assert loads(
+        CloudEvent(
+            dummy_attributes,
+            data='{"hello": "world"}',
+        ).json()
+    )[
         "data"
     ] == {"hello": "world"}
 
