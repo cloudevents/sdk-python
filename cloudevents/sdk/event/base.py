@@ -24,7 +24,6 @@ from cloudevents.sdk import types
 
 
 class EventGetterSetter(object):  # pragma: no cover
-
     # ce-specversion
     def CloudEventVersion(self) -> str:
         raise Exception("not implemented")

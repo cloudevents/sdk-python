@@ -30,7 +30,6 @@ class BinaryHTTPCloudEventConverter(base.Converter):
         content_type: typing.Optional[str] = None,
         headers: typing.Optional[typing.Mapping[str, str]] = None,
     ) -> bool:
-
         if headers is None:
             headers = {"ce-specversion": ""}
         return has_binary_headers(headers)

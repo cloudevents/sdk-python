@@ -44,7 +44,6 @@ def failing_func(*args):
 
 
 class KafkaConversionTestBase:
-
     expected_data = {"name": "test", "amount": 1}
     expected_custom_mapped_key = "custom-key"
 
