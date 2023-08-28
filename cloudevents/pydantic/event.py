@@ -18,7 +18,13 @@ import typing
 from cloudevents.exceptions import PydanticFeatureNotInstalled
 
 try:
-    import pydantic
+    from pydantic import VERSION as PYDANTIC_VERSION
+
+    pydantic_major_version = PYDANTIC_VERSION.split(".")[0]
+    if pydantic_major_version == "2":
+        from pydantic.v1 import BaseModel, Field
+    else:
+        from pydantic import BaseModel, Field  # type: ignore
 except ImportError:  # pragma: no cover # hard to test
     raise PydanticFeatureNotInstalled(
         "CloudEvents pydantic feature is not installed. "
@@ -84,7 +90,7 @@ def _ce_json_loads(  # type: ignore[no-untyped-def]
     return conversion.to_dict(http.from_json(data))
 
 
-class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
+class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
     """
     A Python-friendly CloudEvent representation backed by Pydantic-modeled fields.
 
@@ -97,7 +103,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
     ) -> "CloudEvent":
         return cls(attributes, data)
 
-    data: typing.Optional[typing.Any] = pydantic.Field(
+    data: typing.Optional[typing.Any] = Field(
         title="Event Data",
         description=(
             "CloudEvents MAY include domain-specific information about the occurrence."
@@ -107,7 +113,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
             " when those respective attributes are present."
         ),
     )
-    source: str = pydantic.Field(
+    source: str = Field(
         title="Event Source",
         description=(
             "Identifies the context in which an event happened. Often this will include"
@@ -132,7 +138,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
         example="https://github.com/cloudevents",
     )
 
-    id: str = pydantic.Field(
+    id: str = Field(
         default_factory=attribute.default_id_selection_algorithm,
         title="Event ID",
         description=(
@@ -144,7 +150,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
         ),
         example="A234-1234-1234",
     )
-    type: str = pydantic.Field(
+    type: str = Field(
         title="Event Type",
         description=(
             "This attribute contains a value describing the type of event related to"
@@ -154,7 +160,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
         ),
         example="com.github.pull_request.opened",
     )
-    specversion: attribute.SpecVersion = pydantic.Field(
+    specversion: attribute.SpecVersion = Field(
         default=attribute.DEFAULT_SPECVERSION,
         title="Specification Version",
         description=(
@@ -168,7 +174,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
         ),
         example=attribute.DEFAULT_SPECVERSION,
     )
-    time: typing.Optional[datetime.datetime] = pydantic.Field(
+    time: typing.Optional[datetime.datetime] = Field(
         default_factory=attribute.default_time_selection_algorithm,
         title="Occurrence Time",
         description=(
@@ -182,7 +188,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
         example="2018-04-05T17:31:00Z",
     )
 
-    subject: typing.Optional[str] = pydantic.Field(
+    subject: typing.Optional[str] = Field(
         title="Event Subject",
         description=(
             "This describes the subject of the event in the context of the event"
@@ -202,7 +208,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
         ),
         example="123",
     )
-    datacontenttype: typing.Optional[str] = pydantic.Field(
+    datacontenttype: typing.Optional[str] = Field(
         title="Event Data Content Type",
         description=(
             "Content type of data value. This attribute enables data to carry any type"
@@ -211,7 +217,7 @@ class CloudEvent(abstract.CloudEvent, pydantic.BaseModel):  # type: ignore
         ),
         example="text/xml",
     )
-    dataschema: typing.Optional[str] = pydantic.Field(
+    dataschema: typing.Optional[str] = Field(
         title="Event Data Schema",
         description=(
             "Identifies the schema that data adheres to. "

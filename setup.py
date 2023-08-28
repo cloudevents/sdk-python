@@ -79,6 +79,6 @@ if __name__ == "__main__":
         include_package_data=True,
         version=pypi_config["version_target"],
         install_requires=["deprecation>=2.0,<3.0"],
-        extras_require={"pydantic": "pydantic>=1.0.0,<2.0"},
+        extras_require={"pydantic": "pydantic>=1.0.0,<3.0"},
         zip_safe=True,
     )
