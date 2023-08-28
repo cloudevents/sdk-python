@@ -17,6 +17,7 @@ import json
 import typing
 
 from cloudevents.exceptions import PydanticFeatureNotInstalled
+from cloudevents.pydantic.fields_docs import FIELD_DESCRIPTIONS
 
 try:
     from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
@@ -45,128 +46,55 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
         return cls(attributes, data)
 
     data: typing.Optional[typing.Any] = Field(
-        title="Event Data",
-        description=(
-            "CloudEvents MAY include domain-specific information about the occurrence."
-            " When present, this information will be encapsulated within data.It is"
-            " encoded into a media format which is specified by the datacontenttype"
-            " attribute (e.g. application/json), and adheres to the dataschema format"
-            " when those respective attributes are present."
-        ),
+        title=FIELD_DESCRIPTIONS["data"].get("title"),
+        description=FIELD_DESCRIPTIONS["data"].get("description"),
+        example=FIELD_DESCRIPTIONS["data"].get("example"),
         default=None,
     )
     source: str = Field(
-        title="Event Source",
-        description=(
-            "Identifies the context in which an event happened. Often this will include"
-            " information such as the type of the event source, the organization"
-            " publishing the event or the process that produced the event. The exact"
-            " syntax and semantics behind the data encoded in the URI is defined by the"
-            " event producer.\n"
-            "\n"
-            "Producers MUST ensure that source + id is unique for"
-            " each distinct event.\n"
-            "\n"
-            "An application MAY assign a unique source to each"
-            " distinct producer, which makes it easy to produce unique IDs since no"
-            " other producer will have the same source. The application MAY use UUIDs,"
-            " URNs, DNS authorities or an application-specific scheme to create unique"
-            " source identifiers.\n"
-            "\n"
-            "A source MAY include more than one producer. In"
-            " that case the producers MUST collaborate to ensure that source + id is"
-            " unique for each distinct event."
-        ),
-        example="https://github.com/cloudevents",
+        title=FIELD_DESCRIPTIONS["source"].get("title"),
+        description=FIELD_DESCRIPTIONS["source"].get("description"),
+        example=FIELD_DESCRIPTIONS["source"].get("example"),
     )
-
     id: str = Field(
+        title=FIELD_DESCRIPTIONS["id"].get("title"),
+        description=FIELD_DESCRIPTIONS["id"].get("description"),
+        example=FIELD_DESCRIPTIONS["id"].get("example"),
         default_factory=attribute.default_id_selection_algorithm,
-        title="Event ID",
-        description=(
-            "Identifies the event. Producers MUST ensure that source + id is unique for"
-            " each distinct event. If a duplicate event is re-sent (e.g. due to a"
-            " network error) it MAY have the same id. Consumers MAY assume that Events"
-            " with identical source and id are duplicates. MUST be unique within the"
-            " scope of the producer"
-        ),
-        example="A234-1234-1234",
     )
     type: str = Field(
-        title="Event Type",
-        description=(
-            "This attribute contains a value describing the type of event related to"
-            " the originating occurrence. Often this attribute is used for routing,"
-            " observability, policy enforcement, etc. The format of this is producer"
-            " defined and might include information such as the version of the type"
-        ),
-        example="com.github.pull_request.opened",
+        title=FIELD_DESCRIPTIONS["type"].get("title"),
+        description=FIELD_DESCRIPTIONS["type"].get("description"),
+        example=FIELD_DESCRIPTIONS["type"].get("example"),
     )
     specversion: attribute.SpecVersion = Field(
+        title=FIELD_DESCRIPTIONS["specversion"].get("title"),
+        description=FIELD_DESCRIPTIONS["specversion"].get("description"),
+        example=FIELD_DESCRIPTIONS["specversion"].get("example"),
         default=attribute.DEFAULT_SPECVERSION,
-        title="Specification Version",
-        description=(
-            "The version of the CloudEvents specification which the event uses. This"
-            " enables the interpretation of the context.\n"
-            "\n"
-            "Currently, this attribute will only have the 'major'"
-            " and 'minor' version numbers included in it. This allows for 'patch'"
-            " changes to the specification to be made without changing this property's"
-            " value in the serialization."
-        ),
-        example=attribute.DEFAULT_SPECVERSION,
     )
     time: typing.Optional[datetime.datetime] = Field(
+        title=FIELD_DESCRIPTIONS["time"].get("title"),
+        description=FIELD_DESCRIPTIONS["time"].get("description"),
+        example=FIELD_DESCRIPTIONS["time"].get("example"),
         default_factory=attribute.default_time_selection_algorithm,
-        title="Occurrence Time",
-        description=(
-            " Timestamp of when the occurrence happened. If the time of the occurrence"
-            " cannot be determined then this attribute MAY be set to some other time"
-            " (such as the current time) by the CloudEvents producer, however all"
-            " producers for the same source MUST be consistent in this respect. In"
-            " other words, either they all use the actual time of the occurrence or"
-            " they all use the same algorithm to determine the value used."
-        ),
-        example="2018-04-05T17:31:00Z",
     )
-
     subject: typing.Optional[str] = Field(
-        title="Event Subject",
-        description=(
-            "This describes the subject of the event in the context of the event"
-            " producer (identified by source). In publish-subscribe scenarios, a"
-            " subscriber will typically subscribe to events emitted by a source, but"
-            " the source identifier alone might not be sufficient as a qualifier for"
-            " any specific event if the source context has internal"
-            " sub-structure.\n"
-            "\n"
-            "Identifying the subject of the event in context"
-            " metadata (opposed to only in the data payload) is particularly helpful in"
-            " generic subscription filtering scenarios where middleware is unable to"
-            " interpret the data content. In the above example, the subscriber might"
-            " only be interested in blobs with names ending with '.jpg' or '.jpeg' and"
-            " the subject attribute allows for constructing a simple and efficient"
-            " string-suffix filter for that subset of events."
-        ),
-        example="123",
+        title=FIELD_DESCRIPTIONS["subject"].get("title"),
+        description=FIELD_DESCRIPTIONS["subject"].get("description"),
+        example=FIELD_DESCRIPTIONS["subject"].get("example"),
         default=None,
     )
     datacontenttype: typing.Optional[str] = Field(
-        title="Event Data Content Type",
-        description=(
-            "Content type of data value. This attribute enables data to carry any type"
-            " of content, whereby format and encoding might differ from that of the"
-            " chosen event format."
-        ),
-        example="text/xml",
+        title=FIELD_DESCRIPTIONS["datacontenttype"].get("title"),
+        description=FIELD_DESCRIPTIONS["datacontenttype"].get("description"),
+        example=FIELD_DESCRIPTIONS["datacontenttype"].get("example"),
         default=None,
     )
     dataschema: typing.Optional[str] = Field(
-        title="Event Data Schema",
-        description=(
-            "Identifies the schema that data adheres to. "
-            "Incompatible changes to the schema SHOULD be reflected by a different URI"
-        ),
+        title=FIELD_DESCRIPTIONS["dataschema"].get("title"),
+        description=FIELD_DESCRIPTIONS["dataschema"].get("description"),
+        example=FIELD_DESCRIPTIONS["dataschema"].get("example"),
         default=None,
     )
 
@@ -232,21 +160,23 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
         return data
 
     @model_serializer(when_used="json")
-    def serialize_model(self) -> typing.Dict[str, typing.Any]:
+    def serialize_model(self) -> typing.Any:
         """Performs Pydantic-specific serialization of the event.
 
         Needed by the pydantic base-model to serialize the event correctly to json.
         Without this function the data will be incorrectly serialized.
 
-        :param self: CloudEvent represented as a dict.
+        :param self: CloudEvent.
 
-        :return: Event serialized as a standard dict CloudEvent with user specific
+        :return: Event serialized as a standard CloudEvent dict with user specific
         parameters.
         """
-        # Using HTTP from dict due to performance issues.
+        # Using HTTP from dict due to performance issues (leftover from pydantic V1 implementation).
+        # We shouldn't use logic from other CloudEvent implementations. This needs improvement.
+        # Mypy thinks `self` is missing in call to `model_dump`
         event = http.from_dict(self.model_dump())
         event_json = conversion.to_json(event)
-        # Pydantic is known for initialization time lagging.
+        # Pydantic is known for initialization time lagging (leftover from pydantic V1 implementation).
         return json.loads(event_json)
 
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
