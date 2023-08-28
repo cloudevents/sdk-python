@@ -106,6 +106,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
             " attribute (e.g. application/json), and adheres to the dataschema format"
             " when those respective attributes are present."
         ),
+        default=None,
     )
     source: str = Field(
         title="Event Source",
@@ -201,6 +202,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
             " string-suffix filter for that subset of events."
         ),
         example="123",
+        default=None,
     )
     datacontenttype: typing.Optional[str] = Field(
         title="Event Data Content Type",
@@ -210,6 +212,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
             " chosen event format."
         ),
         example="text/xml",
+        default=None,
     )
     dataschema: typing.Optional[str] = Field(
         title="Event Data Schema",
@@ -217,6 +220,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
             "Identifies the schema that data adheres to. "
             "Incompatible changes to the schema SHOULD be reflected by a different URI"
         ),
+        default=None,
     )
 
     def __init__(  # type: ignore[no-untyped-def]

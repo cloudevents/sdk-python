@@ -160,24 +160,41 @@ def test_http_cloudevent_mutates_equality(
 
 
 def test_cloudevent_missing_specversion(cloudevents_implementation):
+    errors = {
+        "v1": "value is not a valid enumeration member; permitted: '0.3', '1.0'",
+        "v2": "Input should be '0.3' or '1.0'"
+    }
     attributes = {"specversion": "0.2", "source": "s", "type": "t"}
     with pytest.raises(cloudevents_implementation["validation_error"]) as e:
         _ = cloudevents_implementation["event"](attributes, None)
-    assert "value is not a valid enumeration member; permitted: '0.3', '1.0'" in str(
+    assert errors[cloudevents_implementation["pydantic_version"]] in str(
         e.value
     )
 
 
 def test_cloudevent_missing_minimal_required_fields(cloudevents_implementation):
     attributes = {"type": "t"}
+    errors = {
+        "v1": "\nsource\n  field required ",
+        "v2": '\nsource\n  Field required ',
+    }
+
     with pytest.raises(cloudevents_implementation["validation_error"]) as e:
         _ = cloudevents_implementation["event"](attributes, None)
-    assert "\nsource\n  field required " in str(e.value)
+
+    if cloudevents_implementation["pydantic_version"] == 'v2':
+        pass
+
+    assert errors[cloudevents_implementation["pydantic_version"]] in str(e.value)
 
     attributes = {"source": "s"}
+    errors = {
+        "v1": "\ntype\n  field required ",
+        "v2": "\ntype\n  Field required ",
+    }
     with pytest.raises(cloudevents_implementation["validation_error"]) as e:
         _ = cloudevents_implementation["event"](attributes, None)
-    assert "\ntype\n  field required " in str(e.value)
+    assert errors[cloudevents_implementation["pydantic_version"]] in str(e.value)
 
 
 def test_cloudevent_general_overrides(cloudevents_implementation):
