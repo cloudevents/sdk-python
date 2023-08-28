@@ -11,7 +11,33 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from cloudevents.pydantic.conversion import from_dict, from_http, from_json
-from cloudevents.pydantic.event import CloudEvent
+from cloudevents.exceptions import PydanticFeatureNotInstalled
+
+try:
+    from pydantic import VERSION as PYDANTIC_VERSION
+
+    pydantic_major_version = PYDANTIC_VERSION.split(".")[0]
+    if pydantic_major_version == "2":
+        from cloudevents.pydantic.pydantic_v1.conversion import (
+            from_dict,
+            from_http,
+            from_json,
+        )
+        from cloudevents.pydantic.pydantic_v1.event import CloudEvent
+
+    else:
+        from cloudevents.pydantic.pydantic_v2.conversion import (
+            from_dict,
+            from_http,
+            from_json,
+        )
+        from cloudevents.pydantic.pydantic_v2.event import CloudEvent
+
+
+except ImportError:  # pragma: no cover # hard to test
+    raise PydanticFeatureNotInstalled(
+        "CloudEvents pydantic feature is not installed. "
+        "Install it using pip install cloudevents[pydantic]"
+    )
 
 __all__ = ["CloudEvent", "from_json", "from_dict", "from_http"]

@@ -18,13 +18,7 @@ import typing
 from cloudevents.exceptions import PydanticFeatureNotInstalled
 
 try:
-    from pydantic import VERSION as PYDANTIC_VERSION
-
-    pydantic_major_version = PYDANTIC_VERSION.split(".")[0]
-    if pydantic_major_version == "2":
-        from pydantic.v1 import BaseModel, Field
-    else:
-        from pydantic import BaseModel, Field  # type: ignore
+    import pydantic
 except ImportError:  # pragma: no cover # hard to test
     raise PydanticFeatureNotInstalled(
         "CloudEvents pydantic feature is not installed. "

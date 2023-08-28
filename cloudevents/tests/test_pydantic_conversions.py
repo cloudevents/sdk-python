@@ -17,9 +17,24 @@ import datetime
 import json
 
 import pytest
+from pydantic import ValidationError as PydanticV2ValidationError
+from pydantic.v1 import ValidationError as PydanticV1ValidationError
 
 from cloudevents.conversion import to_json
-from cloudevents.pydantic import CloudEvent, from_dict, from_json
+from cloudevents.pydantic.pydantic_v1.conversion import (
+    from_dict as pydantic_v1_from_dict,
+)
+from cloudevents.pydantic.pydantic_v1.conversion import (
+    from_json as pydantic_v1_from_json,
+)
+from cloudevents.pydantic.pydantic_v1.event import CloudEvent as PydanticV1CloudEvent
+from cloudevents.pydantic.pydantic_v2.conversion import (
+    from_dict as pydantic_v2_from_dict,
+)
+from cloudevents.pydantic.pydantic_v2.conversion import (
+    from_json as pydantic_v2_from_json,
+)
+from cloudevents.pydantic.pydantic_v2.event import CloudEvent as PydanticV2CloudEvent
 from cloudevents.sdk.event.attribute import SpecVersion
 
 test_data = json.dumps({"data-key": "val"})
@@ -29,9 +44,32 @@ test_attributes = {
 }
 
 
+_pydantic_implementation = {
+    "v1": {
+        "event": PydanticV1CloudEvent,
+        "validation_error": PydanticV1ValidationError,
+        "from_dict": pydantic_v1_from_dict,
+        "from_json": pydantic_v1_from_json,
+        "pydantic_version": "v1",
+    },
+    "v2": {
+        "event": PydanticV2CloudEvent,
+        "validation_error": PydanticV2ValidationError,
+        "from_dict": pydantic_v2_from_dict,
+        "from_json": pydantic_v2_from_json,
+        "pydantic_version": "v2",
+    },
+}
+
+
+@pytest.fixture(params=["v1", "v2"])
+def cloudevents_implementation(request):
+    return _pydantic_implementation[request.param]
+
+
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_to_json(specversion):
-    event = CloudEvent(test_attributes, test_data)
+def test_to_json(specversion, cloudevents_implementation):
+    event = cloudevents_implementation["event"](test_attributes, test_data)
     event_json = to_json(event)
     event_dict = json.loads(event_json)
 
@@ -42,10 +80,10 @@ def test_to_json(specversion):
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_to_json_base64(specversion):
+def test_to_json_base64(specversion, cloudevents_implementation):
     data = b"test123"
 
-    event = CloudEvent(test_attributes, data)
+    event = cloudevents_implementation["event"](test_attributes, data)
     event_json = to_json(event)
     event_dict = json.loads(event_json)
 
@@ -60,7 +98,7 @@ def test_to_json_base64(specversion):
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_from_json(specversion):
+def test_from_json(specversion, cloudevents_implementation):
     payload = {
         "type": "com.example.string",
         "source": "https://example.com/event-producer",
@@ -68,7 +106,7 @@ def test_from_json(specversion):
         "specversion": specversion,
         "data": {"data-key": "val"},
     }
-    event = from_json(json.dumps(payload))
+    event = cloudevents_implementation["from_json"](json.dumps(payload))
 
     for key, val in payload.items():
         if key == "data":
@@ -78,7 +116,7 @@ def test_from_json(specversion):
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_from_json_base64(specversion):
+def test_from_json_base64(specversion, cloudevents_implementation):
     # Create base64 encoded data
     raw_data = {"data-key": "val"}
     data = json.dumps(raw_data).encode()
@@ -95,7 +133,7 @@ def test_from_json_base64(specversion):
     payload_json = json.dumps(payload)
 
     # Create event
-    event = from_json(payload_json)
+    event = cloudevents_implementation["from_json"](payload_json)
 
     # Test fields were marshalled properly
     for key, val in payload.items():
@@ -107,11 +145,11 @@ def test_from_json_base64(specversion):
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_json_can_talk_to_itself(specversion):
-    event = CloudEvent(test_attributes, test_data)
+def test_json_can_talk_to_itself(specversion, cloudevents_implementation):
+    event = cloudevents_implementation["event"](test_attributes, test_data)
     event_json = to_json(event)
 
-    event = from_json(event_json)
+    event = cloudevents_implementation["from_json"](event_json)
 
     for key, val in test_attributes.items():
         assert event[key] == val
@@ -119,20 +157,20 @@ def test_json_can_talk_to_itself(specversion):
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_json_can_talk_to_itself_base64(specversion):
+def test_json_can_talk_to_itself_base64(specversion, cloudevents_implementation):
     data = b"test123"
 
-    event = CloudEvent(test_attributes, data)
+    event = cloudevents_implementation["event"](test_attributes, data)
     event_json = to_json(event)
 
-    event = from_json(event_json)
+    event = cloudevents_implementation["from_json"](event_json)
 
     for key, val in test_attributes.items():
         assert event[key] == val
     assert event.data == data
 
 
-def test_from_dict():
+def test_from_dict(cloudevents_implementation):
     given = {
         "data": b"\x00\x00\x11Hello World",
         "datacontenttype": "application/octet-stream",
@@ -146,12 +184,14 @@ def test_from_dict():
         ),
         "type": "dummy.type",
     }
-    assert from_dict(given).dict() == given
+    assert cloudevents_implementation["from_dict"](given).dict() == given
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_pydantic_json_function_parameters_must_affect_output(specversion):
-    event = CloudEvent(test_attributes, test_data)
+def test_pydantic_json_function_parameters_must_affect_output(
+    specversion, cloudevents_implementation
+):
+    event = cloudevents_implementation["event"](test_attributes, test_data)
     v1 = event.json(indent=2, sort_keys=True)
     v2 = event.json(indent=4, sort_keys=True)
     assert v1 != v2
