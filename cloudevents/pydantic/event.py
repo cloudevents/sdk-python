@@ -24,7 +24,7 @@ try:
     if pydantic_major_version == "2":
         from pydantic.v1 import BaseModel, Field
     else:
-        from pydantic import BaseModel, Field
+        from pydantic import BaseModel, Field  # type: ignore
 except ImportError:  # pragma: no cover # hard to test
     raise PydanticFeatureNotInstalled(
         "CloudEvents pydantic feature is not installed. "
