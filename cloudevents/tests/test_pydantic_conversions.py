@@ -21,20 +21,20 @@ from pydantic import ValidationError as PydanticV2ValidationError
 from pydantic.v1 import ValidationError as PydanticV1ValidationError
 
 from cloudevents.conversion import to_json
-from cloudevents.pydantic.pydantic_v1.conversion import (
+from cloudevents.pydantic.v1.conversion import (
     from_dict as pydantic_v1_from_dict,
 )
-from cloudevents.pydantic.pydantic_v1.conversion import (
+from cloudevents.pydantic.v1.conversion import (
     from_json as pydantic_v1_from_json,
 )
-from cloudevents.pydantic.pydantic_v1.event import CloudEvent as PydanticV1CloudEvent
-from cloudevents.pydantic.pydantic_v2.conversion import (
+from cloudevents.pydantic.v1.event import CloudEvent as PydanticV1CloudEvent
+from cloudevents.pydantic.v2.conversion import (
     from_dict as pydantic_v2_from_dict,
 )
-from cloudevents.pydantic.pydantic_v2.conversion import (
+from cloudevents.pydantic.v2.conversion import (
     from_json as pydantic_v2_from_json,
 )
-from cloudevents.pydantic.pydantic_v2.event import CloudEvent as PydanticV2CloudEvent
+from cloudevents.pydantic.v2.event import CloudEvent as PydanticV2CloudEvent
 from cloudevents.sdk.event.attribute import SpecVersion
 
 test_data = json.dumps({"data-key": "val"})
@@ -187,6 +187,7 @@ def test_from_dict(cloudevents_implementation):
     assert cloudevents_implementation["from_dict"](given).dict() == given
 
 
+@pytest.mark.xfail  # Pydantic V2 doesn't support function params
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
 def test_pydantic_json_function_parameters_must_affect_output(
     specversion, cloudevents_implementation

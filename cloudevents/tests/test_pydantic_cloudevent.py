@@ -20,8 +20,8 @@ from pydantic.v1 import ValidationError as PydanticV1ValidationError
 
 from cloudevents.conversion import _json_or_string
 from cloudevents.exceptions import IncompatibleArgumentsError
-from cloudevents.pydantic.pydantic_v1.event import CloudEvent as PydanticV1CloudEvent
-from cloudevents.pydantic.pydantic_v2.event import CloudEvent as PydanticV2CloudEvent
+from cloudevents.pydantic.v1.event import CloudEvent as PydanticV1CloudEvent
+from cloudevents.pydantic.v2.event import CloudEvent as PydanticV2CloudEvent
 from cloudevents.sdk.event.attribute import SpecVersion
 
 _DUMMY_SOURCE = "dummy:source"
@@ -162,27 +162,25 @@ def test_http_cloudevent_mutates_equality(
 def test_cloudevent_missing_specversion(cloudevents_implementation):
     errors = {
         "v1": "value is not a valid enumeration member; permitted: '0.3', '1.0'",
-        "v2": "Input should be '0.3' or '1.0'"
+        "v2": "Input should be '0.3' or '1.0'",
     }
     attributes = {"specversion": "0.2", "source": "s", "type": "t"}
     with pytest.raises(cloudevents_implementation["validation_error"]) as e:
         _ = cloudevents_implementation["event"](attributes, None)
-    assert errors[cloudevents_implementation["pydantic_version"]] in str(
-        e.value
-    )
+    assert errors[cloudevents_implementation["pydantic_version"]] in str(e.value)
 
 
 def test_cloudevent_missing_minimal_required_fields(cloudevents_implementation):
     attributes = {"type": "t"}
     errors = {
         "v1": "\nsource\n  field required ",
-        "v2": '\nsource\n  Field required ',
+        "v2": "\nsource\n  Field required ",
     }
 
     with pytest.raises(cloudevents_implementation["validation_error"]) as e:
         _ = cloudevents_implementation["event"](attributes, None)
 
-    if cloudevents_implementation["pydantic_version"] == 'v2':
+    if cloudevents_implementation["pydantic_version"] == "v2":
         pass
 
     assert errors[cloudevents_implementation["pydantic_version"]] in str(e.value)

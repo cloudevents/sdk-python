@@ -24,14 +24,14 @@ from sanic import Sanic, response
 
 import cloudevents.exceptions as cloud_exceptions
 from cloudevents.conversion import to_binary, to_structured
-from cloudevents.pydantic.pydantic_v1.conversion import (
+from cloudevents.pydantic.v1.conversion import (
     from_http as pydantic_v1_from_http,
 )
-from cloudevents.pydantic.pydantic_v1.event import CloudEvent as PydanticV1CloudEvent
-from cloudevents.pydantic.pydantic_v2.conversion import (
+from cloudevents.pydantic.v1.event import CloudEvent as PydanticV1CloudEvent
+from cloudevents.pydantic.v2.conversion import (
     from_http as pydantic_v2_from_http,
 )
-from cloudevents.pydantic.pydantic_v2.event import CloudEvent as PydanticV2CloudEvent
+from cloudevents.pydantic.v2.event import CloudEvent as PydanticV2CloudEvent
 from cloudevents.sdk import converters
 from cloudevents.sdk.converters.binary import is_binary
 from cloudevents.sdk.converters.structured import is_structured

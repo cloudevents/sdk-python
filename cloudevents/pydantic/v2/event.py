@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import base64
 import datetime
 import json
 import typing
@@ -18,7 +19,7 @@ import typing
 from cloudevents.exceptions import PydanticFeatureNotInstalled
 
 try:
-    from pydantic import BaseModel, Field
+    from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 except ImportError:  # pragma: no cover # hard to test
     raise PydanticFeatureNotInstalled(
         "CloudEvents pydantic feature is not installed. "
@@ -28,60 +29,6 @@ except ImportError:  # pragma: no cover # hard to test
 from cloudevents import abstract, conversion, http
 from cloudevents.exceptions import IncompatibleArgumentsError
 from cloudevents.sdk.event import attribute
-
-
-def _ce_json_dumps(  # type: ignore[no-untyped-def]
-    obj: typing.Dict[str, typing.Any],
-    *args,
-    **kwargs,
-) -> str:
-    """Performs Pydantic-specific serialization of the event.
-
-    Needed by the pydantic base-model to serialize the event correctly to json.
-    Without this function the data will be incorrectly serialized.
-
-    :param obj: CloudEvent represented as a dict.
-    :param args: User arguments which will be passed to json.dumps function.
-    :param kwargs: User arguments which will be passed to json.dumps function.
-
-    :return: Event serialized as a standard JSON CloudEvent with user specific
-    parameters.
-    """
-    # Using HTTP from dict due to performance issues.
-    event = http.from_dict(obj)
-    event_json = conversion.to_json(event)
-    # Pydantic is known for initialization time lagging.
-    return json.dumps(
-        # We SHOULD de-serialize the value, to serialize it back with
-        # the correct json args and kwargs passed by the user.
-        # This MAY cause performance issues in the future.
-        # When that issue will cause real problem you MAY add a special keyword
-        # argument that disabled this conversion
-        json.loads(event_json),
-        *args,
-        **kwargs,
-    )
-
-
-def _ce_json_loads(  # type: ignore[no-untyped-def]
-    data: typing.AnyStr, *args, **kwargs  # noqa
-) -> typing.Dict[typing.Any, typing.Any]:
-    """Perforns Pydantic-specific deserialization of the event.
-
-    Needed by the pydantic base-model to de-serialize the event correctly from json.
-    Without this function the data will be incorrectly de-serialized.
-
-    :param obj: CloudEvent encoded as a json string.
-    :param args: These arguments SHOULD NOT be passed by pydantic.
-        Located here for fail-safe reasons, in-case it does.
-    :param kwargs: These arguments SHOULD NOT be passed by pydantic.
-        Located here for fail-safe reasons, in-case it does.
-
-    :return: CloudEvent in a dict representation.
-    """
-    # Using HTTP from dict due to performance issues.
-    # Pydantic is known for initialization time lagging.
-    return conversion.to_dict(http.from_json(data))
 
 
 class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
@@ -258,9 +205,9 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
             kwargs.update(attributes)
         super(CloudEvent, self).__init__(data=data, **kwargs)
 
-    class Config:
-        extra: str = "allow"  # this is the way we implement extensions
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",  # this is the way we implement extensions
+        json_schema_extra={
             "example": {
                 "specversion": "1.0",
                 "type": "com.github.pull_request.opened",
@@ -273,15 +220,40 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
                 "datacontenttype": "text/xml",
                 "data": '<much wow="xml"/>',
             }
-        }
-        json_dumps = _ce_json_dumps
-        json_loads = _ce_json_loads
+        },
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def check_base64_data_input(cls, data: typing.Any) -> typing.Any:
+        if isinstance(data, dict) and data.get("data_base64") is not None:
+            data["data"] = base64.b64decode(data["data_base64"])
+            del data["data_base64"]
+        return data
+
+    @model_serializer(when_used="json")
+    def serialize_model(self) -> typing.Dict[str, typing.Any]:
+        """Performs Pydantic-specific serialization of the event.
+
+        Needed by the pydantic base-model to serialize the event correctly to json.
+        Without this function the data will be incorrectly serialized.
+
+        :param self: CloudEvent represented as a dict.
+
+        :return: Event serialized as a standard dict CloudEvent with user specific
+        parameters.
+        """
+        # Using HTTP from dict due to performance issues.
+        event = http.from_dict(self.model_dump())
+        event_json = conversion.to_json(event)
+        # Pydantic is known for initialization time lagging.
+        return json.loads(event_json)
 
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
         return {
             key: conversion.best_effort_encode_attribute_value(value)
             for key, value in self.__dict__.items()
-            if key != "data"
+            if key not in ["data", "base64_data"]
         }
 
     def get_data(self) -> typing.Optional[typing.Any]:
