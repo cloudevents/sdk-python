@@ -171,12 +171,12 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
         :return: Event serialized as a standard CloudEvent dict with user specific
         parameters.
         """
-        # Using HTTP from dict due to performance issues (leftover from pydantic V1 implementation).
-        # We shouldn't use logic from other CloudEvent implementations. This needs improvement.
+        # Using HTTP from dict due to performance issues (from V1 implementation).
+        # We shouldn't use logic from other CloudEvent implementations.
         # Mypy thinks `self` is missing in call to `model_dump`
-        event = http.from_dict(self.model_dump())
+        event = http.from_dict(self.model_dump())  # type: ignore
         event_json = conversion.to_json(event)
-        # Pydantic is known for initialization time lagging (leftover from pydantic V1 implementation).
+        # Pydantic is known for initialization time lagging (from V1 implementation).
         return json.loads(event_json)
 
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
