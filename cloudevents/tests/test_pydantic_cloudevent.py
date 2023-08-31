@@ -179,10 +179,6 @@ def test_cloudevent_missing_minimal_required_fields(cloudevents_implementation):
 
     with pytest.raises(cloudevents_implementation["validation_error"]) as e:
         _ = cloudevents_implementation["event"](attributes, None)
-
-    if cloudevents_implementation["pydantic_version"] == "v2":
-        pass
-
     assert errors[cloudevents_implementation["pydantic_version"]] in str(e.value)
 
     attributes = {"source": "s"}
