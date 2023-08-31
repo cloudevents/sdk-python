@@ -14,7 +14,6 @@
 
 import base64
 import datetime
-import json
 import typing
 
 from cloudevents.exceptions import PydanticFeatureNotInstalled
@@ -28,7 +27,7 @@ except ImportError:  # pragma: no cover # hard to test
         "Install it using pip install cloudevents[pydantic]"
     )
 
-from cloudevents import abstract, conversion, http
+from cloudevents import abstract, conversion
 from cloudevents.exceptions import IncompatibleArgumentsError
 from cloudevents.sdk.event import attribute
 
@@ -167,25 +166,23 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
             del data["data_base64"]
         return data
 
-    @model_serializer(when_used="json")
-    def serialize_model(self) -> typing.Any:
+    @model_serializer(when_used="json", mode="wrap")
+    def serialize_model(self, handler: typing.Callable) -> typing.Dict[str, typing.Any]:
         """Performs Pydantic-specific serialization of the event.
 
         Needed by the pydantic base-model to serialize the event correctly to json.
         Without this function the data will be incorrectly serialized.
 
         :param self: CloudEvent.
+        :param handler: The nested serialization handler.
 
         :return: Event serialized as a standard CloudEvent dict with user specific
         parameters.
         """
-        # Using HTTP from dict due to performance issues (from V1 implementation).
-        # We shouldn't use logic from other CloudEvent implementations.
-        # Mypy thinks `self` is missing in call to `model_dump`
-        event = http.from_dict(self.model_dump())  # type: ignore
-        event_json = conversion.to_json(event)
-        # Pydantic is known for initialization time lagging (from V1 implementation).
-        return json.loads(event_json)
+        model_dump: dict = handler(self)
+        if isinstance(self.data, (bytes, bytearray, memoryview)):
+            model_dump["data_base64"] = base64.b64encode(self.data).decode("ascii")
+        return model_dump
 
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
         return {
