@@ -155,6 +155,13 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
     @model_validator(mode="before")
     @classmethod
     def check_base64_data_input(cls, data: typing.Any) -> typing.Any:
+        """Populates the `data` property if the model gets created using `data_base64`.
+
+        :param data: Input data.
+
+        :return: Event serialized as a standard CloudEvent dict with user specific
+        parameters.
+        """
         if isinstance(data, dict) and data.get("data_base64") is not None:
             data["data"] = base64.b64decode(data["data_base64"])
             del data["data_base64"]
