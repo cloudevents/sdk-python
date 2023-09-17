@@ -350,7 +350,10 @@ def test_binary_data_deserialization(cloudevents_implementation):
     }
     assert cloudevents_implementation["event"].parse_raw(given).dict() == expected
     if cloudevents_implementation["pydantic_version"] == "v2":
-        assert cloudevents_implementation["event"].model_validate_json(given).dict() == expected
+        assert (
+            cloudevents_implementation["event"].model_validate_json(given).dict()
+            == expected
+        )
 
 
 def test_access_data_event_attribute_should_raise_key_error(dummy_event):
