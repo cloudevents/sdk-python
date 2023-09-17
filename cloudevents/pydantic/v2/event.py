@@ -190,7 +190,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
         return {
             key: conversion.best_effort_encode_attribute_value(value)
             for key, value in self.__dict__.items()
-            if key not in ["data", "base64_data"]
+            if key not in ["data"]
         }
 
     def get_data(self) -> typing.Optional[typing.Any]:
