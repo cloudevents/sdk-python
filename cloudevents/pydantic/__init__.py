@@ -18,18 +18,16 @@ try:
     from pydantic import VERSION as PYDANTIC_VERSION
 
     pydantic_major_version = PYDANTIC_VERSION.split(".")[0]
-    if pydantic_major_version == "2":
-        from cloudevents.pydantic.v1.conversion import from_dict, from_http, from_json
-        from cloudevents.pydantic.v1.event import CloudEvent
+    if pydantic_major_version == "1":
+        from cloudevents.pydantic.v1 import CloudEvent, from_dict, from_http, from_json
 
     else:
-        from cloudevents.pydantic.v2.conversion import (  # type: ignore
+        from cloudevents.pydantic.v2 import (  # type: ignore
+            CloudEvent,
             from_dict,
             from_http,
             from_json,
         )
-        from cloudevents.pydantic.v2.event import CloudEvent  # type: ignore
-
 
 except ImportError:  # pragma: no cover # hard to test
     raise PydanticFeatureNotInstalled(
