@@ -14,12 +14,6 @@
 
 from cloudevents.sdk.event import attribute
 
-"""
-This contains title, description, example and other NON-FUNCTIONAL data
-for pydantic fields. It could be potentially used across all the SDK.
-Functional field configuration (e.g. defaults) is still defined in the
-pydantic model classes.
-"""
 FIELD_DESCRIPTIONS = {
     "data": {
         "title": "Event Data",
@@ -138,3 +132,11 @@ FIELD_DESCRIPTIONS = {
         ),
     },
 }
+
+"""
+The dictionary above contains title, description, example and other
+NON-FUNCTIONAL data for pydantic fields. It could be potentially.
+used across all the SDK.
+Functional field configurations (e.g. defaults) are still defined
+in the pydantic model classes.
+"""
