@@ -324,7 +324,7 @@ def test_binary_data_serialization(
     ).json()
     result_json = loads(event)
     assert result_json["data_base64"] == "AAARSGVsbG8gV29ybGQ="
-    assert "daata" not in result_json
+    assert "data" not in result_json
 
 
 def test_binary_data_deserialization(cloudevents_implementation):

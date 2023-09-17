@@ -177,14 +177,3 @@ def test_from_dict(cloudevents_implementation):
         "type": "dummy.type",
     }
     assert cloudevents_implementation["from_dict"](given).dict() == given
-
-
-@pytest.mark.xfail  # Pydantic V2 doesn't support function params
-@pytest.mark.parametrize("specversion", ["0.3", "1.0"])
-def test_pydantic_json_function_parameters_must_affect_output(
-    specversion, cloudevents_implementation
-):
-    event = cloudevents_implementation["event"](test_attributes, test_data)
-    v1 = event.json(indent=2, sort_keys=True)
-    v2 = event.json(indent=4, sort_keys=True)
-    assert v1 != v2
