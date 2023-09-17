@@ -14,6 +14,7 @@
 
 import base64
 import datetime
+import json
 import typing
 
 from cloudevents.exceptions import PydanticFeatureNotInstalled
@@ -166,23 +167,24 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
             del data["data_base64"]
         return data
 
-    @model_serializer(when_used="json", mode="wrap")
-    def serialize_model(self, handler: typing.Callable) -> typing.Dict[str, typing.Any]:
-        """Performs Pydantic-specific serialization of the event.
+    @model_serializer(when_used="json")
+    def _ce_json_dumps(self) -> typing.Dict[str, typing.Any]:
+        """Performs Pydantic-specific serialization of the event when
+        serializing the model using `.model_dump_json()` method.
 
         Needed by the pydantic base-model to serialize the event correctly to json.
         Without this function the data will be incorrectly serialized.
 
         :param self: CloudEvent.
-        :param handler: The nested serialization handler.
 
         :return: Event serialized as a standard CloudEvent dict with user specific
         parameters.
         """
-        model_dump: dict = handler(self)
-        if isinstance(self.data, (bytes, bytearray, memoryview)):
-            model_dump["data_base64"] = base64.b64encode(self.data).decode("ascii")
-        return model_dump
+        # This is inefficient but we want to use the same serialization logic
+        # as the rest of the SDK. We need either for pydantic to allow bypassing
+        # the internal JSON serialization logic, or for the conversion module to
+        # separate the fields structured data conversion from the json serialization
+        return json.loads(conversion.to_json(self))
 
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
         return {
