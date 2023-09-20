@@ -201,7 +201,10 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
         :return: Event serialized as a standard CloudEvent dict with user specific
         parameters.
         """
-        return json.loads(conversion.to_json(self))
+        # Here mypy complains about json.loads returning Any
+        # which is incompatible with this method return type
+        # but we know it's always a dictionary in this case
+        return json.loads(conversion.to_json(self))  # type: ignore
 
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
         return {
