@@ -11,12 +11,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import typing
 
 from cloudevents.conversion import from_dict as _abstract_from_dict
 from cloudevents.conversion import from_http as _abstract_from_http
 from cloudevents.conversion import from_json as _abstract_from_json
-from cloudevents.pydantic.event import CloudEvent
+from cloudevents.pydantic.v2.event import CloudEvent
 from cloudevents.sdk import types
 
 
