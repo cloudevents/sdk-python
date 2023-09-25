@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] — 2023-09-25
+### Added
+- Pydantic v2 support. ([#219])
+- Pydantic v2 to v1 compatibility layer. ([#218])
+- Governance docs per main CE discussions. ([#221])
+
 ## [1.9.0] — 2023-01-04
 ### Added
 - Added typings to the codebase. ([#207])
@@ -179,6 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.10.0]: https://github.com/cloudevents/sdk-python/compare/1.9.0...1.10.0
 [1.9.0]: https://github.com/cloudevents/sdk-python/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/cloudevents/sdk-python/compare/1.7.0...1.8.0
 [1.7.1]: https://github.com/cloudevents/sdk-python/compare/1.7.0...1.7.1
@@ -256,3 +263,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#207]: https://github.com/cloudevents/sdk-python/pull/207
 [#208]: https://github.com/cloudevents/sdk-python/pull/208
 [#209]: https://github.com/cloudevents/sdk-python/pull/209
+[#218]: https://github.com/cloudevents/sdk-python/pull/218
+[#219]: https://github.com/cloudevents/sdk-python/pull/219
+[#221]: https://github.com/cloudevents/sdk-python/pull/221
