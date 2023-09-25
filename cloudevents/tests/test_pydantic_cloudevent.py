@@ -15,18 +15,14 @@ import datetime
 from json import loads
 
 import pytest
-from pydantic import VERSION as PYDANTIC_VERSION
+from pydantic import ValidationError as PydanticV2ValidationError
+from pydantic.v1 import ValidationError as PydanticV1ValidationError
 
 from cloudevents.conversion import _json_or_string
 from cloudevents.exceptions import IncompatibleArgumentsError
-from cloudevents.pydantic import CloudEvent
+from cloudevents.pydantic.v1.event import CloudEvent as PydanticV1CloudEvent
+from cloudevents.pydantic.v2.event import CloudEvent as PydanticV2CloudEvent
 from cloudevents.sdk.event.attribute import SpecVersion
-
-pydantic_major_version = PYDANTIC_VERSION.split(".")[0]
-if pydantic_major_version == "2":
-    from pydantic.v1 import ValidationError
-else:
-    from pydantic import ValidationError
 
 _DUMMY_SOURCE = "dummy:source"
 _DUMMY_TYPE = "tests.cloudevents.override"
@@ -37,6 +33,25 @@ _DUMMY_ID = "my-id"
 @pytest.fixture(params=["0.3", "1.0"])
 def specversion(request):
     return request.param
+
+
+_pydantic_implementation = {
+    "v1": {
+        "event": PydanticV1CloudEvent,
+        "validation_error": PydanticV1ValidationError,
+        "pydantic_version": "v1",
+    },
+    "v2": {
+        "event": PydanticV2CloudEvent,
+        "validation_error": PydanticV2ValidationError,
+        "pydantic_version": "v2",
+    },
+}
+
+
+@pytest.fixture(params=["v1", "v2"])
+def cloudevents_implementation(request):
+    return _pydantic_implementation[request.param]
 
 
 @pytest.fixture()
@@ -64,8 +79,10 @@ def your_dummy_data():
 
 
 @pytest.fixture()
-def dummy_event(dummy_attributes, my_dummy_data):
-    return CloudEvent(attributes=dummy_attributes, data=my_dummy_data)
+def dummy_event(dummy_attributes, my_dummy_data, cloudevents_implementation):
+    return cloudevents_implementation["event"](
+        attributes=dummy_attributes, data=my_dummy_data
+    )
 
 
 @pytest.fixture()
@@ -75,10 +92,12 @@ def non_exiting_attribute_name(dummy_event):
     return result
 
 
-def test_pydantic_cloudevent_equality(dummy_attributes, my_dummy_data, your_dummy_data):
+def test_pydantic_cloudevent_equality(
+    dummy_attributes, my_dummy_data, your_dummy_data, cloudevents_implementation
+):
     data = my_dummy_data
-    event1 = CloudEvent(dummy_attributes, data)
-    event2 = CloudEvent(dummy_attributes, data)
+    event1 = cloudevents_implementation["event"](dummy_attributes, data)
+    event2 = cloudevents_implementation["event"](dummy_attributes, data)
     assert event1 == event2
     # Test different attributes
     for key in dummy_attributes:
@@ -86,15 +105,15 @@ def test_pydantic_cloudevent_equality(dummy_attributes, my_dummy_data, your_dumm
             continue
         else:
             dummy_attributes[key] = f"noise-{key}"
-        event3 = CloudEvent(dummy_attributes, data)
-        event2 = CloudEvent(dummy_attributes, data)
+        event3 = cloudevents_implementation["event"](dummy_attributes, data)
+        event2 = cloudevents_implementation["event"](dummy_attributes, data)
         assert event2 == event3
         assert event1 != event2 and event3 != event1
 
     # Test different data
     data = your_dummy_data
-    event3 = CloudEvent(dummy_attributes, data)
-    event2 = CloudEvent(dummy_attributes, data)
+    event3 = cloudevents_implementation["event"](dummy_attributes, data)
+    event2 = cloudevents_implementation["event"](dummy_attributes, data)
     assert event2 == event3
     assert event1 != event2 and event3 != event1
 
@@ -115,12 +134,12 @@ def test_http_cloudevent_must_not_equal_to_non_cloudevent_value(
 
 
 def test_http_cloudevent_mutates_equality(
-    dummy_attributes, my_dummy_data, your_dummy_data
+    dummy_attributes, my_dummy_data, your_dummy_data, cloudevents_implementation
 ):
     data = my_dummy_data
-    event1 = CloudEvent(dummy_attributes, data)
-    event2 = CloudEvent(dummy_attributes, data)
-    event3 = CloudEvent(dummy_attributes, data)
+    event1 = cloudevents_implementation["event"](dummy_attributes, data)
+    event2 = cloudevents_implementation["event"](dummy_attributes, data)
+    event3 = cloudevents_implementation["event"](dummy_attributes, data)
 
     assert event1 == event2
     # Test different attributes
@@ -140,29 +159,40 @@ def test_http_cloudevent_mutates_equality(
     assert event1 != event2 and event3 != event1
 
 
-def test_cloudevent_missing_specversion():
+def test_cloudevent_missing_specversion(cloudevents_implementation):
+    errors = {
+        "v1": "value is not a valid enumeration member; permitted: '0.3', '1.0'",
+        "v2": "Input should be '0.3' or '1.0'",
+    }
     attributes = {"specversion": "0.2", "source": "s", "type": "t"}
-    with pytest.raises(ValidationError) as e:
-        _ = CloudEvent(attributes, None)
-    assert "value is not a valid enumeration member; permitted: '0.3', '1.0'" in str(
-        e.value
-    )
+    with pytest.raises(cloudevents_implementation["validation_error"]) as e:
+        _ = cloudevents_implementation["event"](attributes, None)
+    assert errors[cloudevents_implementation["pydantic_version"]] in str(e.value)
 
 
-def test_cloudevent_missing_minimal_required_fields():
+def test_cloudevent_missing_minimal_required_fields(cloudevents_implementation):
     attributes = {"type": "t"}
-    with pytest.raises(ValidationError) as e:
-        _ = CloudEvent(attributes, None)
-    assert "\nsource\n  field required " in str(e.value)
+    errors = {
+        "v1": "\nsource\n  field required ",
+        "v2": "\nsource\n  Field required ",
+    }
+
+    with pytest.raises(cloudevents_implementation["validation_error"]) as e:
+        _ = cloudevents_implementation["event"](attributes, None)
+    assert errors[cloudevents_implementation["pydantic_version"]] in str(e.value)
 
     attributes = {"source": "s"}
-    with pytest.raises(ValidationError) as e:
-        _ = CloudEvent(attributes, None)
-    assert "\ntype\n  field required " in str(e.value)
+    errors = {
+        "v1": "\ntype\n  field required ",
+        "v2": "\ntype\n  Field required ",
+    }
+    with pytest.raises(cloudevents_implementation["validation_error"]) as e:
+        _ = cloudevents_implementation["event"](attributes, None)
+    assert errors[cloudevents_implementation["pydantic_version"]] in str(e.value)
 
 
-def test_cloudevent_general_overrides():
-    event = CloudEvent(
+def test_cloudevent_general_overrides(cloudevents_implementation):
+    event = cloudevents_implementation["event"](
         {
             "source": "my-source",
             "type": "com.test.overrides",
@@ -223,9 +253,9 @@ def test_get_operation_on_non_existing_attribute_should_not_copy_default_value(
 
 
 @pytest.mark.xfail()  # https://github.com/cloudevents/sdk-python/issues/185
-def test_json_data_serialization_without_explicit_type():
+def test_json_data_serialization_without_explicit_type(cloudevents_implementation):
     assert loads(
-        CloudEvent(
+        cloudevents_implementation["event"](
             source=_DUMMY_SOURCE, type=_DUMMY_TYPE, data='{"hello": "world"}'
         ).json()
     )["data"] == {"hello": "world"}
@@ -242,17 +272,15 @@ def test_json_data_serialization_without_explicit_type():
     ],
 )
 def test_json_data_serialization_with_explicit_json_content_type(
-    dummy_attributes, json_content_type
+    dummy_attributes, json_content_type, cloudevents_implementation
 ):
     dummy_attributes["datacontenttype"] = json_content_type
     assert loads(
-        CloudEvent(
+        cloudevents_implementation["event"](
             dummy_attributes,
             data='{"hello": "world"}',
         ).json()
-    )[
-        "data"
-    ] == {"hello": "world"}
+    )["data"] == {"hello": "world"}
 
 
 _NON_JSON_CONTENT_TYPES = [
@@ -275,10 +303,10 @@ _NON_JSON_CONTENT_TYPES = [
 
 @pytest.mark.parametrize("datacontenttype", _NON_JSON_CONTENT_TYPES)
 def test_json_data_serialization_with_explicit_non_json_content_type(
-    dummy_attributes, datacontenttype
+    dummy_attributes, datacontenttype, cloudevents_implementation
 ):
     dummy_attributes["datacontenttype"] = datacontenttype
-    event = CloudEvent(
+    event = cloudevents_implementation["event"](
         dummy_attributes,
         data='{"hello": "world"}',
     ).json()
@@ -286,18 +314,20 @@ def test_json_data_serialization_with_explicit_non_json_content_type(
 
 
 @pytest.mark.parametrize("datacontenttype", _NON_JSON_CONTENT_TYPES)
-def test_binary_data_serialization(dummy_attributes, datacontenttype):
+def test_binary_data_serialization(
+    dummy_attributes, datacontenttype, cloudevents_implementation
+):
     dummy_attributes["datacontenttype"] = datacontenttype
-    event = CloudEvent(
+    event = cloudevents_implementation["event"](
         dummy_attributes,
         data=b"\x00\x00\x11Hello World",
     ).json()
     result_json = loads(event)
     assert result_json["data_base64"] == "AAARSGVsbG8gV29ybGQ="
-    assert "daata" not in result_json
+    assert "data" not in result_json
 
 
-def test_binary_data_deserialization():
+def test_binary_data_deserialization(cloudevents_implementation):
     given = (
         b'{"source": "dummy:source", "id": "11775cb2-fd00-4487-a18b-30c3600eaa5f",'
         b' "type": "dummy.type", "specversion": "1.0", "time":'
@@ -318,7 +348,12 @@ def test_binary_data_deserialization():
         ),
         "type": "dummy.type",
     }
-    assert CloudEvent.parse_raw(given).dict() == expected
+    assert cloudevents_implementation["event"].parse_raw(given).dict() == expected
+    if cloudevents_implementation["pydantic_version"] == "v2":
+        assert (
+            cloudevents_implementation["event"].model_validate_json(given).dict()
+            == expected
+        )
 
 
 def test_access_data_event_attribute_should_raise_key_error(dummy_event):
@@ -355,6 +390,6 @@ def test_data_must_never_exist_as_an_attribute_name(dummy_event):
     assert "data" not in dummy_event
 
 
-def test_attributes_and_kwards_are_incompatible():
+def test_attributes_and_kwards_are_incompatible(cloudevents_implementation):
     with pytest.raises(IncompatibleArgumentsError):
-        CloudEvent({"a": "b"}, other="hello world")
+        cloudevents_implementation["event"]({"a": "b"}, other="hello world")
