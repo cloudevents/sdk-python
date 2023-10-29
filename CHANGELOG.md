@@ -6,8 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.1]
+
 ### Fixed
-- Fixed Pydantic v2 `to_json` (and `to_structured`) conversion ()
+- Fixed Pydantic v2 `to_json` (and `to_structured`) conversion ([#229])
 
 ## [1.10.0] — 2023-09-25
 ### Added
@@ -188,6 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.10.1]: https://github.com/cloudevents/sdk-python/compare/1.10.0...1.10.1
 [1.10.0]: https://github.com/cloudevents/sdk-python/compare/1.9.0...1.10.0
 [1.9.0]: https://github.com/cloudevents/sdk-python/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/cloudevents/sdk-python/compare/1.7.0...1.8.0
@@ -269,3 +272,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#218]: https://github.com/cloudevents/sdk-python/pull/218
 [#219]: https://github.com/cloudevents/sdk-python/pull/219
 [#221]: https://github.com/cloudevents/sdk-python/pull/221
+[#229]: https://github.com/cloudevents/sdk-python/pull/229
