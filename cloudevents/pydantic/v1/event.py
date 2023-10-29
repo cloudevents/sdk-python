@@ -186,7 +186,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
                 )
             attributes = {k.lower(): v for k, v in attributes.items()}
             kwargs.update(attributes)
-        super(CloudEvent, self).__init__(data=data, **kwargs)
+        super().__init__(data=data, **kwargs)
 
     class Config:
         extra: str = "allow"  # this is the way we implement extensions
