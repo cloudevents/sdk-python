@@ -11,12 +11,12 @@ repos:
       - id: isort
         args: [ "--profile", "black", "--filter-files" ]
   - repo: https://github.com/psf/black
-    rev: 23.9.1
+    rev: 23.10.1
     hooks:
       - id: black
         language_version: python3.11
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.6.0"
+    rev: v1.6.1
     hooks:
       - id: mypy
         files: ^(cloudevents/)
@@ -24,4 +24,4 @@ repos:
         types: [ python ]
         args: [ ]
         additional_dependencies:
-          - 'pydantic'
+          - "pydantic"
