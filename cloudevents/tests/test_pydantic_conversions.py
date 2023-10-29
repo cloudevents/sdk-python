@@ -33,8 +33,8 @@ test_data = json.dumps({"data-key": "val"})
 test_attributes = {
     "type": "com.example.string",
     "source": "https://example.com/event-producer",
+    "extension-attribute": "extension-attribute-test-value",
 }
-
 
 _pydantic_implementation = {
     "v1": {
@@ -177,3 +177,4 @@ def test_from_dict(cloudevents_implementation):
         "type": "dummy.type",
     }
     assert cloudevents_implementation["from_dict"](given).dict() == given
+
