@@ -209,7 +209,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
         return {
             key: conversion.best_effort_encode_attribute_value(value)
-            for key, value in self.__dict__.items()
+            for key, value in dict(BaseModel.__iter__(self)).items()
             if key not in ["data"]
         }
 
