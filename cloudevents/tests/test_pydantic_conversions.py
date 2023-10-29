@@ -177,4 +177,3 @@ def test_from_dict(cloudevents_implementation):
         "type": "dummy.type",
     }
     assert cloudevents_implementation["from_dict"](given).dict() == given
-
