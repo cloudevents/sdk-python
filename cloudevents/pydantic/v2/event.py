@@ -134,7 +134,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
                 )
             attributes = {k.lower(): v for k, v in attributes.items()}
             kwargs.update(attributes)
-        super(CloudEvent, self).__init__(data=data, **kwargs)
+        super().__init__(data=data, **kwargs)
 
     model_config = ConfigDict(
         extra="allow",  # this is the way we implement extensions
@@ -209,7 +209,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
         return {
             key: conversion.best_effort_encode_attribute_value(value)
-            for key, value in self.__dict__.items()
+            for key, value in dict(BaseModel.__iter__(self)).items()
             if key not in ["data"]
         }
 
