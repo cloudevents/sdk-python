@@ -34,10 +34,6 @@ protocol binding, this SDK has the following responsibilities:
 * Marshalling/unmarshalling the `data` field
 * Encode/decode the marshalled fields to/from the specific binding format
 
-We want to separate the responsibilities that belong to the event and its implementation
-in the user system (data, extensions) from the binding and format specification for
-core fields.
-
 ## Modules
 
 We should separate the implementation of the requirements so that they can be tested independently and
@@ -80,7 +76,7 @@ We should implement a `to_dict`/`from_dict` functionalities in the `CloudEvent` 
 QUESTION: Can we define a data type for the `data` field after it's been marshalled?
 (ie. can we say it will be either `str` or binary data?)
 
-### Formats
+### The `cloudevents.formats` module
 
 Formats do solve a single responsibility:
 
@@ -99,7 +95,7 @@ def from_json(event: str) -> dict: ...
 
 TODO: Review typing as JSON produces a string but other formats might be different.
 
-### Bindings
+### The `cloudevents.bindings` module
 
 Bindings do solve these responsibilities:
 
