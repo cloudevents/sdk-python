@@ -121,7 +121,7 @@ class HTTPCloudEvent:
     headers: list
     body: Any  # unsure about typing here
 
-    
+
 def to_binary(event: CloudEvent) -> HTTPCloudEvent:
     e = event.to_dict()
     # logic to marshall into http binary output
@@ -169,9 +169,9 @@ def from_binary(headers: list, body: dict, event_types: Optional[dict[str, type]
     event_as_dict = {}
     # specific logic to unmarshall raw headers into a dictionary
     if event_types:
-        # Use 
+        # Use
         return event_types.get(event_as_dict['type'], CloudEvent).from_dict(e)
-    else:    
+    else:
         return CloudEvent.from_dict(e)
 ```
 
