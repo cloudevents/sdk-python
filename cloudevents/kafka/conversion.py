@@ -87,10 +87,10 @@ def to_binary(
         )
 
     headers = {}
-    if event["content-type"]:
-        headers["content-type"] = event["content-type"].encode("utf-8")
+    if event["datacontenttype"]:
+        headers["datacontenttype"] = event["datacontenttype"].encode("utf-8")
     for attr, value in event.get_attributes().items():
-        if attr not in ["data", "partitionkey", "content-type"]:
+        if attr not in ["data", "partitionkey", "datacontenttype"]:
             if value is not None:
                 headers["ce_{0}".format(attr)] = value.encode("utf-8")
 
@@ -189,8 +189,8 @@ def to_structured(
         attrs["data"] = data
 
     headers = {}
-    if "content-type" in attrs:
-        headers["content-type"] = attrs.pop("content-type").encode("utf-8")
+    if "datacontenttype" in attrs:
+        headers["datacontenttype"] = attrs.pop("datacontenttype").encode("utf-8")
 
     try:
         value = envelope_marshaller(attrs)
