@@ -101,7 +101,6 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
         default=None,
     )
 
-
     def __init__(  # type: ignore[no-untyped-def]
         self,
         attributes: typing.Optional[typing.Dict[str, typing.Any]] = None,
