@@ -51,53 +51,53 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
     data: typing.Optional[typing.Any] = Field(
         title=FIELD_DESCRIPTIONS["data"].get("title"),
         description=FIELD_DESCRIPTIONS["data"].get("description"),
-        example=FIELD_DESCRIPTIONS["data"].get("example"),
+        json_schema_extra=FIELD_DESCRIPTIONS["data"].get("example"),
         default=None,
     )
     source: str = Field(
         title=FIELD_DESCRIPTIONS["source"].get("title"),
         description=FIELD_DESCRIPTIONS["source"].get("description"),
-        example=FIELD_DESCRIPTIONS["source"].get("example"),
+        json_schema_extra=FIELD_DESCRIPTIONS["source"].get("example"),
     )
     id: str = Field(
         title=FIELD_DESCRIPTIONS["id"].get("title"),
         description=FIELD_DESCRIPTIONS["id"].get("description"),
-        example=FIELD_DESCRIPTIONS["id"].get("example"),
+        examples=FIELD_DESCRIPTIONS["id"].get("example"),
         default_factory=attribute.default_id_selection_algorithm,
     )
     type: str = Field(
         title=FIELD_DESCRIPTIONS["type"].get("title"),
         description=FIELD_DESCRIPTIONS["type"].get("description"),
-        example=FIELD_DESCRIPTIONS["type"].get("example"),
+        json_schema_extra=FIELD_DESCRIPTIONS["type"].get("example"),
     )
     specversion: attribute.SpecVersion = Field(
         title=FIELD_DESCRIPTIONS["specversion"].get("title"),
         description=FIELD_DESCRIPTIONS["specversion"].get("description"),
-        example=FIELD_DESCRIPTIONS["specversion"].get("example"),
+        json_schema_extra=FIELD_DESCRIPTIONS["specversion"].get("example"),
         default=attribute.DEFAULT_SPECVERSION,
     )
     time: typing.Optional[datetime.datetime] = Field(
         title=FIELD_DESCRIPTIONS["time"].get("title"),
         description=FIELD_DESCRIPTIONS["time"].get("description"),
-        example=FIELD_DESCRIPTIONS["time"].get("example"),
+        json_schema_extra=FIELD_DESCRIPTIONS["time"].get("example"),
         default_factory=attribute.default_time_selection_algorithm,
     )
     subject: typing.Optional[str] = Field(
         title=FIELD_DESCRIPTIONS["subject"].get("title"),
         description=FIELD_DESCRIPTIONS["subject"].get("description"),
-        example=FIELD_DESCRIPTIONS["subject"].get("example"),
+        json_schema_extra=FIELD_DESCRIPTIONS["subject"].get("example"),
         default=None,
     )
     datacontenttype: typing.Optional[str] = Field(
         title=FIELD_DESCRIPTIONS["datacontenttype"].get("title"),
         description=FIELD_DESCRIPTIONS["datacontenttype"].get("description"),
-        example=FIELD_DESCRIPTIONS["datacontenttype"].get("example"),
+        json_schema_extra=FIELD_DESCRIPTIONS["datacontenttype"].get("example"),
         default=None,
     )
     dataschema: typing.Optional[str] = Field(
         title=FIELD_DESCRIPTIONS["dataschema"].get("title"),
         description=FIELD_DESCRIPTIONS["dataschema"].get("description"),
-        example=FIELD_DESCRIPTIONS["dataschema"].get("example"),
+        json_schema_extra=FIELD_DESCRIPTIONS["dataschema"].get("example"),
         default=None,
     )
 
