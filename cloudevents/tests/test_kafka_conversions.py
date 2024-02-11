@@ -59,7 +59,7 @@ class KafkaConversionTestBase:
                 "source": "pytest",
                 "type": "com.pytest.test",
                 "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
-                "content-type": "foo",
+                "datacontenttype": "foo",
                 "partitionkey": "test_key_123",
             },
             data=self.expected_data,
