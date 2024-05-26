@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Dropped Python3.7 from CI while its EOL.
+
 ## [1.10.1]
 
 ### Fixed
