@@ -87,10 +87,10 @@ def to_binary(
         )
 
     headers = {}
-    if event["content-type"]:
-        headers["content-type"] = event["content-type"].encode("utf-8")
+    if event["datacontenttype"]:
+        headers["content-type"] = event["datacontenttype"].encode("utf-8")
     for attr, value in event.get_attributes().items():
-        if attr not in ["data", "partitionkey", "content-type"]:
+        if attr not in ["data", "partitionkey", "datacontenttype"]:
             if value is not None:
                 headers["ce_{0}".format(attr)] = value.encode("utf-8")
 
@@ -126,7 +126,7 @@ def from_binary(
     for header, value in message.headers.items():
         header = header.lower()
         if header == "content-type":
-            attributes["content-type"] = value.decode()
+            attributes["datacontenttype"] = value.decode()
         elif header.startswith("ce_"):
             attributes[header[3:]] = value.decode()
 
@@ -189,8 +189,8 @@ def to_structured(
         attrs["data"] = data
 
     headers = {}
-    if "content-type" in attrs:
-        headers["content-type"] = attrs.pop("content-type").encode("utf-8")
+    if "datacontenttype" in attrs:
+        headers["content-type"] = attrs.pop("datacontenttype").encode("utf-8")
 
     try:
         value = envelope_marshaller(attrs)
@@ -255,7 +255,10 @@ def from_structured(
             attributes[name] = decoded_value
 
     for header, val in message.headers.items():
-        attributes[header.lower()] = val.decode()
+        if header.lower() == "content-type":
+            attributes["datacontenttype"] = val.decode()
+        else:
+            attributes[header.lower()] = val.decode()
     if event_type:
         result = event_type.create(attributes, data)
     else:

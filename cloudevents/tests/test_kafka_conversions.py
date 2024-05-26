@@ -59,7 +59,7 @@ class KafkaConversionTestBase:
                 "source": "pytest",
                 "type": "com.pytest.test",
                 "time": datetime.datetime(2000, 1, 1, 6, 42, 33).isoformat(),
-                "content-type": "foo",
+                "datacontenttype": "foo",
                 "partitionkey": "test_key_123",
             },
             data=self.expected_data,
@@ -123,7 +123,7 @@ class TestToBinary(KafkaConversionTestBase):
         assert result.headers["ce_source"] == source_event["source"].encode("utf-8")
         assert result.headers["ce_type"] == source_event["type"].encode("utf-8")
         assert result.headers["ce_time"] == source_event["time"].encode("utf-8")
-        assert result.headers["content-type"] == source_event["content-type"].encode(
+        assert result.headers["content-type"] == source_event["datacontenttype"].encode(
             "utf-8"
         )
         assert "data" not in result.headers
@@ -163,7 +163,7 @@ class TestFromBinary(KafkaConversionTestBase):
                 "ce_time": datetime.datetime(2000, 1, 1, 6, 42, 33)
                 .isoformat()
                 .encode("utf-8"),
-                "content-type": "foo".encode("utf-8"),
+                "datacontenttype": "foo".encode("utf-8"),
             },
             value=simple_serialize(self.expected_data),
             key="test_key_123",
@@ -205,7 +205,7 @@ class TestFromBinary(KafkaConversionTestBase):
         assert result["type"] == source_binary_json_message.headers["ce_type"].decode()
         assert result["time"] == source_binary_json_message.headers["ce_time"].decode()
         assert (
-            result["content-type"]
+            result["datacontenttype"]
             == source_binary_json_message.headers["content-type"].decode()
         )
 
@@ -328,7 +328,7 @@ class TestToStructured(KafkaConversionTestBase):
     def test_sets_headers(self, source_event):
         result = to_structured(source_event)
         assert len(result.headers) == 1
-        assert result.headers["content-type"] == source_event["content-type"].encode(
+        assert result.headers["content-type"] == source_event["datacontenttype"].encode(
             "utf-8"
         )
 
@@ -474,7 +474,7 @@ class TestFromStructured(KafkaConversionTestBase):
     ):
         result = from_structured(source_structured_json_message)
         assert (
-            result["content-type"]
+            result["datacontenttype"]
             == source_structured_json_message.headers["content-type"].decode()
         )
 
@@ -487,7 +487,7 @@ class TestFromStructured(KafkaConversionTestBase):
             envelope_unmarshaller=custom_unmarshaller,
         )
         assert (
-            result["content-type"]
+            result["datacontenttype"]
             == source_structured_bytes_bytes_message.headers["content-type"].decode()
         )
 
