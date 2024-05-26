@@ -12,22 +12,31 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from typing import TYPE_CHECKING
+
 from cloudevents.exceptions import PydanticFeatureNotInstalled
 
 try:
-    from pydantic import VERSION as PYDANTIC_VERSION
-
-    pydantic_major_version = PYDANTIC_VERSION.split(".")[0]
-    if pydantic_major_version == "1":
-        from cloudevents.pydantic.v1 import CloudEvent, from_dict, from_http, from_json
-
+    if TYPE_CHECKING:
+        from cloudevents.pydantic.v2 import CloudEvent, from_dict, from_http, from_json
     else:
-        from cloudevents.pydantic.v2 import (  # type: ignore
-            CloudEvent,
-            from_dict,
-            from_http,
-            from_json,
-        )
+        from pydantic import VERSION as PYDANTIC_VERSION
+
+        pydantic_major_version = PYDANTIC_VERSION.split(".")[0]
+        if pydantic_major_version == "1":
+            from cloudevents.pydantic.v1 import (
+                CloudEvent,
+                from_dict,
+                from_http,
+                from_json,
+            )
+        else:
+            from cloudevents.pydantic.v2 import (
+                CloudEvent,
+                from_dict,
+                from_http,
+                from_json,
+            )
 
 except ImportError:  # pragma: no cover # hard to test
     raise PydanticFeatureNotInstalled(

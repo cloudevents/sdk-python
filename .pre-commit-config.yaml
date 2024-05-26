@@ -6,17 +6,17 @@ repos:
       - id: end-of-file-fixer
       - id: check-toml
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
         args: [ "--profile", "black", "--filter-files" ]
   - repo: https://github.com/psf/black
-    rev: 23.10.1
+    rev: 24.4.2
     hooks:
       - id: black
         language_version: python3.11
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.6.1
+    rev: v1.10.0
     hooks:
       - id: mypy
         files: ^(cloudevents/)
@@ -24,4 +24,4 @@ repos:
         types: [ python ]
         args: [ ]
         additional_dependencies:
-          - "pydantic"
+          - "pydantic~=2.7"
