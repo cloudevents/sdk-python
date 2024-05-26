@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Dropped Python3.7 from CI while it's EOL.
+- Dropped Python3.7 from CI while its EOL.
 
 ## [1.10.1]
 
