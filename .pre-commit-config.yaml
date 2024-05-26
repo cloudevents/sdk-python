@@ -24,4 +24,4 @@ repos:
         types: [ python ]
         args: [ ]
         additional_dependencies:
-          - "pydantic"
+          - "pydantic~=2.7"
