@@ -6,9 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.0]
+
+### Fixed
+- Pydantic v2 `examples` keyword usage and improved typings handling ([#235])
+- Kafka `to_binary` check for invalid `content-type` attribute ([#232])
+
 ### Changed
 
-- Dropped Python3.7 from CI while its EOL.
+- Dropped Python3.7 from CI while its EOL. ([#236])
 
 ## [1.10.1]
 
@@ -194,6 +200,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
+[1.11.0]: https://github.com/cloudevents/sdk-python/compare/1.10.1...1.11.0
 [1.10.1]: https://github.com/cloudevents/sdk-python/compare/1.10.0...1.10.1
 [1.10.0]: https://github.com/cloudevents/sdk-python/compare/1.9.0...1.10.0
 [1.9.0]: https://github.com/cloudevents/sdk-python/compare/1.8.0...1.9.0
@@ -277,3 +284,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#219]: https://github.com/cloudevents/sdk-python/pull/219
 [#221]: https://github.com/cloudevents/sdk-python/pull/221
 [#229]: https://github.com/cloudevents/sdk-python/pull/229
+[#232]: https://github.com/cloudevents/sdk-python/pull/232
+[#235]: https://github.com/cloudevents/sdk-python/pull/235
+[#236]: https://github.com/cloudevents/sdk-python/pull/236
