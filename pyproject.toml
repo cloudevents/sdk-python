@@ -105,5 +105,5 @@ exclude = [
 
 [tool.ruff.lint]
 
-ignore = ["W503", "E731"]
+ignore = ["E731"]
 extend-ignore = ["E203"]
