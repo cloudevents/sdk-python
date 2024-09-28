@@ -17,7 +17,7 @@ import io
 from flask import Flask, request
 from PIL import Image
 
-from cloudevents.http import from_http
+from cloudevents_v1.http import from_http
 
 app = Flask(__name__)
 

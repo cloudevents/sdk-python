@@ -21,8 +21,8 @@ from client import image_bytes
 from image_sample_server import app
 from PIL import Image
 
-from cloudevents.conversion import to_binary, to_structured
-from cloudevents.http import CloudEvent, from_http
+from cloudevents_v1.conversion import to_binary, to_structured
+from cloudevents_v1.http import CloudEvent, from_http
 
 image_fileobj = io.BytesIO(image_bytes)
 image_expected_shape = (1880, 363)

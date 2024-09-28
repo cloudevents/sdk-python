@@ -12,27 +12,27 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from flask import Flask, request
+import pytest
 
-from cloudevents_v1.http import from_http
-
-app = Flask(__name__)
-
-
-# create an endpoint at http://localhost:/3000/
-@app.route("/", methods=["POST"])
-def home():
-    # create a CloudEvent
-    event = from_http(request.headers, request.get_data())
-
-    # you can access cloudevent fields as seen below
-    print(
-        f"Found {event['id']} from {event['source']} with type "
-        f"{event['type']} and specversion {event['specversion']}"
-    )
-
-    return "", 204
+from cloudevents_v1.http import (
+    CloudEvent,
+    to_binary,
+    to_binary_http,
+    to_structured,
+    to_structured_http,
+)
 
 
-if __name__ == "__main__":
-    app.run(port=3000)
+@pytest.fixture
+def event():
+    return CloudEvent({"source": "s", "type": "t"}, None)
+
+
+def test_to_binary_http_deprecated(event):
+    with pytest.deprecated_call():
+        assert to_binary(event) == to_binary_http(event)
+
+
+def test_to_structured_http_deprecated(event):
+    with pytest.deprecated_call():
+        assert to_structured(event) == to_structured_http(event)

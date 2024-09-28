@@ -1,0 +1,65 @@
+#  Copyright 2018-Present The CloudEvents Authors
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+from sanic import Sanic, response
+
+from cloudevents_v1.sdk import converters, marshaller
+from cloudevents_v1.sdk.event import v1
+from cloudevents_v1.tests import data as test_data
+
+m = marshaller.NewDefaultHTTPMarshaller()
+app = Sanic("test_with_sanic")
+
+
+@app.route("/is-ok", ["POST"])
+async def is_ok(request):
+    m.FromRequest(v1.Event(), dict(request.headers), request.body, lambda x: x)
+    return response.text("OK")
+
+
+@app.route("/echo", ["POST"])
+async def echo(request):
+    event = m.FromRequest(v1.Event(), dict(request.headers), request.body, lambda x: x)
+    hs, body = m.ToRequest(event, converters.TypeBinary, lambda x: x)
+    return response.text(body.decode("utf-8"), headers=hs)
+
+
+def test_reusable_marshaller():
+    for _ in range(10):
+        _, r = app.test_client.post(
+            "/is-ok", headers=test_data.headers[v1.Event], data=test_data.body
+        )
+        assert r.status == 200
+
+
+def test_web_app_integration():
+    _, r = app.test_client.post(
+        "/is-ok", headers=test_data.headers[v1.Event], data=test_data.body
+    )
+    assert r.status == 200
+
+
+def test_web_app_echo():
+    _, r = app.test_client.post(
+        "/echo", headers=test_data.headers[v1.Event], data=test_data.body
+    )
+    assert r.status == 200
+    event = m.FromRequest(v1.Event(), dict(r.headers), r.body, lambda x: x)
+    assert event is not None
+    props = event.Properties()
+    for key in test_data.headers[v1.Event].keys():
+        if key == "Content-Type":
+            assert "datacontenttype" in props
+        else:
+            assert key.lstrip("ce-") in props

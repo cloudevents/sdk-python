@@ -15,8 +15,8 @@
 import pytest
 from json_sample_server import app
 
-from cloudevents.conversion import to_binary, to_structured
-from cloudevents.http import CloudEvent
+from cloudevents_v1.conversion import to_binary, to_structured
+from cloudevents_v1.http import CloudEvent
 
 
 @pytest.fixture

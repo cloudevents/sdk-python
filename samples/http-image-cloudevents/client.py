@@ -16,8 +16,8 @@ import sys
 
 import requests
 
-from cloudevents.conversion import to_binary, to_structured
-from cloudevents.http import CloudEvent
+from cloudevents_v1.conversion import to_binary, to_structured
+from cloudevents_v1.http import CloudEvent
 
 resp = requests.get(
     "https://raw.githubusercontent.com/cncf/artwork/master/projects/cloudevents/horizontal/color/cloudevents-horizontal-color.png"  # noqa
