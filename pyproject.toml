@@ -1,19 +1,109 @@
-[tool.black]
-line-length = 88
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+[project]
+name = "cloudevents"
+dynamic = ["version"]
+description = "CloudEvents Python SDK"
+authors = [
+    { name = "The Cloud Events Contributors", email = "cncfcloudevents@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+license = "Apache-2.0"
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+]
+keywords = [
+    "CloudEvents",
+    "Eventing",
+    "Serverless",
+]
 
-[tool.isort]
-profile = "black"
+[project.urls]
+"Source code" = "https://github.com/cloudevents/sdk-python"
+"Documentation" = "https://cloudevents.io"
+"Home page" = "https://cloudevents.io"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "pytest>=8.3.3",
+    "mypy>=1.11.2",
+    "isort>=5.13.2",
+    "flake8>=7.1.1",
+    "pep8-naming>=0.14.1",
+    "flake8-print>=5.0.0",
+    "pre-commit>=3.8.0",
+    "pytest-cov>=5.0.0",
+]
+
+[tool.hatch.version]
+path = "src/cloudevents/__init__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel.force-include]
+"CHANGELOG.md" = "CHANGELOG.md"
+"MAINTAINERS.md" = "MAINTAINERS.md"
+"README.md" = "README.md"
+
+[tool.hatch.build.targets.sdist]
+packages = ["src/cloudevents"]
+
+[tool.hatch.build.targets.sdist.force-include]
+"CHANGELOG.md" = "CHANGELOG.md"
+"MAINTAINERS.md" = "MAINTAINERS.md"
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "site-packages",
+    "venv",
+]
+
+[tool.ruff.lint]
+
+ignore = ["W503", "E731"]
+extend-ignore = ["E203"]

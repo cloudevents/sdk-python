@@ -1,7 +1,0 @@
-black
-isort
-flake8
-pep8-naming
-flake8-print
-tox
-pre-commit

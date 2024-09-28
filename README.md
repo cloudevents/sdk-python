@@ -1,4 +1,4 @@
-# Python SDK for [CloudEvents](https://github.com/cloudevents/spec)
+# Python SDK v2 for [CloudEvents](https://github.com/cloudevents/spec)
 
 [![PyPI version](https://badge.fury.io/py/cloudevents.svg)](https://badge.fury.io/py/cloudevents)
 
@@ -10,12 +10,11 @@ will) break with every update.
 This SDK current supports the following versions of CloudEvents:
 
 - v1.0
-- v0.3
 
 ## Python SDK
 
-Package **cloudevents** provides primitives to work with CloudEvents specification:
-https://github.com/cloudevents/spec.
+Package [**cloudevents**](src/cloudevents) provides primitives to work with 
+[CloudEvents specification](https://github.com/cloudevents/spec).
 
 ### Installing
 
@@ -162,18 +161,13 @@ with one of the project's SDKs, please send an email to
 
 ## Maintenance
 
-We use [black][black] and [isort][isort] for autoformatting. We set up a [tox][tox]
-environment to reformat the codebase.
-
-e.g.
-
-```bash
-pip install tox
-tox -e reformat
-```
+We use [Rye][rye] for dependency and package management, [ruff][ruff] and [isort][isort] 
+for autoformatting and [pre-commit][pre-commit] to automate those with commit
+hooks.
 
 For information on releasing version bumps see [RELEASING.md](RELEASING.md)
 
-[black]: https://black.readthedocs.io/
+[rye]: https://rye.astral.sh/
+[ruff]: https://docs.astral.sh/ruff
 [isort]: https://pycqa.github.io/isort/
-[tox]: https://tox.wiki/
+[pre-commit]: https://pre-commit.com
