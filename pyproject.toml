@@ -53,6 +53,8 @@ dev-dependencies = [
     "pre-commit>=3.8.0",
     "pytest-cov>=5.0.0",
 ]
+universal = true
+generate-hashes = true
 
 [tool.hatch.version]
 path = "src/cloudevents/__init__.py"
@@ -104,6 +106,10 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-
 ignore = ["E731"]
 extend-ignore = ["E203"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]

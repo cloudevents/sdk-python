@@ -6,12 +6,12 @@
 #   features: []
 #   all-features: false
 #   with-sources: false
-#   generate-hashes: false
-#   universal: false
+#   generate-hashes: true
+#   universal: true
 
 -e file:.
 cfgv==3.4.0
-colorama==0.4.6
+colorama==0.4.6 ; sys_platform == 'win32'
 coverage==7.6.1
 distlib==0.3.8
 filelock==3.16.1
