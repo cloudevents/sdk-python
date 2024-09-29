@@ -13,11 +13,10 @@
 #    under the License.
 import typing
 
-from deprecation import deprecated
-
 from cloudevents_v1.conversion import (
     _best_effort_serialize_to_json as _moved_default_marshaller,
 )
+from deprecation import deprecated
 
 # THIS MODULE IS DEPRECATED, YOU SHOULD NOT ADD NEW FUNCTIONALLY HERE
 

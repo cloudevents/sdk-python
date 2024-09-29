@@ -14,9 +14,8 @@
 
 import json
 
-import pytest
-
 import cloudevents_v1.exceptions as cloud_exceptions
+import pytest
 from cloudevents_v1.http import CloudEvent, from_http, to_binary, to_structured
 from cloudevents_v1.sdk import exceptions, marshaller
 from cloudevents_v1.sdk.converters import binary, structured

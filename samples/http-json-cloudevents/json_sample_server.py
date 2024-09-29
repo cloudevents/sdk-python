@@ -12,9 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from flask import Flask, request
-
 from cloudevents_v1.http import from_http
+from flask import Flask, request
 
 app = Flask(__name__)
 

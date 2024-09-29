@@ -12,10 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import pytest
-
 import cloudevents_v1.exceptions as cloud_exceptions
-from cloudevents_v1.sdk.event import v1, v03
+import pytest
+from cloudevents_v1.sdk.event import v03, v1
 
 
 @pytest.mark.parametrize("event_class", [v1.Event, v03.Event])

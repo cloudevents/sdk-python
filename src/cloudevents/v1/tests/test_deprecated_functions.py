@@ -13,7 +13,6 @@
 #    under the License.
 
 import pytest
-
 from cloudevents_v1.http import (
     CloudEvent,
     to_binary,

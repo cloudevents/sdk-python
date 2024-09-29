@@ -17,7 +17,6 @@ import datetime
 import json
 
 import pytest
-
 from cloudevents_v1 import exceptions as cloud_exceptions
 from cloudevents_v1.http import CloudEvent
 from cloudevents_v1.kafka.conversion import (

@@ -20,7 +20,7 @@ from cloudevents_v1 import exceptions as cloud_exceptions
 from cloudevents_v1.abstract import AnyCloudEvent
 from cloudevents_v1.sdk import converters, marshaller, types
 from cloudevents_v1.sdk.converters import is_binary
-from cloudevents_v1.sdk.event import v1, v03
+from cloudevents_v1.sdk.event import v03, v1
 
 
 def _best_effort_serialize_to_json(  # type: ignore[no-untyped-def]

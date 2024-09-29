@@ -14,14 +14,13 @@
 
 import typing
 
-from deprecation import deprecated
-
 from cloudevents_v1.abstract import AnyCloudEvent
 from cloudevents_v1.conversion import to_binary as _moved_to_binary
 from cloudevents_v1.conversion import to_structured as _moved_to_structured
 from cloudevents_v1.http.conversion import from_http as _moved_from_http
 from cloudevents_v1.http.event import CloudEvent
 from cloudevents_v1.sdk import types
+from deprecation import deprecated
 
 # THIS MODULE IS DEPRECATED, YOU SHOULD NOT ADD NEW FUNCTIONALLY HERE
 

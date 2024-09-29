@@ -15,10 +15,9 @@
 import json
 
 import pytest
-
 from cloudevents_v1.sdk import converters, marshaller
 from cloudevents_v1.sdk.converters import structured
-from cloudevents_v1.sdk.event import v1, v03
+from cloudevents_v1.sdk.event import v03, v1
 from cloudevents_v1.tests import data
 
 

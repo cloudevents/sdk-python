@@ -17,10 +17,9 @@ import json
 import typing
 from typing import Any
 
-from pydantic.deprecated import parse as _deprecated_parse
-
 from cloudevents_v1.exceptions import PydanticFeatureNotInstalled
 from cloudevents_v1.pydantic.fields_docs import FIELD_DESCRIPTIONS
+from pydantic.deprecated import parse as _deprecated_parse
 
 try:
     from pydantic import BaseModel, ConfigDict, Field, model_serializer

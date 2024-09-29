@@ -13,7 +13,6 @@
 #    under the License.
 
 import pytest
-
 from cloudevents_v1.sdk import exceptions
 from cloudevents_v1.sdk.converters import base, binary
 
