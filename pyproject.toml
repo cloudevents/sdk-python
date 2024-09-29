@@ -6,7 +6,7 @@ authors = [
     { name = "The Cloud Events Contributors", email = "cncfcloudevents@gmail.com" }
 ]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.9"
 license = "Apache-2.0"
 classifiers = [
     "Intended Audience :: Information Technology",
@@ -31,6 +31,9 @@ keywords = [
     "Eventing",
     "Serverless",
 ]
+dependencies = [
+    "ruff>=0.6.8",
+]
 
 [project.urls]
 "Source code" = "https://github.com/cloudevents/sdk-python"
@@ -41,8 +44,7 @@ keywords = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-managed = true
+[tool.uv]
 dev-dependencies = [
     "pytest>=8.3.3",
     "mypy>=1.11.2",
@@ -53,6 +55,8 @@ dev-dependencies = [
     "pre-commit>=3.8.0",
     "pytest-cov>=5.0.0",
 ]
+
+[tool.uv.pip]
 universal = true
 generate-hashes = true
 
