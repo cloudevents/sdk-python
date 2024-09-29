@@ -14,7 +14,7 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
       - name: Set up Python
-        run: uv python install
+        run: uv python install 3.12
       - name: Install the project
         run: uv sync --all-extras --dev
       - name: Lint
@@ -37,5 +37,5 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
       - name: Install the project
         run: uv sync --all-extras --dev
-      - name: Lint
+      - name: Run tests
         run: uv run pytest tests
