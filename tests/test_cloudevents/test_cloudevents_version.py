@@ -15,5 +15,5 @@
 from cloudevents import __version__
 
 
-def test_cloudevents_version():
+def test_cloudevents_version() -> None:
     assert __version__ is not None
