@@ -138,6 +138,6 @@ warn_return_any = true
 strict_equality = true
 disallow_untyped_defs = true
 exclude = [
-    "src/cloudevents/v1",
-    "samples"
+    "src/cloudevents/v1/",
+    "samples/"
 ]
