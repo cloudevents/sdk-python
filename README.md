@@ -13,7 +13,7 @@ This SDK current supports the following versions of CloudEvents:
 
 ## Python SDK
 
-Package [**cloudevents**](src/cloudevents) provides primitives to work with 
+Package [**cloudevents**](src/cloudevents) provides primitives to work with
 [CloudEvents specification](https://github.com/cloudevents/spec).
 
 ### Installing
@@ -161,13 +161,13 @@ with one of the project's SDKs, please send an email to
 
 ## Maintenance
 
-We use [Rye][rye] for dependency and package management, [ruff][ruff] and [isort][isort] 
+We use [uv][uv] for dependency and package management, [ruff][ruff] and [isort][isort]
 for autoformatting and [pre-commit][pre-commit] to automate those with commit
 hooks.
 
 For information on releasing version bumps see [RELEASING.md](RELEASING.md)
 
-[rye]: https://rye.astral.sh/
+[uv]: https://docs.astral.sh/uv/
 [ruff]: https://docs.astral.sh/ruff
 [isort]: https://pycqa.github.io/isort/
 [pre-commit]: https://pre-commit.com
