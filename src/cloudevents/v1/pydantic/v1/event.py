@@ -71,7 +71,9 @@ def _ce_json_dumps(  # type: ignore[no-untyped-def]
 
 
 def _ce_json_loads(  # type: ignore[no-untyped-def]
-    data: typing.AnyStr, *args, **kwargs  # noqa
+    data: typing.AnyStr,
+    *args,
+    **kwargs,  # noqa
 ) -> typing.Dict[typing.Any, typing.Any]:
     """Performs Pydantic-specific deserialization of the event.
 

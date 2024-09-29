@@ -18,7 +18,12 @@ from cloudevents_v1.exceptions import PydanticFeatureNotInstalled
 
 try:
     if TYPE_CHECKING:
-        from cloudevents_v1.pydantic.v2 import CloudEvent, from_dict, from_http, from_json
+        from cloudevents_v1.pydantic.v2 import (
+            CloudEvent,
+            from_dict,
+            from_http,
+            from_json,
+        )
     else:
         from pydantic import VERSION as PYDANTIC_VERSION
 

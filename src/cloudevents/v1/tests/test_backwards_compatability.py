@@ -37,7 +37,9 @@ def test_http_methods(dummy_event):
     from cloudevents_v1.http import from_http, to_binary, to_structured
     from cloudevents_v1.http.http_methods import from_http as deprecated_from_http
     from cloudevents_v1.http.http_methods import to_binary as deprecated_to_binary
-    from cloudevents_v1.http.http_methods import to_structured as deprecated_to_structured
+    from cloudevents_v1.http.http_methods import (
+        to_structured as deprecated_to_structured,
+    )
 
     assert from_http(*to_binary(dummy_event)) == deprecated_from_http(
         *deprecated_to_binary(dummy_event)
