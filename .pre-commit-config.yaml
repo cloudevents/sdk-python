@@ -16,6 +16,5 @@ repos:
     rev: v1.11.2
     hooks:
       - id: mypy
-        files: ^(src/cloudevents/)
+        args: [ "--config-file", "pyproject.toml" ]
         types: [ python ]
-        args: [ ]

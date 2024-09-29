@@ -117,3 +117,26 @@ extend-ignore = ["E203"]
 testpaths = [
     "tests",
 ]
+
+[tool.mypy]
+python_version = 3.9
+
+ignore_missing_imports = true
+namespace_packages = true
+explicit_package_bases = true
+scripts_are_modules = true
+pretty = true
+show_error_context = true
+follow_imports_for_stubs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+# subset of mypy --strict
+# https://mypy.readthedocs.io/en/stable/config_file.html
+check_untyped_defs = true
+disallow_incomplete_defs = true
+warn_return_any = true
+strict_equality = true
+disallow_untyped_defs = true
+exclude = [
+    "src/cloudevents/v1"
+]
