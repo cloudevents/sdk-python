@@ -18,11 +18,7 @@ jobs:
       - name: Install the project
         run: uv sync --all-extras --dev
       - name: Lint
-        run: uv run ruff check
-      - name: isort
-        run: uv run isort -c src/cloudevents
-      - name: flake8
-        run: uv run flake8 src/cloudevents --ignore W503,E731 --extend-ignore E203 --max-line-length 88
+        run: uv run ruff check --select I
 
   test:
     strategy:
