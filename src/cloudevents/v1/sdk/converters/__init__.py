@@ -12,26 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents_v1.http import from_http
-from flask import Flask, request
+from cloudevents_v1.sdk.converters import binary, structured
+from cloudevents_v1.sdk.converters.binary import is_binary
+from cloudevents_v1.sdk.converters.structured import is_structured
 
-app = Flask(__name__)
+TypeBinary: str = binary.BinaryHTTPCloudEventConverter.TYPE
+TypeStructured: str = structured.JSONHTTPCloudEventConverter.TYPE
 
-
-# create an endpoint at http://localhost:/3000/
-@app.route("/", methods=["POST"])
-def home():
-    # create a CloudEvent
-    event = from_http(request.headers, request.get_data())
-
-    # you can access cloudevent fields as seen below
-    print(
-        f"Found {event['id']} from {event['source']} with type "
-        f"{event['type']} and specversion {event['specversion']}"
-    )
-
-    return "", 204
-
-
-if __name__ == "__main__":
-    app.run(port=3000)
+__all__ = [
+    "binary",
+    "structured",
+    "is_binary",
+    "is_structured",
+    "TypeBinary",
+    "TypeStructured",
+]

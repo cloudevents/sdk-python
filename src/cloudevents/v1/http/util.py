@@ -11,27 +11,21 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import typing
 
-from cloudevents_v1.http import from_http
-from flask import Flask, request
+from cloudevents_v1.conversion import (
+    _best_effort_serialize_to_json as _moved_default_marshaller,
+)
+from deprecation import deprecated
 
-app = Flask(__name__)
-
-
-# create an endpoint at http://localhost:/3000/
-@app.route("/", methods=["POST"])
-def home():
-    # create a CloudEvent
-    event = from_http(request.headers, request.get_data())
-
-    # you can access cloudevent fields as seen below
-    print(
-        f"Found {event['id']} from {event['source']} with type "
-        f"{event['type']} and specversion {event['specversion']}"
-    )
-
-    return "", 204
+# THIS MODULE IS DEPRECATED, YOU SHOULD NOT ADD NEW FUNCTIONALLY HERE
 
 
-if __name__ == "__main__":
-    app.run(port=3000)
+@deprecated(
+    deprecated_in="1.6.0",
+    details="You SHOULD NOT use the default marshaller",
+)
+def default_marshaller(
+    content: typing.Any,
+) -> typing.Optional[typing.Union[bytes, str, typing.Any]]:
+    return _moved_default_marshaller(content)

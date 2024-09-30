@@ -12,26 +12,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents_v1.http import from_http
-from flask import Flask, request
-
-app = Flask(__name__)
+import pytest
+from cloudevents_v1.sdk.event.opt import Option
 
 
-# create an endpoint at http://localhost:/3000/
-@app.route("/", methods=["POST"])
-def home():
-    # create a CloudEvent
-    event = from_http(request.headers, request.get_data())
-
-    # you can access cloudevent fields as seen below
-    print(
-        f"Found {event['id']} from {event['source']} with type "
-        f"{event['type']} and specversion {event['specversion']}"
-    )
-
-    return "", 204
+def test_set_raise_error():
+    with pytest.raises(ValueError):
+        o = Option("test", "value", True)
+        o.set(None)
 
 
-if __name__ == "__main__":
-    app.run(port=3000)
+def test_options_eq_override():
+    o = Option("test", "value", True)
+    assert o.required()
+
+    o2 = Option("test", "value", True)
+    assert o2.required()
+
+    assert o == o2
+    o.set("setting to new value")
+
+    assert o != o2

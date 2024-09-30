@@ -13,10 +13,9 @@
 #    under the License.
 
 import pytest
+from cloudevents_v1.conversion import to_binary, to_structured
+from cloudevents_v1.http import CloudEvent
 from json_sample_server import app
-
-from cloudevents.conversion import to_binary, to_structured
-from cloudevents.http import CloudEvent
 
 
 @pytest.fixture
