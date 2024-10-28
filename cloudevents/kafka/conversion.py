@@ -21,7 +21,6 @@ from cloudevents.abstract import AnyCloudEvent
 from cloudevents.kafka.exceptions import KeyMapperError
 from cloudevents.sdk import types
 
-
 JSON_MARSHALLER: types.MarshallerType = json.dumps
 JSON_UNMARSHALLER: types.UnmarshallerType = json.loads
 IDENTITY_MARSHALLER = IDENTITY_UNMARSHALLER = lambda x: x
