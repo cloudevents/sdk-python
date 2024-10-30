@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.1]
+
+### Fixed
+- Kafka `conversion` marshaller and unmarshaller typings ([#240])
+
 ## [1.11.0]
 
 ### Fixed
@@ -287,3 +292,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#232]: https://github.com/cloudevents/sdk-python/pull/232
 [#235]: https://github.com/cloudevents/sdk-python/pull/235
 [#236]: https://github.com/cloudevents/sdk-python/pull/236
+[#240]: https://github.com/cloudevents/sdk-python/pull/240
