@@ -1,4 +1,18 @@
-from typing import Optional
+#  Copyright 2018-Present The CloudEvents Authors
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+from typing import Any, Optional
 from datetime import datetime
 
 REQUIRED_ATTRIBUTES = {"id", "source", "type", "specversion"}
@@ -6,7 +20,18 @@ OPTIONAL_ATTRIBUTES = {"datacontenttype", "dataschema", "subject", "time"}
 
 
 class CloudEvent:
-    def __init__(self, attributes: dict, data: Optional[dict] = None):
+    def __init__(self, attributes: dict, data: Optional[dict] = None) -> 'CloudEvent':
+        """
+        Create a new CloudEvent instance.
+
+        :param attributes: The attributes of the CloudEvent instance.
+        :type attributes: dict
+        :param data: The payload of the CloudEvent instance.
+        :type data: Optional[dict]
+
+        :raises ValueError: If any of the required attributes are missing or have invalid values.
+        :raises TypeError: If any of the attributes have invalid types.
+        """
         self.__validate_attribute(attributes)
         self._attributes = attributes
         self._data = data
@@ -64,8 +89,23 @@ class CloudEvent:
             if not attributes["dataschema"]:
                 raise ValueError("Attribute 'dataschema' must not be empty")
 
-    def get_attribute(self, attribute: str):
+    def get_attribute(self, attribute: str) -> Optional[Any]:
+        """
+        Retrieve a value of an attribute of the event denoted by the given `attribute`.
+        
+        :param attribute: The name of the event attribute to retrieve the value for.
+        :type attribute: str
+        
+        :return: The event attribute value.
+        :rtype: Optional[Any]
+        """
         return self._attributes[attribute]
 
-    def get_data(self):
+    def get_data(self) -> Optional[dict]:
+        """
+        Retrieve data of the event.
+
+        :return: The data of the event.
+        :rtype: Optional[dict]
+        """
         return self._data

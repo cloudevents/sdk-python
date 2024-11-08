@@ -13,7 +13,7 @@ from datetime import datetime
         ({"id": "1", "source": "/", "type": "test"}, "specversion"),
     ],
 )
-def test_missing_required_attribute(attributes, missing_attribute):
+def test_missing_required_attribute(attributes, missing_attribute) -> None:
     with pytest.raises(ValueError) as e:
         CloudEvent(attributes)
 
@@ -27,7 +27,7 @@ def test_missing_required_attribute(attributes, missing_attribute):
         (12, "Attribute 'id' must be a string"),
     ],
 )
-def test_id_validation(id, error):
+def test_id_validation(id, error) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent({"id": id, "source": "/", "type": "test", "specversion": "1.0"})
 
@@ -35,7 +35,7 @@ def test_id_validation(id, error):
 
 
 @pytest.mark.parametrize("source,error", [(123, "Attribute 'source' must be a string")])
-def test_source_validation(source, error):
+def test_source_validation(source, error) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent({"id": "1", "source": source, "type": "test", "specversion": "1.0"})
 
@@ -49,7 +49,7 @@ def test_source_validation(source, error):
         ("1.4", "Attribute 'specversion' must be '1.0'"),
     ],
 )
-def test_specversion_validation(specversion, error):
+def test_specversion_validation(specversion, error) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {"id": "1", "source": "/", "type": "test", "specversion": specversion}
@@ -68,7 +68,7 @@ def test_specversion_validation(specversion, error):
         ),
     ],
 )
-def test_time_validation(time, error):
+def test_time_validation(time, error) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {
@@ -93,7 +93,7 @@ def test_time_validation(time, error):
         ),
     ],
 )
-def test_subject_validation(subject, error):
+def test_subject_validation(subject, error) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {
@@ -118,7 +118,7 @@ def test_subject_validation(subject, error):
         ),
     ],
 )
-def test_datacontenttype_validation(datacontenttype, error):
+def test_datacontenttype_validation(datacontenttype, error) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {
@@ -143,7 +143,7 @@ def test_datacontenttype_validation(datacontenttype, error):
         ),
     ],
 )
-def test_dataschema_validation(dataschema, error):
+def test_dataschema_validation(dataschema, error) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {
