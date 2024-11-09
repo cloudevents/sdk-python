@@ -45,11 +45,11 @@ class CloudEvent:
         :raises TypeError: If any of the attributes have invalid types.
         """
         self._validate_attribute(attributes)
-        self._attributes: dict = attributes
+        self._attributes: dict[str, Any] = attributes
         self._data: Optional[dict] = data
 
     @staticmethod
-    def _validate_attribute(attributes: dict) -> None:
+    def _validate_attribute(attributes: dict[str, Any]) -> None:
         """
         Validates the attributes of the CloudEvent as per the CloudEvents specification.
 
