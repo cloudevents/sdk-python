@@ -2,6 +2,7 @@ from cloudevents.core.v1.event import CloudEvent
 
 import pytest
 from datetime import datetime
+from typing import Any, Optional
 
 
 @pytest.mark.parametrize(
@@ -13,7 +14,7 @@ from datetime import datetime
         ({"id": "1", "source": "/", "type": "test"}, "specversion"),
     ],
 )
-def test_missing_required_attribute(attributes, missing_attribute) -> None:
+def test_missing_required_attribute(attributes: dict, missing_attribute: str) -> None:
     with pytest.raises(ValueError) as e:
         CloudEvent(attributes)
 
@@ -27,7 +28,7 @@ def test_missing_required_attribute(attributes, missing_attribute) -> None:
         (12, "Attribute 'id' must be a string"),
     ],
 )
-def test_id_validation(id, error) -> None:
+def test_id_validation(id: Optional[Any], error: str) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent({"id": id, "source": "/", "type": "test", "specversion": "1.0"})
 
@@ -35,7 +36,7 @@ def test_id_validation(id, error) -> None:
 
 
 @pytest.mark.parametrize("source,error", [(123, "Attribute 'source' must be a string")])
-def test_source_validation(source, error) -> None:
+def test_source_validation(source: Any, error: str) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent({"id": "1", "source": source, "type": "test", "specversion": "1.0"})
 
@@ -49,7 +50,7 @@ def test_source_validation(source, error) -> None:
         ("1.4", "Attribute 'specversion' must be '1.0'"),
     ],
 )
-def test_specversion_validation(specversion, error) -> None:
+def test_specversion_validation(specversion: Any, error: str) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {"id": "1", "source": "/", "type": "test", "specversion": specversion}
@@ -68,7 +69,7 @@ def test_specversion_validation(specversion, error) -> None:
         ),
     ],
 )
-def test_time_validation(time, error) -> None:
+def test_time_validation(time: Any, error: str) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {
@@ -93,7 +94,7 @@ def test_time_validation(time, error) -> None:
         ),
     ],
 )
-def test_subject_validation(subject, error) -> None:
+def test_subject_validation(subject: Any, error: str) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {
@@ -118,7 +119,7 @@ def test_subject_validation(subject, error) -> None:
         ),
     ],
 )
-def test_datacontenttype_validation(datacontenttype, error) -> None:
+def test_datacontenttype_validation(datacontenttype: Any, error: str) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {
@@ -143,7 +144,7 @@ def test_datacontenttype_validation(datacontenttype, error) -> None:
         ),
     ],
 )
-def test_dataschema_validation(dataschema, error) -> None:
+def test_dataschema_validation(dataschema: Any, error: str) -> None:
     with pytest.raises((ValueError, TypeError)) as e:
         CloudEvent(
             {
@@ -152,6 +153,43 @@ def test_dataschema_validation(dataschema, error) -> None:
                 "type": "test",
                 "specversion": "1.0",
                 "dataschema": dataschema,
+            }
+        )
+
+    assert str(e.value) == error
+
+
+@pytest.mark.parametrize(
+    "extension_name,error",
+    [
+        ("123", "Extension attribute '123' should start with a letter"),
+        (
+            "shrt",
+            "Extension attribute 'shrt' should be between 5 and 20 characters long",
+        ),
+        (
+            "thisisaverylongextension",
+            "Extension attribute 'thisisaverylongextension' should be between 5 and 20 characters long",
+        ),
+        (
+            "ThisIsNotValid",
+            "Extension attribute 'ThisIsNotValid' should only contain lowercase letters and numbers",
+        ),
+        (
+            "data",
+            "Extension attribute 'data' is reserved and must not be used",
+        ),
+    ],
+)
+def test_custom_extension(extension_name: str, error: str) -> None:
+    with pytest.raises(ValueError) as e:
+        CloudEvent(
+            {
+                "id": "1",
+                "source": "/",
+                "type": "test",
+                "specversion": "1.0",
+                extension_name: "value",
             }
         )
 

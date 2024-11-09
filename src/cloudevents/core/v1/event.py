@@ -14,13 +14,14 @@
 
 from typing import Any, Optional
 from datetime import datetime
+import re
 
 REQUIRED_ATTRIBUTES = {"id", "source", "type", "specversion"}
 OPTIONAL_ATTRIBUTES = {"datacontenttype", "dataschema", "subject", "time"}
 
 
 class CloudEvent:
-    def __init__(self, attributes: dict, data: Optional[dict] = None) -> 'CloudEvent':
+    def __init__(self, attributes: dict, data: Optional[dict] = None) -> None:
         """
         Create a new CloudEvent instance.
 
@@ -32,11 +33,14 @@ class CloudEvent:
         :raises ValueError: If any of the required attributes are missing or have invalid values.
         :raises TypeError: If any of the attributes have invalid types.
         """
-        self.__validate_attribute(attributes)
+        self._validate_attribute(attributes)
         self._attributes = attributes
         self._data = data
 
-    def __validate_attribute(self, attributes: dict):
+    def _validate_attribute(self, attributes: dict) -> None:
+        """
+        Private method that validates the attributes of the CloudEvent as per the CloudEvents specification.
+        """
         missing_attributes = [
             attr for attr in REQUIRED_ATTRIBUTES if attr not in attributes
         ]
@@ -47,6 +51,7 @@ class CloudEvent:
 
         if attributes["id"] is None:
             raise ValueError("Attribute 'id' must not be None")
+
         if not isinstance(attributes["id"], str):
             raise TypeError("Attribute 'id' must be a string")
 
@@ -58,6 +63,7 @@ class CloudEvent:
 
         if not isinstance(attributes["specversion"], str):
             raise TypeError("Attribute 'specversion' must be a string")
+
         if attributes["specversion"] != "1.0":
             raise ValueError("Attribute 'specversion' must be '1.0'")
 
@@ -89,13 +95,36 @@ class CloudEvent:
             if not attributes["dataschema"]:
                 raise ValueError("Attribute 'dataschema' must not be empty")
 
+        for custom_extension in (
+            set(attributes.keys()) - REQUIRED_ATTRIBUTES - OPTIONAL_ATTRIBUTES
+        ):
+            if custom_extension == "data":
+                raise ValueError(
+                    "Extension attribute 'data' is reserved and must not be used"
+                )
+
+            if not custom_extension[0].isalpha():
+                raise ValueError(
+                    f"Extension attribute '{custom_extension}' should start with a letter"
+                )
+
+            if not (5 <= len(custom_extension) <= 20):
+                raise ValueError(
+                    f"Extension attribute '{custom_extension}' should be between 5 and 20 characters long"
+                )
+
+            if not re.match(r"^[a-z0-9]+$", custom_extension):
+                raise ValueError(
+                    f"Extension attribute '{custom_extension}' should only contain lowercase letters and numbers"
+                )
+
     def get_attribute(self, attribute: str) -> Optional[Any]:
         """
         Retrieve a value of an attribute of the event denoted by the given `attribute`.
-        
+
         :param attribute: The name of the event attribute to retrieve the value for.
         :type attribute: str
-        
+
         :return: The event attribute value.
         :rtype: Optional[Any]
         """
