@@ -12,34 +12,48 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from typing import Any, Optional
+from typing import Any, Optional, Final
 from datetime import datetime
 import re
 
-REQUIRED_ATTRIBUTES = {"id", "source", "type", "specversion"}
-OPTIONAL_ATTRIBUTES = {"datacontenttype", "dataschema", "subject", "time"}
+REQUIRED_ATTRIBUTES: Final[set[str]] = {"id", "source", "type", "specversion"}
+OPTIONAL_ATTRIBUTES: Final[set[str]] = {
+    "datacontenttype",
+    "dataschema",
+    "subject",
+    "time",
+}
 
 
 class CloudEvent:
-    def __init__(self, attributes: dict, data: Optional[dict] = None) -> None:
+    """
+    The CloudEvent Python wrapper contract exposing generically-available
+    properties and APIs.
+
+    Implementations might handle fields and have other APIs exposed but are
+    obliged to follow this contract.
+    """
+
+    def __init__(self, attributes: dict[str, Any], data: Optional[dict] = None) -> None:
         """
         Create a new CloudEvent instance.
 
         :param attributes: The attributes of the CloudEvent instance.
-        :type attributes: dict
         :param data: The payload of the CloudEvent instance.
-        :type data: Optional[dict]
 
         :raises ValueError: If any of the required attributes are missing or have invalid values.
         :raises TypeError: If any of the attributes have invalid types.
         """
         self._validate_attribute(attributes)
-        self._attributes = attributes
-        self._data = data
+        self._attributes: dict = attributes
+        self._data: Optional[dict] = data
 
-    def _validate_attribute(self, attributes: dict) -> None:
+    @staticmethod
+    def _validate_attribute(attributes: dict) -> None:
         """
-        Private method that validates the attributes of the CloudEvent as per the CloudEvents specification.
+        Validates the attributes of the CloudEvent as per the CloudEvents specification.
+
+        See https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#required-attributes
         """
         missing_attributes = [
             attr for attr in REQUIRED_ATTRIBUTES if attr not in attributes
@@ -95,27 +109,22 @@ class CloudEvent:
             if not attributes["dataschema"]:
                 raise ValueError("Attribute 'dataschema' must not be empty")
 
-        for custom_extension in (
+        for extension_attributes in (
             set(attributes.keys()) - REQUIRED_ATTRIBUTES - OPTIONAL_ATTRIBUTES
         ):
-            if custom_extension == "data":
+            if extension_attributes == "data":
                 raise ValueError(
                     "Extension attribute 'data' is reserved and must not be used"
                 )
 
-            if not custom_extension[0].isalpha():
+            if not (1 <= len(extension_attributes) <= 20):
                 raise ValueError(
-                    f"Extension attribute '{custom_extension}' should start with a letter"
+                    f"Extension attribute '{extension_attributes}' should be between 1 and 20 characters long"
                 )
 
-            if not (5 <= len(custom_extension) <= 20):
+            if not re.match(r"^[a-z0-9]+$", extension_attributes):
                 raise ValueError(
-                    f"Extension attribute '{custom_extension}' should be between 5 and 20 characters long"
-                )
-
-            if not re.match(r"^[a-z0-9]+$", custom_extension):
-                raise ValueError(
-                    f"Extension attribute '{custom_extension}' should only contain lowercase letters and numbers"
+                    f"Extension attribute '{extension_attributes}' should only contain lowercase letters and numbers"
                 )
 
     def get_attribute(self, attribute: str) -> Optional[Any]:
@@ -123,10 +132,8 @@ class CloudEvent:
         Retrieve a value of an attribute of the event denoted by the given `attribute`.
 
         :param attribute: The name of the event attribute to retrieve the value for.
-        :type attribute: str
 
         :return: The event attribute value.
-        :rtype: Optional[Any]
         """
         return self._attributes[attribute]
 
@@ -135,6 +142,5 @@ class CloudEvent:
         Retrieve data of the event.
 
         :return: The data of the event.
-        :rtype: Optional[dict]
         """
         return self._data
