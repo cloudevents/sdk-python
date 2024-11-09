@@ -52,6 +52,7 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
+          attestations: false
       - name: Install GitPython and cloudevents for pypi_packaging
         run: pip install -U -r requirements/publish.txt
       - name: Create Tag
