@@ -15,7 +15,7 @@
 from cloudevents.core.v1.event import CloudEvent
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 
@@ -207,3 +207,39 @@ def test_custom_extension(extension_name: str, error: str) -> None:
         )
 
     assert str(e.value) == error
+
+
+def test_cloud_event_constructor() -> None:
+    id = "1"
+    source = "/source"
+    type = "com.test.type"
+    specversion = "1.0"
+    datacontenttype = "application/json"
+    dataschema = "http://example.com/schema"
+    subject = "test_subject"
+    time = datetime.now(tz=timezone.utc)
+    data = {"key": "value"}
+
+    event = CloudEvent(
+        attributes={
+            "id": id,
+            "source": source,
+            "type": type,
+            "specversion": specversion,
+            "datacontenttype": datacontenttype,
+            "dataschema": dataschema,
+            "subject": subject,
+            "time": time,
+        },
+        data=data,
+    )
+
+    assert event.get_id() == id
+    assert event.get_source() == source
+    assert event.get_type() == type
+    assert event.get_specversion() == specversion
+    assert event.get_datacontenttype() == datacontenttype
+    assert event.get_dataschema() == dataschema
+    assert event.get_subject() == subject
+    assert event.get_time() == time
+    assert event.get_data() == data

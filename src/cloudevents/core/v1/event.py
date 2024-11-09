@@ -127,15 +127,69 @@ class CloudEvent:
                     f"Extension attribute '{extension_attributes}' should only contain lowercase letters and numbers"
                 )
 
-    def get_attribute(self, attribute: str) -> Optional[Any]:
+    def get_id(self) -> str:
         """
-        Retrieve a value of an attribute of the event denoted by the given `attribute`.
+        Retrieve the ID of the event.
 
-        :param attribute: The name of the event attribute to retrieve the value for.
-
-        :return: The event attribute value.
+        :return: The ID of the event.
         """
-        return self._attributes[attribute]
+        return self._attributes["id"]
+
+    def get_source(self) -> str:
+        """
+        Retrieve the source of the event.
+
+        :return: The source of the event.
+        """
+        return self._attributes["source"]
+
+    def get_type(self) -> str:
+        """
+        Retrieve the type of the event.
+
+        :return: The type of the event.
+        """
+        return self._attributes["type"]
+
+    def get_specversion(self) -> str:
+        """
+        Retrieve the specversion of the event.
+
+        :return: The specversion of the event.
+        """
+        return self._attributes["specversion"]
+
+    def get_datacontenttype(self) -> Optional[str]:
+        """
+        Retrieve the datacontenttype of the event.
+
+        :return: The datacontenttype of the event.
+        """
+        return self._attributes.get("datacontenttype")
+
+    def get_dataschema(self) -> Optional[str]:
+        """
+        Retrieve the dataschema of the event.
+
+        :return: The dataschema of the event.
+        """
+        return self._attributes.get("dataschema")
+
+    def get_subject(self) -> Optional[str]:
+        """
+        Retrieve the subject of the event.
+
+        :return: The subject of the event.
+        """
+        return self._attributes.get("subject")
+
+    def get_time(self) -> Optional[datetime]:
+        """
+        Retrieve the time of the event.
+
+        :return: The time of the event.
+        """
+        return self._attributes.get("time")
 
     def get_data(self) -> Optional[dict]:
         """
