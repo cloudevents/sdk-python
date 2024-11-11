@@ -55,6 +55,19 @@ class CloudEvent:
 
         See https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#required-attributes
         """
+        CloudEvent._validate_required_attributes(attributes)
+        CloudEvent._validate_attribute_types(attributes)
+        CloudEvent._validate_optional_attributes(attributes)
+        CloudEvent._validate_extension_attributes(attributes)
+
+    @staticmethod
+    def _validate_required_attributes(attributes: dict[str, Any]) -> None:
+        """
+        Validates that all required attributes are present.
+
+        :param attributes: The attributes of the CloudEvent instance.
+        :raises ValueError: If any of the required attributes are missing.
+        """
         missing_attributes = [
             attr for attr in REQUIRED_ATTRIBUTES if attr not in attributes
         ]
@@ -63,52 +76,66 @@ class CloudEvent:
                 f"Missing required attribute(s): {', '.join(missing_attributes)}"
             )
 
+    @staticmethod
+    def _validate_attribute_types(attributes: dict[str, Any]) -> None:
+        """
+        Validates the types of the required attributes.
+
+        :param attributes: The attributes of the CloudEvent instance.
+        :raises ValueError: If any of the required attributes have invalid values.
+        :raises TypeError: If any of the required attributes have invalid types.
+        """
         if attributes["id"] is None:
             raise ValueError("Attribute 'id' must not be None")
-
         if not isinstance(attributes["id"], str):
             raise TypeError("Attribute 'id' must be a string")
-
         if not isinstance(attributes["source"], str):
             raise TypeError("Attribute 'source' must be a string")
-
         if not isinstance(attributes["type"], str):
             raise TypeError("Attribute 'type' must be a string")
-
         if not isinstance(attributes["specversion"], str):
             raise TypeError("Attribute 'specversion' must be a string")
-
         if attributes["specversion"] != "1.0":
             raise ValueError("Attribute 'specversion' must be '1.0'")
 
+    @staticmethod
+    def _validate_optional_attributes(attributes: dict[str, Any]) -> None:
+        """
+        Validates the types and values of the optional attributes.
+
+        :param attributes: The attributes of the CloudEvent instance.
+        :raises ValueError: If any of the optional attributes have invalid values.
+        :raises TypeError: If any of the optional attributes have invalid types.
+        """
         if "time" in attributes:
             if not isinstance(attributes["time"], datetime):
                 raise TypeError("Attribute 'time' must be a datetime object")
-
             if not attributes["time"].tzinfo:
                 raise ValueError("Attribute 'time' must be timezone aware")
-
         if "subject" in attributes:
             if not isinstance(attributes["subject"], str):
                 raise TypeError("Attribute 'subject' must be a string")
-
             if not attributes["subject"]:
                 raise ValueError("Attribute 'subject' must not be empty")
-
         if "datacontenttype" in attributes:
             if not isinstance(attributes["datacontenttype"], str):
                 raise TypeError("Attribute 'datacontenttype' must be a string")
-
             if not attributes["datacontenttype"]:
                 raise ValueError("Attribute 'datacontenttype' must not be empty")
-
         if "dataschema" in attributes:
             if not isinstance(attributes["dataschema"], str):
                 raise TypeError("Attribute 'dataschema' must be a string")
-
             if not attributes["dataschema"]:
                 raise ValueError("Attribute 'dataschema' must not be empty")
 
+    @staticmethod
+    def _validate_extension_attributes(attributes: dict[str, Any]) -> None:
+        """
+        Validates the extension attributes.
+
+        :param attributes: The attributes of the CloudEvent instance.
+        :raises ValueError: If any of the extension attributes have invalid values.
+        """
         for extension_attributes in (
             set(attributes.keys()) - REQUIRED_ATTRIBUTES - OPTIONAL_ATTRIBUTES
         ):
@@ -116,12 +143,10 @@ class CloudEvent:
                 raise ValueError(
                     "Extension attribute 'data' is reserved and must not be used"
                 )
-
             if not (1 <= len(extension_attributes) <= 20):
                 raise ValueError(
                     f"Extension attribute '{extension_attributes}' should be between 1 and 20 characters long"
                 )
-
             if not re.match(r"^[a-z0-9]+$", extension_attributes):
                 raise ValueError(
                     f"Extension attribute '{extension_attributes}' should only contain lowercase letters and numbers"
