@@ -18,7 +18,7 @@ class CloudEventValidationError(Exception):
 
     def __init__(self, errors: dict[str, list[str]]) -> None:
         super().__init__("Validation errors occurred")
-        self.errors = errors
+        self.errors: dict[str, list[str]] = errors
 
     def __str__(self) -> str:
         error_messages = [
