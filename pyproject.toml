@@ -112,6 +112,8 @@ exclude = [
 [tool.ruff.lint]
 ignore = ["E731"]
 extend-ignore = ["E203"]
+select = ["I"]
+
 
 [tool.pytest.ini_options]
 testpaths = [
