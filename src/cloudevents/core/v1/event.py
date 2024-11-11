@@ -215,6 +215,15 @@ class CloudEvent:
         :return: The time of the event.
         """
         return self._attributes.get("time")
+    
+    def get_extension(self, extension_name: str) -> Any:
+        """
+        Retrieve an extension attribute of the event.
+
+        :param extension_name: The name of the extension attribute.
+        :return: The value of the extension attribute.
+        """
+        return self._attributes.get(extension_name)
 
     def get_data(self) -> Optional[dict]:
         """

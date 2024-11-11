@@ -219,6 +219,7 @@ def test_cloud_event_constructor() -> None:
     subject = "test_subject"
     time = datetime.now(tz=timezone.utc)
     data = {"key": "value"}
+    customextension = "customExtension"
 
     event = CloudEvent(
         attributes={
@@ -230,6 +231,7 @@ def test_cloud_event_constructor() -> None:
             "dataschema": dataschema,
             "subject": subject,
             "time": time,
+            "customextension": customextension,
         },
         data=data,
     )
@@ -242,4 +244,5 @@ def test_cloud_event_constructor() -> None:
     assert event.get_dataschema() == dataschema
     assert event.get_subject() == subject
     assert event.get_time() == time
+    assert event.get_extension("customextension") == customextension
     assert event.get_data() == data
