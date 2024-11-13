@@ -13,10 +13,17 @@
 #    under the License.
 
 import re
+from collections import defaultdict
 from datetime import datetime
 from typing import Any, Final, Optional
 
-from cloudevents.core.v1.exceptions import CloudEventValidationError
+from cloudevents.core.v1.exceptions import (
+    BaseCloudEventException,
+    CloudEventValidationError,
+    CustomExtensionAttributeError,
+    InvalidAttributeTypeError,
+    MissingRequiredAttributeError,
+)
 
 REQUIRED_ATTRIBUTES: Final[list[str]] = ["id", "source", "type", "specversion"]
 OPTIONAL_ATTRIBUTES: Final[list[str]] = [
@@ -57,108 +64,133 @@ class CloudEvent:
 
         See https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#required-attributes
         """
-        errors = {}
+        errors: dict[str, list] = defaultdict(list)
         errors.update(CloudEvent._validate_required_attributes(attributes))
-        errors.update(CloudEvent._validate_attribute_types(attributes))
         errors.update(CloudEvent._validate_optional_attributes(attributes))
         errors.update(CloudEvent._validate_extension_attributes(attributes))
         if errors:
-            raise CloudEventValidationError(errors)
+            raise CloudEventValidationError(dict(errors))
 
     @staticmethod
     def _validate_required_attributes(
         attributes: dict[str, Any],
-    ) -> dict[str, list[str]]:
-        """
-        Validates that all required attributes are present.
-
-        :param attributes: The attributes of the CloudEvent instance.
-        :return: A dictionary of validation error messages.
-        """
-        errors = {}
-        missing_attributes = [
-            attr for attr in REQUIRED_ATTRIBUTES if attr not in attributes
-        ]
-        if missing_attributes:
-            errors["required"] = [
-                f"Missing required attribute(s): {', '.join(missing_attributes)}"
-            ]
-        return errors
-
-    @staticmethod
-    def _validate_attribute_types(attributes: dict[str, Any]) -> dict[str, list[str]]:
+    ) -> dict[str, list[BaseCloudEventException]]:
         """
         Validates the types of the required attributes.
 
         :param attributes: The attributes of the CloudEvent instance.
         :return: A dictionary of validation error messages.
         """
-        errors = {}
-        type_errors = []
+        errors = defaultdict(list)
+
+        if "id" not in attributes:
+            errors["id"].append(MissingRequiredAttributeError(missing="id"))
         if attributes.get("id") is None:
-            type_errors.append("Attribute 'id' must not be None")
+            errors["id"].append(
+                InvalidAttributeTypeError("Attribute 'id' must not be None")
+            )
         if not isinstance(attributes.get("id"), str):
-            type_errors.append("Attribute 'id' must be a string")
+            errors["id"].append(
+                InvalidAttributeTypeError("Attribute 'id' must be a string")
+            )
+
+        if "source" not in attributes:
+            errors["source"].append(MissingRequiredAttributeError(missing="source"))
         if not isinstance(attributes.get("source"), str):
-            type_errors.append("Attribute 'source' must be a string")
+            errors["source"].append(
+                InvalidAttributeTypeError("Attribute 'source' must be a string")
+            )
+
+        if "type" not in attributes:
+            errors["type"].append(MissingRequiredAttributeError(missing="type"))
         if not isinstance(attributes.get("type"), str):
-            type_errors.append("Attribute 'type' must be a string")
+            errors["type"].append(
+                InvalidAttributeTypeError("Attribute 'type' must be a string")
+            )
+
+        if "specversion" not in attributes:
+            errors["specversion"].append(
+                MissingRequiredAttributeError(missing="specversion")
+            )
         if not isinstance(attributes.get("specversion"), str):
-            type_errors.append("Attribute 'specversion' must be a string")
+            errors["specversion"].append(
+                InvalidAttributeTypeError("Attribute 'specversion' must be a string")
+            )
         if attributes.get("specversion") != "1.0":
-            type_errors.append("Attribute 'specversion' must be '1.0'")
-        if type_errors:
-            errors["type"] = type_errors
+            errors["specversion"].append(
+                InvalidAttributeTypeError("Attribute 'specversion' must be '1.0'")
+            )
         return errors
 
     @staticmethod
     def _validate_optional_attributes(
         attributes: dict[str, Any],
-    ) -> dict[str, list[str]]:
+    ) -> dict[str, list[BaseCloudEventException]]:
         """
         Validates the types and values of the optional attributes.
 
         :param attributes: The attributes of the CloudEvent instance.
         :return: A dictionary of validation error messages.
         """
-        errors = {}
-        optional_errors = []
+        errors = defaultdict(list)
+
         if "time" in attributes:
             if not isinstance(attributes["time"], datetime):
-                optional_errors.append("Attribute 'time' must be a datetime object")
+                errors["time"].append(
+                    InvalidAttributeTypeError(
+                        "Attribute 'time' must be a datetime object"
+                    )
+                )
             if hasattr(attributes["time"], "tzinfo") and not attributes["time"].tzinfo:
-                optional_errors.append("Attribute 'time' must be timezone aware")
+                errors["time"].append(
+                    InvalidAttributeTypeError("Attribute 'time' must be timezone aware")
+                )
         if "subject" in attributes:
             if not isinstance(attributes["subject"], str):
-                optional_errors.append("Attribute 'subject' must be a string")
+                errors["subject"].append(
+                    InvalidAttributeTypeError("Attribute 'subject' must be a string")
+                )
             if not attributes["subject"]:
-                optional_errors.append("Attribute 'subject' must not be empty")
+                errors["subject"].append(
+                    InvalidAttributeTypeError("Attribute 'subject' must not be empty")
+                )
         if "datacontenttype" in attributes:
             if not isinstance(attributes["datacontenttype"], str):
-                optional_errors.append("Attribute 'datacontenttype' must be a string")
+                errors["datacontenttype"].append(
+                    InvalidAttributeTypeError(
+                        "Attribute 'datacontenttype' must be a string"
+                    )
+                )
             if not attributes["datacontenttype"]:
-                optional_errors.append("Attribute 'datacontenttype' must not be empty")
+                errors["datacontenttype"].append(
+                    InvalidAttributeTypeError(
+                        "Attribute 'datacontenttype' must not be empty"
+                    )
+                )
         if "dataschema" in attributes:
             if not isinstance(attributes["dataschema"], str):
-                optional_errors.append("Attribute 'dataschema' must be a string")
+                errors["dataschema"].append(
+                    InvalidAttributeTypeError("Attribute 'dataschema' must be a string")
+                )
             if not attributes["dataschema"]:
-                optional_errors.append("Attribute 'dataschema' must not be empty")
-        if optional_errors:
-            errors["optional"] = optional_errors
+                errors["dataschema"].append(
+                    InvalidAttributeTypeError(
+                        "Attribute 'dataschema' must not be empty"
+                    )
+                )
         return errors
 
     @staticmethod
     def _validate_extension_attributes(
         attributes: dict[str, Any],
-    ) -> dict[str, list[str]]:
+    ) -> dict[str, list[BaseCloudEventException]]:
         """
         Validates the extension attributes.
 
         :param attributes: The attributes of the CloudEvent instance.
         :return: A dictionary of validation error messages.
         """
-        errors = {}
-        extension_errors = []
+        errors = defaultdict(list)
         extension_attributes = [
             key
             for key in attributes.keys()
@@ -166,19 +198,23 @@ class CloudEvent:
         ]
         for extension_attribute in extension_attributes:
             if extension_attribute == "data":
-                extension_errors.append(
-                    "Extension attribute 'data' is reserved and must not be used"
+                errors[extension_attribute].append(
+                    CustomExtensionAttributeError(
+                        "Extension attribute 'data' is reserved and must not be used"
+                    )
                 )
             if not (1 <= len(extension_attribute) <= 20):
-                extension_errors.append(
-                    f"Extension attribute '{extension_attribute}' should be between 1 and 20 characters long"
+                errors[extension_attribute].append(
+                    CustomExtensionAttributeError(
+                        f"Extension attribute '{extension_attribute}' should be between 1 and 20 characters long"
+                    )
                 )
             if not re.match(r"^[a-z0-9]+$", extension_attribute):
-                extension_errors.append(
-                    f"Extension attribute '{extension_attribute}' should only contain lowercase letters and numbers"
+                errors[extension_attribute].append(
+                    CustomExtensionAttributeError(
+                        f"Extension attribute '{extension_attribute}' should only contain lowercase letters and numbers"
+                    )
                 )
-        if extension_errors:
-            errors["extensions"] = extension_errors
         return errors
 
     def get_id(self) -> str:

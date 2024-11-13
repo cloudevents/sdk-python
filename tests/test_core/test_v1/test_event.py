@@ -18,41 +18,87 @@ from typing import Any
 import pytest
 
 from cloudevents.core.v1.event import CloudEvent
-from cloudevents.core.v1.exceptions import CloudEventValidationError
+from cloudevents.core.v1.exceptions import (
+    CloudEventValidationError,
+    CustomExtensionAttributeError,
+    InvalidAttributeTypeError,
+    MissingRequiredAttributeError,
+)
 
 
 def test_missing_required_attributes() -> None:
     with pytest.raises(CloudEventValidationError) as e:
         CloudEvent({})
 
-    assert e.value.errors == {
-        "required": ["Missing required attribute(s): id, source, type, specversion"],
+    expected_errors = {
+        "id": [
+            str(MissingRequiredAttributeError("id")),
+            str(InvalidAttributeTypeError("Attribute 'id' must not be None")),
+            str(InvalidAttributeTypeError("Attribute 'id' must be a string")),
+        ],
+        "source": [
+            str(MissingRequiredAttributeError("source")),
+            str(InvalidAttributeTypeError("Attribute 'source' must be a string")),
+        ],
         "type": [
-            "Attribute 'id' must not be None",
-            "Attribute 'id' must be a string",
-            "Attribute 'source' must be a string",
-            "Attribute 'type' must be a string",
-            "Attribute 'specversion' must be a string",
-            "Attribute 'specversion' must be '1.0'",
+            str(MissingRequiredAttributeError("type")),
+            str(InvalidAttributeTypeError("Attribute 'type' must be a string")),
+        ],
+        "specversion": [
+            str(MissingRequiredAttributeError("specversion")),
+            str(InvalidAttributeTypeError("Attribute 'specversion' must be a string")),
+            str(InvalidAttributeTypeError("Attribute 'specversion' must be '1.0'")),
         ],
     }
 
+    actual_errors = {
+        key: [str(e) for e in value] for key, value in e.value.errors.items()
+    }
+    assert actual_errors == expected_errors
+
 
 @pytest.mark.parametrize(
-    "time,error",
+    "time,expected_error",
     [
         (
             "2023-10-25T17:09:19.736166Z",
-            {"optional": ["Attribute 'time' must be a datetime object"]},
+            {
+                "time": [
+                    str(
+                        InvalidAttributeTypeError(
+                            "Attribute 'time' must be a datetime object"
+                        )
+                    )
+                ]
+            },
         ),
         (
             datetime(2023, 10, 25, 17, 9, 19, 736166),
-            {"optional": ["Attribute 'time' must be timezone aware"]},
+            {
+                "time": [
+                    str(
+                        InvalidAttributeTypeError(
+                            "Attribute 'time' must be timezone aware"
+                        )
+                    )
+                ]
+            },
         ),
-        (1, {"optional": ["Attribute 'time' must be a datetime object"]}),
+        (
+            1,
+            {
+                "time": [
+                    str(
+                        InvalidAttributeTypeError(
+                            "Attribute 'time' must be a datetime object"
+                        )
+                    )
+                ]
+            },
+        ),
     ],
 )
-def test_time_validation(time: Any, error: dict) -> None:
+def test_time_validation(time: Any, expected_error: dict) -> None:
     with pytest.raises(CloudEventValidationError) as e:
         CloudEvent(
             {
@@ -63,21 +109,42 @@ def test_time_validation(time: Any, error: dict) -> None:
                 "time": time,
             }
         )
-
-    assert e.value.errors == error
+    actual_errors = {
+        key: [str(e) for e in value] for key, value in e.value.errors.items()
+    }
+    assert actual_errors == expected_error
 
 
 @pytest.mark.parametrize(
-    "subject,error",
+    "subject,expected_error",
     [
-        (1234, {"optional": ["Attribute 'subject' must be a string"]}),
+        (
+            1234,
+            {
+                "subject": [
+                    str(
+                        InvalidAttributeTypeError(
+                            "Attribute 'subject' must be a string"
+                        )
+                    )
+                ]
+            },
+        ),
         (
             "",
-            {"optional": ["Attribute 'subject' must not be empty"]},
+            {
+                "subject": [
+                    str(
+                        InvalidAttributeTypeError(
+                            "Attribute 'subject' must not be empty"
+                        )
+                    )
+                ]
+            },
         ),
     ],
 )
-def test_subject_validation(subject: Any, error: dict) -> None:
+def test_subject_validation(subject: Any, expected_error: dict) -> None:
     with pytest.raises(CloudEventValidationError) as e:
         CloudEvent(
             {
@@ -89,20 +156,42 @@ def test_subject_validation(subject: Any, error: dict) -> None:
             }
         )
 
-    assert e.value.errors == error
+    actual_errors = {
+        key: [str(e) for e in value] for key, value in e.value.errors.items()
+    }
+    assert actual_errors == expected_error
 
 
 @pytest.mark.parametrize(
-    "datacontenttype,error",
+    "datacontenttype,expected_error",
     [
-        (1234, {"optional": ["Attribute 'datacontenttype' must be a string"]}),
+        (
+            1234,
+            {
+                "datacontenttype": [
+                    str(
+                        InvalidAttributeTypeError(
+                            "Attribute 'datacontenttype' must be a string"
+                        )
+                    )
+                ]
+            },
+        ),
         (
             "",
-            {"optional": ["Attribute 'datacontenttype' must not be empty"]},
+            {
+                "datacontenttype": [
+                    str(
+                        InvalidAttributeTypeError(
+                            "Attribute 'datacontenttype' must not be empty"
+                        )
+                    )
+                ]
+            },
         ),
     ],
 )
-def test_datacontenttype_validation(datacontenttype: Any, error: dict) -> None:
+def test_datacontenttype_validation(datacontenttype: Any, expected_error: dict) -> None:
     with pytest.raises(CloudEventValidationError) as e:
         CloudEvent(
             {
@@ -114,20 +203,42 @@ def test_datacontenttype_validation(datacontenttype: Any, error: dict) -> None:
             }
         )
 
-    assert e.value.errors == error
+    actual_errors = {
+        key: [str(e) for e in value] for key, value in e.value.errors.items()
+    }
+    assert actual_errors == expected_error
 
 
 @pytest.mark.parametrize(
-    "dataschema,error",
+    "dataschema,expected_error",
     [
-        (1234, {"optional": ["Attribute 'dataschema' must be a string"]}),
+        (
+            1234,
+            {
+                "dataschema": [
+                    str(
+                        InvalidAttributeTypeError(
+                            "Attribute 'dataschema' must be a string"
+                        )
+                    )
+                ]
+            },
+        ),
         (
             "",
-            {"optional": ["Attribute 'dataschema' must not be empty"]},
+            {
+                "dataschema": [
+                    str(
+                        InvalidAttributeTypeError(
+                            "Attribute 'dataschema' must not be empty"
+                        )
+                    )
+                ]
+            },
         ),
     ],
 )
-def test_dataschema_validation(dataschema: Any, error: str) -> None:
+def test_dataschema_validation(dataschema: Any, expected_error: dict) -> None:
     with pytest.raises(CloudEventValidationError) as e:
         CloudEvent(
             {
@@ -139,40 +250,59 @@ def test_dataschema_validation(dataschema: Any, error: str) -> None:
             }
         )
 
-    assert e.value.errors == error
+    actual_errors = {
+        key: [str(e) for e in value] for key, value in e.value.errors.items()
+    }
+    assert actual_errors == expected_error
 
 
 @pytest.mark.parametrize(
-    "extension_name,error",
+    "extension_name,expected_error",
     [
         (
             "",
             {
-                "extensions": [
-                    "Extension attribute '' should be between 1 and 20 characters long",
-                    "Extension attribute '' should only contain lowercase letters and numbers",
+                "": [
+                    str(
+                        CustomExtensionAttributeError(
+                            "Extension attribute '' should be between 1 and 20 characters long"
+                        )
+                    ),
+                    str(
+                        CustomExtensionAttributeError(
+                            "Extension attribute '' should only contain lowercase letters and numbers"
+                        )
+                    ),
                 ]
             },
         ),
         (
             "thisisaverylongextension",
             {
-                "extensions": [
-                    "Extension attribute 'thisisaverylongextension' should be between 1 and 20 characters long"
+                "thisisaverylongextension": [
+                    str(
+                        CustomExtensionAttributeError(
+                            "Extension attribute 'thisisaverylongextension' should be between 1 and 20 characters long"
+                        )
+                    )
                 ]
             },
         ),
         (
             "data",
             {
-                "extensions": [
-                    "Extension attribute 'data' is reserved and must not be used"
+                "data": [
+                    str(
+                        CustomExtensionAttributeError(
+                            "Extension attribute 'data' is reserved and must not be used"
+                        )
+                    )
                 ]
             },
         ),
     ],
 )
-def test_custom_extension(extension_name: str, error: dict) -> None:
+def test_custom_extension(extension_name: str, expected_error: dict) -> None:
     with pytest.raises(CloudEventValidationError) as e:
         CloudEvent(
             {
@@ -184,7 +314,10 @@ def test_custom_extension(extension_name: str, error: dict) -> None:
             }
         )
 
-    assert e.value.errors == error
+    actual_errors = {
+        key: [str(e) for e in value] for key, value in e.value.errors.items()
+    }
+    assert actual_errors == expected_error
 
 
 def test_cloud_event_constructor() -> None:
