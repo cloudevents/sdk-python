@@ -223,7 +223,7 @@ class CloudEvent:
 
         :return: The ID of the event.
         """
-        return self._attributes["id"]
+        return self._attributes["id"]  # type: ignore
 
     def get_source(self) -> str:
         """
@@ -231,7 +231,7 @@ class CloudEvent:
 
         :return: The source of the event.
         """
-        return self._attributes["source"]
+        return self._attributes["source"]  # type: ignore
 
     def get_type(self) -> str:
         """
@@ -239,7 +239,7 @@ class CloudEvent:
 
         :return: The type of the event.
         """
-        return self._attributes["type"]
+        return self._attributes["type"]  # type: ignore
 
     def get_specversion(self) -> str:
         """
@@ -247,7 +247,7 @@ class CloudEvent:
 
         :return: The specversion of the event.
         """
-        return self._attributes["specversion"]
+        return self._attributes["specversion"]  # type: ignore
 
     def get_datacontenttype(self) -> Optional[str]:
         """
