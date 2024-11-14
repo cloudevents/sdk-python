@@ -42,6 +42,7 @@ class MissingRequiredAttributeError(BaseCloudEventException, ValueError):
     """
 
     def __init__(self, attribute_name: str) -> None:
+        self.attribute_name: str = attribute_name
         super().__init__(f"Missing required attribute: '{attribute_name}'")
 
 
