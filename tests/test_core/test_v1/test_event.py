@@ -22,6 +22,7 @@ from cloudevents.core.v1.exceptions import (
     CloudEventValidationError,
     CustomExtensionAttributeError,
     InvalidAttributeTypeError,
+    InvalidAttributeValueError,
     MissingRequiredAttributeError,
 )
 
@@ -33,21 +34,25 @@ def test_missing_required_attributes() -> None:
     expected_errors = {
         "id": [
             str(MissingRequiredAttributeError("id")),
-            str(InvalidAttributeTypeError("Attribute 'id' must not be None")),
-            str(InvalidAttributeTypeError("Attribute 'id' must be a string")),
+            str(InvalidAttributeValueError("id", "Attribute 'id' must not be None")),
+            str(InvalidAttributeTypeError("id", str)),
         ],
         "source": [
             str(MissingRequiredAttributeError("source")),
-            str(InvalidAttributeTypeError("Attribute 'source' must be a string")),
+            str(InvalidAttributeTypeError("source", str)),
         ],
         "type": [
             str(MissingRequiredAttributeError("type")),
-            str(InvalidAttributeTypeError("Attribute 'type' must be a string")),
+            str(InvalidAttributeTypeError("type", str)),
         ],
         "specversion": [
             str(MissingRequiredAttributeError("specversion")),
-            str(InvalidAttributeTypeError("Attribute 'specversion' must be a string")),
-            str(InvalidAttributeTypeError("Attribute 'specversion' must be '1.0'")),
+            str(InvalidAttributeTypeError("specversion", str)),
+            str(
+                InvalidAttributeValueError(
+                    "specversion", "Attribute 'specversion' must be '1.0'"
+                )
+            ),
         ],
     }
 
@@ -62,23 +67,15 @@ def test_missing_required_attributes() -> None:
     [
         (
             "2023-10-25T17:09:19.736166Z",
-            {
-                "time": [
-                    str(
-                        InvalidAttributeTypeError(
-                            "Attribute 'time' must be a datetime object"
-                        )
-                    )
-                ]
-            },
+            {"time": [str(InvalidAttributeTypeError("time", datetime))]},
         ),
         (
             datetime(2023, 10, 25, 17, 9, 19, 736166),
             {
                 "time": [
                     str(
-                        InvalidAttributeTypeError(
-                            "Attribute 'time' must be timezone aware"
+                        InvalidAttributeValueError(
+                            "time", "Attribute 'time' must be timezone aware"
                         )
                     )
                 ]
@@ -86,15 +83,7 @@ def test_missing_required_attributes() -> None:
         ),
         (
             1,
-            {
-                "time": [
-                    str(
-                        InvalidAttributeTypeError(
-                            "Attribute 'time' must be a datetime object"
-                        )
-                    )
-                ]
-            },
+            {"time": [str(InvalidAttributeTypeError("time", datetime))]},
         ),
     ],
 )
@@ -120,23 +109,15 @@ def test_time_validation(time: Any, expected_error: dict) -> None:
     [
         (
             1234,
-            {
-                "subject": [
-                    str(
-                        InvalidAttributeTypeError(
-                            "Attribute 'subject' must be a string"
-                        )
-                    )
-                ]
-            },
+            {"subject": [str(InvalidAttributeTypeError("subject", str))]},
         ),
         (
             "",
             {
                 "subject": [
                     str(
-                        InvalidAttributeTypeError(
-                            "Attribute 'subject' must not be empty"
+                        InvalidAttributeValueError(
+                            "subject", "Attribute 'subject' must not be empty"
                         )
                     )
                 ]
@@ -169,11 +150,7 @@ def test_subject_validation(subject: Any, expected_error: dict) -> None:
             1234,
             {
                 "datacontenttype": [
-                    str(
-                        InvalidAttributeTypeError(
-                            "Attribute 'datacontenttype' must be a string"
-                        )
-                    )
+                    str(InvalidAttributeTypeError("datacontenttype", str))
                 ]
             },
         ),
@@ -182,8 +159,9 @@ def test_subject_validation(subject: Any, expected_error: dict) -> None:
             {
                 "datacontenttype": [
                     str(
-                        InvalidAttributeTypeError(
-                            "Attribute 'datacontenttype' must not be empty"
+                        InvalidAttributeValueError(
+                            "datacontenttype",
+                            "Attribute 'datacontenttype' must not be empty",
                         )
                     )
                 ]
@@ -214,23 +192,15 @@ def test_datacontenttype_validation(datacontenttype: Any, expected_error: dict) 
     [
         (
             1234,
-            {
-                "dataschema": [
-                    str(
-                        InvalidAttributeTypeError(
-                            "Attribute 'dataschema' must be a string"
-                        )
-                    )
-                ]
-            },
+            {"dataschema": [str(InvalidAttributeTypeError("dataschema", str))]},
         ),
         (
             "",
             {
                 "dataschema": [
                     str(
-                        InvalidAttributeTypeError(
-                            "Attribute 'dataschema' must not be empty"
+                        InvalidAttributeValueError(
+                            "dataschema", "Attribute 'dataschema' must not be empty"
                         )
                     )
                 ]
@@ -265,12 +235,14 @@ def test_dataschema_validation(dataschema: Any, expected_error: dict) -> None:
                 "": [
                     str(
                         CustomExtensionAttributeError(
-                            "Extension attribute '' should be between 1 and 20 characters long"
+                            "",
+                            "Extension attribute '' should be between 1 and 20 characters long",
                         )
                     ),
                     str(
                         CustomExtensionAttributeError(
-                            "Extension attribute '' should only contain lowercase letters and numbers"
+                            "",
+                            "Extension attribute '' should only contain lowercase letters and numbers",
                         )
                     ),
                 ]
@@ -282,7 +254,8 @@ def test_dataschema_validation(dataschema: Any, expected_error: dict) -> None:
                 "thisisaverylongextension": [
                     str(
                         CustomExtensionAttributeError(
-                            "Extension attribute 'thisisaverylongextension' should be between 1 and 20 characters long"
+                            "thisisaverylongextension",
+                            "Extension attribute 'thisisaverylongextension' should be between 1 and 20 characters long",
                         )
                     )
                 ]
@@ -294,7 +267,8 @@ def test_dataschema_validation(dataschema: Any, expected_error: dict) -> None:
                 "data": [
                     str(
                         CustomExtensionAttributeError(
-                            "Extension attribute 'data' is reserved and must not be used"
+                            "data",
+                            "Extension attribute 'data' is reserved and must not be used",
                         )
                     )
                 ]

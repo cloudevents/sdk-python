@@ -22,6 +22,7 @@ from cloudevents.core.v1.exceptions import (
     CloudEventValidationError,
     CustomExtensionAttributeError,
     InvalidAttributeTypeError,
+    InvalidAttributeValueError,
     MissingRequiredAttributeError,
 )
 
@@ -84,41 +85,37 @@ class CloudEvent:
         errors = defaultdict(list)
 
         if "id" not in attributes:
-            errors["id"].append(MissingRequiredAttributeError(missing="id"))
+            errors["id"].append(MissingRequiredAttributeError(attribute_name="id"))
         if attributes.get("id") is None:
             errors["id"].append(
-                InvalidAttributeTypeError("Attribute 'id' must not be None")
+                InvalidAttributeValueError("id", "Attribute 'id' must not be None")
             )
         if not isinstance(attributes.get("id"), str):
-            errors["id"].append(
-                InvalidAttributeTypeError("Attribute 'id' must be a string")
-            )
+            errors["id"].append(InvalidAttributeTypeError("id", str))
 
         if "source" not in attributes:
-            errors["source"].append(MissingRequiredAttributeError(missing="source"))
-        if not isinstance(attributes.get("source"), str):
             errors["source"].append(
-                InvalidAttributeTypeError("Attribute 'source' must be a string")
+                MissingRequiredAttributeError(attribute_name="source")
             )
+        if not isinstance(attributes.get("source"), str):
+            errors["source"].append(InvalidAttributeTypeError("source", str))
 
         if "type" not in attributes:
-            errors["type"].append(MissingRequiredAttributeError(missing="type"))
+            errors["type"].append(MissingRequiredAttributeError(attribute_name="type"))
         if not isinstance(attributes.get("type"), str):
-            errors["type"].append(
-                InvalidAttributeTypeError("Attribute 'type' must be a string")
-            )
+            errors["type"].append(InvalidAttributeTypeError("type", str))
 
         if "specversion" not in attributes:
             errors["specversion"].append(
-                MissingRequiredAttributeError(missing="specversion")
+                MissingRequiredAttributeError(attribute_name="specversion")
             )
         if not isinstance(attributes.get("specversion"), str):
-            errors["specversion"].append(
-                InvalidAttributeTypeError("Attribute 'specversion' must be a string")
-            )
+            errors["specversion"].append(InvalidAttributeTypeError("specversion", str))
         if attributes.get("specversion") != "1.0":
             errors["specversion"].append(
-                InvalidAttributeTypeError("Attribute 'specversion' must be '1.0'")
+                InvalidAttributeValueError(
+                    "specversion", "Attribute 'specversion' must be '1.0'"
+                )
             )
         return errors
 
@@ -136,46 +133,43 @@ class CloudEvent:
 
         if "time" in attributes:
             if not isinstance(attributes["time"], datetime):
-                errors["time"].append(
-                    InvalidAttributeTypeError(
-                        "Attribute 'time' must be a datetime object"
-                    )
-                )
+                errors["time"].append(InvalidAttributeTypeError("time", datetime))
             if hasattr(attributes["time"], "tzinfo") and not attributes["time"].tzinfo:
                 errors["time"].append(
-                    InvalidAttributeTypeError("Attribute 'time' must be timezone aware")
+                    InvalidAttributeValueError(
+                        "time", "Attribute 'time' must be timezone aware"
+                    )
                 )
         if "subject" in attributes:
             if not isinstance(attributes["subject"], str):
-                errors["subject"].append(
-                    InvalidAttributeTypeError("Attribute 'subject' must be a string")
-                )
+                errors["subject"].append(InvalidAttributeTypeError("subject", str))
             if not attributes["subject"]:
                 errors["subject"].append(
-                    InvalidAttributeTypeError("Attribute 'subject' must not be empty")
+                    InvalidAttributeValueError(
+                        "subject", "Attribute 'subject' must not be empty"
+                    )
                 )
         if "datacontenttype" in attributes:
             if not isinstance(attributes["datacontenttype"], str):
                 errors["datacontenttype"].append(
-                    InvalidAttributeTypeError(
-                        "Attribute 'datacontenttype' must be a string"
-                    )
+                    InvalidAttributeTypeError("datacontenttype", str)
                 )
             if not attributes["datacontenttype"]:
                 errors["datacontenttype"].append(
-                    InvalidAttributeTypeError(
-                        "Attribute 'datacontenttype' must not be empty"
+                    InvalidAttributeValueError(
+                        "datacontenttype",
+                        "Attribute 'datacontenttype' must not be empty",
                     )
                 )
         if "dataschema" in attributes:
             if not isinstance(attributes["dataschema"], str):
                 errors["dataschema"].append(
-                    InvalidAttributeTypeError("Attribute 'dataschema' must be a string")
+                    InvalidAttributeTypeError("dataschema", str)
                 )
             if not attributes["dataschema"]:
                 errors["dataschema"].append(
-                    InvalidAttributeTypeError(
-                        "Attribute 'dataschema' must not be empty"
+                    InvalidAttributeValueError(
+                        "dataschema", "Attribute 'dataschema' must not be empty"
                     )
                 )
         return errors
@@ -200,19 +194,22 @@ class CloudEvent:
             if extension_attribute == "data":
                 errors[extension_attribute].append(
                     CustomExtensionAttributeError(
-                        "Extension attribute 'data' is reserved and must not be used"
+                        extension_attribute,
+                        "Extension attribute 'data' is reserved and must not be used",
                     )
                 )
             if not (1 <= len(extension_attribute) <= 20):
                 errors[extension_attribute].append(
                     CustomExtensionAttributeError(
-                        f"Extension attribute '{extension_attribute}' should be between 1 and 20 characters long"
+                        extension_attribute,
+                        f"Extension attribute '{extension_attribute}' should be between 1 and 20 characters long",
                     )
                 )
             if not re.match(r"^[a-z0-9]+$", extension_attribute):
                 errors[extension_attribute].append(
                     CustomExtensionAttributeError(
-                        f"Extension attribute '{extension_attribute}' should only contain lowercase letters and numbers"
+                        extension_attribute,
+                        f"Extension attribute '{extension_attribute}' should only contain lowercase letters and numbers",
                     )
                 )
         return errors
