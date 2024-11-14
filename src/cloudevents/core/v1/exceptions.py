@@ -14,8 +14,6 @@
 class BaseCloudEventException(Exception):
     """A CloudEvent generic exception."""
 
-    pass
-
 
 class CloudEventValidationError(BaseCloudEventException):
     """
@@ -31,7 +29,7 @@ class CloudEventValidationError(BaseCloudEventException):
         self.errors: dict[str, list[BaseCloudEventException]] = errors
 
     def __str__(self) -> str:
-        error_messages = [
+        error_messages: list[str] = [
             f"{key}: {', '.join(str(e) for e in value)}"
             for key, value in self.errors.items()
         ]
@@ -52,8 +50,8 @@ class CustomExtensionAttributeError(BaseCloudEventException, ValueError):
     Raised when a custom extension attribute violates naming conventions.
     """
 
-    def __init__(self, extension_attribute: str, msg: str) -> None:
-        self.extension_attribute = extension_attribute
+    def __init__(self, attribute_name: str, msg: str) -> None:
+        self.attribute_name: str = attribute_name
         super().__init__(msg)
 
 
@@ -63,7 +61,7 @@ class InvalidAttributeTypeError(BaseCloudEventException, TypeError):
     """
 
     def __init__(self, attribute_name: str, expected_type: type) -> None:
-        self.attribute_name = attribute_name
+        self.attribute_name: str = attribute_name
         super().__init__(f"Attribute '{attribute_name}' must be a {expected_type}")
 
 
@@ -73,5 +71,5 @@ class InvalidAttributeValueError(BaseCloudEventException, ValueError):
     """
 
     def __init__(self, attribute_name: str, msg: str) -> None:
-        self.attribute_name = attribute_name
+        self.attribute_name: str = attribute_name
         super().__init__(msg)
