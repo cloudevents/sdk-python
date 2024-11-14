@@ -64,7 +64,7 @@ class CloudEvent:
 
         See https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#required-attributes
         """
-        errors: dict[str, list] = defaultdict(list)
+        errors: dict[str, list[BaseCloudEventException]] = defaultdict(list)
         errors.update(CloudEvent._validate_required_attributes(attributes))
         errors.update(CloudEvent._validate_optional_attributes(attributes))
         errors.update(CloudEvent._validate_extension_attributes(attributes))
