@@ -32,7 +32,7 @@ class CloudEventValidationError(BaseCloudEventException):
 
     def __str__(self) -> str:
         error_messages = [
-            f"{key}: {', '.join(str(value))}" for key, value in self.errors.items()
+            f"{key}: {', '.join(str(e) for e in value)}" for key, value in self.errors.items()
         ]
         return f"{super().__str__()}: {', '.join(error_messages)}"
 
