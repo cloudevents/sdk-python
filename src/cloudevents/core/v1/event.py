@@ -70,7 +70,7 @@ class CloudEvent:
         errors.update(CloudEvent._validate_optional_attributes(attributes=attributes))
         errors.update(CloudEvent._validate_extension_attributes(attributes=attributes))
         if errors:
-            raise CloudEventValidationError(dict(errors))
+            raise CloudEventValidationError(errors=errors)
 
     @staticmethod
     def _validate_required_attributes(
