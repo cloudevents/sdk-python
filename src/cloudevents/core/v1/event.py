@@ -15,8 +15,9 @@
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Final, Optional
+from typing import Any, Final, Optional, Union
 
+from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.v1.exceptions import (
     BaseCloudEventException,
     CloudEventValidationError,
@@ -35,7 +36,7 @@ OPTIONAL_ATTRIBUTES: Final[list[str]] = [
 ]
 
 
-class CloudEvent:
+class CloudEvent(BaseCloudEvent):
     """
     The CloudEvent Python wrapper contract exposing generically-available
     properties and APIs.
@@ -44,7 +45,9 @@ class CloudEvent:
     obliged to follow this contract.
     """
 
-    def __init__(self, attributes: dict[str, Any], data: Optional[dict] = None) -> None:
+    def __init__(
+        self, attributes: dict[str, Any], data: Optional[Union[dict, str, bytes]] = None
+    ) -> None:
         """
         Create a new CloudEvent instance.
 
@@ -56,7 +59,7 @@ class CloudEvent:
         """
         self._validate_attribute(attributes=attributes)
         self._attributes: dict[str, Any] = attributes
-        self._data: Optional[dict] = data
+        self._data: Optional[Union[dict, str, bytes]] = data
 
     @staticmethod
     def _validate_attribute(attributes: dict[str, Any]) -> None:
@@ -315,10 +318,18 @@ class CloudEvent:
         """
         return self._attributes.get(extension_name)
 
-    def get_data(self) -> Optional[dict]:
+    def get_data(self) -> Optional[Union[dict, str, bytes]]:
         """
         Retrieve data of the event.
 
         :return: The data of the event.
         """
         return self._data
+
+    def get_attributes(self) -> dict[str, Any]:
+        """
+        Retrieve all attributes of the event.
+
+        :return: The attributes of the event.
+        """
+        return self._attributes
