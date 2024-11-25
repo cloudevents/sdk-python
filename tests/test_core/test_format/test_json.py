@@ -155,3 +155,23 @@ def test_write_cloud_event_to_json_with_no_content_type_set_and_data_as_json() -
             "utf-8"
         )
     )
+
+
+def test_read_cloud_event_from_json_with_attributes_only() -> None:
+    data = '{"id": "123", "source": "source", "type": "type", "specversion": "1.0", "time": "2023-10-25T17:09:19.736166Z", "datacontenttype": "application/json", "dataschema": "http://example.com/schema", "subject": "test_subject"}'.encode(
+        "utf-8"
+    )
+    formatter = JSONFormat()
+    result = formatter.read(CloudEvent, data)
+
+    assert result.get_id() == "123"
+    assert result.get_source() == "source"
+    assert result.get_type() == "type"
+    assert result.get_specversion() == "1.0"
+    assert result.get_time() == datetime(
+        2023, 10, 25, 17, 9, 19, 736166, tzinfo=timezone.utc
+    )
+    assert result.get_datacontenttype() == "application/json"
+    assert result.get_dataschema() == "http://example.com/schema"
+    assert result.get_subject() == "test_subject"
+    assert result.get_data() is None

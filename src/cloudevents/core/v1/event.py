@@ -15,7 +15,7 @@
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Final, Optional
+from typing import Any, Final, Optional, Union
 
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.v1.exceptions import (
@@ -45,7 +45,9 @@ class CloudEvent(BaseCloudEvent):
     obliged to follow this contract.
     """
 
-    def __init__(self, attributes: dict[str, Any], data: Optional[dict] = None) -> None:
+    def __init__(
+        self, attributes: dict[str, Any], data: Optional[Union[dict, str, bytes]] = None
+    ) -> None:
         """
         Create a new CloudEvent instance.
 
@@ -57,7 +59,7 @@ class CloudEvent(BaseCloudEvent):
         """
         self._validate_attribute(attributes=attributes)
         self._attributes: dict[str, Any] = attributes
-        self._data: Optional[dict] = data
+        self._data: Optional[Union[dict, str, bytes]] = data
 
     @staticmethod
     def _validate_attribute(attributes: dict[str, Any]) -> None:
@@ -316,7 +318,7 @@ class CloudEvent(BaseCloudEvent):
         """
         return self._attributes.get(extension_name)
 
-    def get_data(self) -> Optional[dict]:
+    def get_data(self) -> Optional[Union[dict, str, bytes]]:
         """
         Retrieve data of the event.
 

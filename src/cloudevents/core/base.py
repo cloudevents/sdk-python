@@ -18,6 +18,10 @@ from typing import Any, Optional, Protocol, Union
 
 
 class BaseCloudEvent(Protocol):
+    def __init__(
+        self, attributes: dict[str, Any], data: Optional[Union[dict, str, bytes]] = None
+    ) -> None: ...
+
     def get_id(self) -> str: ...
 
     def get_source(self) -> str: ...
