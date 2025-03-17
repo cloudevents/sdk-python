@@ -11,9 +11,14 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from __future__ import annotations
+
 import typing
 
 from cloudevents.sdk.event import base, opt
+
+if typing.TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class Event(base.BaseEvent):
@@ -79,39 +84,39 @@ class Event(base.BaseEvent):
             return {}
         return dict(result)
 
-    def SetEventType(self, eventType: str) -> base.BaseEvent:
+    def SetEventType(self, eventType: str) -> Self:
         self.Set("type", eventType)
         return self
 
-    def SetSource(self, source: str) -> base.BaseEvent:
+    def SetSource(self, source: str) -> Self:
         self.Set("source", source)
         return self
 
-    def SetEventID(self, eventID: str) -> base.BaseEvent:
+    def SetEventID(self, eventID: str) -> Self:
         self.Set("id", eventID)
         return self
 
-    def SetEventTime(self, eventTime: typing.Optional[str]) -> base.BaseEvent:
+    def SetEventTime(self, eventTime: typing.Optional[str]) -> Self:
         self.Set("time", eventTime)
         return self
 
-    def SetSubject(self, subject: typing.Optional[str]) -> base.BaseEvent:
+    def SetSubject(self, subject: typing.Optional[str]) -> Self:
         self.Set("subject", subject)
         return self
 
-    def SetSchema(self, schema: typing.Optional[str]) -> base.BaseEvent:
+    def SetSchema(self, schema: typing.Optional[str]) -> Self:
         self.Set("dataschema", schema)
         return self
 
-    def SetContentType(self, contentType: typing.Optional[str]) -> base.BaseEvent:
+    def SetContentType(self, contentType: typing.Optional[str]) -> Self:
         self.Set("datacontenttype", contentType)
         return self
 
-    def SetData(self, data: typing.Optional[object]) -> base.BaseEvent:
+    def SetData(self, data: typing.Optional[object]) -> Self:
         self.Set("data", data)
         return self
 
-    def SetExtensions(self, extensions: typing.Optional[dict]) -> base.BaseEvent:
+    def SetExtensions(self, extensions: typing.Optional[dict]) -> Self:
         self.Set("extensions", extensions)
         return self
 
