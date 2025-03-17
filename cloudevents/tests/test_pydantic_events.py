@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from __future__ import annotations
 
 import bz2
 import io
@@ -28,9 +29,12 @@ from cloudevents.pydantic.v1.conversion import from_http as pydantic_v1_from_htt
 from cloudevents.pydantic.v1.event import CloudEvent as PydanticV1CloudEvent
 from cloudevents.pydantic.v2.conversion import from_http as pydantic_v2_from_http
 from cloudevents.pydantic.v2.event import CloudEvent as PydanticV2CloudEvent
-from cloudevents.sdk import converters
+from cloudevents.sdk import converters, types
 from cloudevents.sdk.converters.binary import is_binary
 from cloudevents.sdk.converters.structured import is_structured
+
+if typing.TYPE_CHECKING:
+    from typing_extensions import TypeAlias
 
 invalid_test_headers = [
     {
@@ -70,7 +74,30 @@ test_data = {"payload-content": "Hello World!"}
 
 app = Sanic("test_pydantic_http_events")
 
-_pydantic_implementation = {
+
+AnyPydanticCloudEvent: TypeAlias = typing.Union[
+    PydanticV1CloudEvent, PydanticV2CloudEvent
+]
+
+
+class FromHttpFn(typing.Protocol):
+    def __call__(
+        self,
+        headers: typing.Dict[str, str],
+        data: typing.Optional[typing.AnyStr],
+        data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
+    ) -> AnyPydanticCloudEvent:
+        pass
+
+
+class PydanticImplementation(typing.TypedDict):
+    event: typing.Type[AnyPydanticCloudEvent]
+    validation_error: typing.Type[Exception]
+    from_http: FromHttpFn
+    pydantic_version: typing.Literal["v1", "v2"]
+
+
+_pydantic_implementation: typing.Mapping[str, PydanticImplementation] = {
     "v1": {
         "event": PydanticV1CloudEvent,
         "validation_error": PydanticV1ValidationError,
@@ -87,7 +114,9 @@ _pydantic_implementation = {
 
 
 @pytest.fixture(params=["v1", "v2"])
-def cloudevents_implementation(request):
+def cloudevents_implementation(
+    request: pytest.FixtureRequest,
+) -> PydanticImplementation:
     return _pydantic_implementation[request.param]
 
 
@@ -108,7 +137,9 @@ async def echo(request, pydantic_version):
 
 
 @pytest.mark.parametrize("body", invalid_cloudevent_request_body)
-def test_missing_required_fields_structured(body, cloudevents_implementation):
+def test_missing_required_fields_structured(
+    body: dict, cloudevents_implementation: PydanticImplementation
+) -> None:
     with pytest.raises(cloud_exceptions.MissingRequiredFields):
         _ = cloudevents_implementation["from_http"](
             {"Content-Type": "application/cloudevents+json"}, json.dumps(body)
@@ -116,20 +147,26 @@ def test_missing_required_fields_structured(body, cloudevents_implementation):
 
 
 @pytest.mark.parametrize("headers", invalid_test_headers)
-def test_missing_required_fields_binary(headers, cloudevents_implementation):
+def test_missing_required_fields_binary(
+    headers: dict, cloudevents_implementation: PydanticImplementation
+) -> None:
     with pytest.raises(cloud_exceptions.MissingRequiredFields):
         _ = cloudevents_implementation["from_http"](headers, json.dumps(test_data))
 
 
 @pytest.mark.parametrize("headers", invalid_test_headers)
-def test_missing_required_fields_empty_data_binary(headers, cloudevents_implementation):
+def test_missing_required_fields_empty_data_binary(
+    headers: dict, cloudevents_implementation: PydanticImplementation
+) -> None:
     # Test for issue #115
     with pytest.raises(cloud_exceptions.MissingRequiredFields):
         _ = cloudevents_implementation["from_http"](headers, None)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_emit_binary_event(specversion, cloudevents_implementation):
+def test_emit_binary_event(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     headers = {
         "ce-id": "my-id",
         "ce-source": "<event-source>",
@@ -159,7 +196,9 @@ def test_emit_binary_event(specversion, cloudevents_implementation):
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_emit_structured_event(specversion, cloudevents_implementation):
+def test_emit_structured_event(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     headers = {"Content-Type": "application/cloudevents+json"}
     body = {
         "id": "my-id",
@@ -188,7 +227,11 @@ def test_emit_structured_event(specversion, cloudevents_implementation):
     "converter", [converters.TypeBinary, converters.TypeStructured]
 )
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_roundtrip_non_json_event(converter, specversion, cloudevents_implementation):
+def test_roundtrip_non_json_event(
+    converter: str,
+    specversion: str,
+    cloudevents_implementation: PydanticImplementation,
+) -> None:
     input_data = io.BytesIO()
     for _ in range(100):
         for j in range(20):
@@ -217,7 +260,9 @@ def test_roundtrip_non_json_event(converter, specversion, cloudevents_implementa
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_missing_ce_prefix_binary_event(specversion, cloudevents_implementation):
+def test_missing_ce_prefix_binary_event(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     prefixed_headers = {}
     headers = {
         "ce-id": "my-id",
@@ -240,9 +285,11 @@ def test_missing_ce_prefix_binary_event(specversion, cloudevents_implementation)
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_valid_binary_events(specversion, cloudevents_implementation):
+def test_valid_binary_events(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     # Test creating multiple cloud events
-    events_queue = []
+    events_queue: list[AnyPydanticCloudEvent] = []
     headers = {}
     num_cloudevents = 30
     for i in range(num_cloudevents):
@@ -258,7 +305,7 @@ def test_valid_binary_events(specversion, cloudevents_implementation):
         )
 
     for i, event in enumerate(events_queue):
-        data = event.data
+        assert isinstance(event.data, dict)
         assert event["id"] == f"id{i}"
         assert event["source"] == f"source{i}.com.test"
         assert event["specversion"] == specversion
@@ -266,7 +313,9 @@ def test_valid_binary_events(specversion, cloudevents_implementation):
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_structured_to_request(specversion, cloudevents_implementation):
+def test_structured_to_request(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     attributes = {
         "specversion": specversion,
         "type": "word.found.name",
@@ -283,11 +332,13 @@ def test_structured_to_request(specversion, cloudevents_implementation):
     assert headers["content-type"] == "application/cloudevents+json"
     for key in attributes:
         assert body[key] == attributes[key]
-    assert body["data"] == data, f"|{body_bytes}|| {body}"
+    assert body["data"] == data, f"|{body_bytes!r}|| {body}"
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_attributes_view_accessor(specversion: str, cloudevents_implementation):
+def test_attributes_view_accessor(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     attributes: dict[str, typing.Any] = {
         "specversion": specversion,
         "type": "word.found.name",
@@ -296,9 +347,7 @@ def test_attributes_view_accessor(specversion: str, cloudevents_implementation):
     }
     data = {"message": "Hello World!"}
 
-    event: cloudevents_implementation["event"] = cloudevents_implementation["event"](
-        attributes, data
-    )
+    event = cloudevents_implementation["event"](attributes, data)
     event_attributes: typing.Mapping[str, typing.Any] = event.get_attributes()
     assert event_attributes["specversion"] == attributes["specversion"]
     assert event_attributes["type"] == attributes["type"]
@@ -308,7 +357,9 @@ def test_attributes_view_accessor(specversion: str, cloudevents_implementation):
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_binary_to_request(specversion, cloudevents_implementation):
+def test_binary_to_request(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     attributes = {
         "specversion": specversion,
         "type": "word.found.name",
@@ -327,7 +378,9 @@ def test_binary_to_request(specversion, cloudevents_implementation):
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_empty_data_structured_event(specversion, cloudevents_implementation):
+def test_empty_data_structured_event(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     # Testing if cloudevent breaks when no structured data field present
     attributes = {
         "specversion": specversion,
@@ -352,7 +405,9 @@ def test_empty_data_structured_event(specversion, cloudevents_implementation):
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_empty_data_binary_event(specversion, cloudevents_implementation):
+def test_empty_data_binary_event(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     # Testing if cloudevent breaks when no structured data field present
     headers = {
         "Content-Type": "application/octet-stream",
@@ -372,12 +427,14 @@ def test_empty_data_binary_event(specversion, cloudevents_implementation):
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_valid_structured_events(specversion, cloudevents_implementation):
+def test_valid_structured_events(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     # Test creating multiple cloud events
-    events_queue = []
+    events_queue: list[AnyPydanticCloudEvent] = []
     num_cloudevents = 30
     for i in range(num_cloudevents):
-        event = {
+        raw_event = {
             "id": f"id{i}",
             "source": f"source{i}.com.test",
             "type": "cloudevent.test.type",
@@ -387,11 +444,12 @@ def test_valid_structured_events(specversion, cloudevents_implementation):
         events_queue.append(
             cloudevents_implementation["from_http"](
                 {"content-type": "application/cloudevents+json"},
-                json.dumps(event),
+                json.dumps(raw_event),
             )
         )
 
     for i, event in enumerate(events_queue):
+        assert isinstance(event.data, dict)
         assert event["id"] == f"id{i}"
         assert event["source"] == f"source{i}.com.test"
         assert event["specversion"] == specversion
@@ -399,7 +457,9 @@ def test_valid_structured_events(specversion, cloudevents_implementation):
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_structured_no_content_type(specversion, cloudevents_implementation):
+def test_structured_no_content_type(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     # Test creating multiple cloud events
     data = {
         "id": "id",
@@ -410,6 +470,7 @@ def test_structured_no_content_type(specversion, cloudevents_implementation):
     }
     event = cloudevents_implementation["from_http"]({}, json.dumps(data))
 
+    assert isinstance(event.data, dict)
     assert event["id"] == "id"
     assert event["source"] == "source.com.test"
     assert event["specversion"] == specversion
@@ -437,7 +498,9 @@ def test_is_binary():
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_cloudevent_repr(specversion, cloudevents_implementation):
+def test_cloudevent_repr(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     headers = {
         "Content-Type": "application/octet-stream",
         "ce-specversion": specversion,
@@ -454,7 +517,9 @@ def test_cloudevent_repr(specversion, cloudevents_implementation):
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_none_data_cloudevent(specversion, cloudevents_implementation):
+def test_none_data_cloudevent(
+    specversion: str, cloudevents_implementation: PydanticImplementation
+) -> None:
     event = cloudevents_implementation["event"](
         {
             "source": "<my-url>",
@@ -466,7 +531,7 @@ def test_none_data_cloudevent(specversion, cloudevents_implementation):
     to_structured(event)
 
 
-def test_wrong_specversion(cloudevents_implementation):
+def test_wrong_specversion(cloudevents_implementation: PydanticImplementation) -> None:
     headers = {"Content-Type": "application/cloudevents+json"}
     data = json.dumps(
         {
@@ -481,15 +546,19 @@ def test_wrong_specversion(cloudevents_implementation):
     assert "Found invalid specversion 0.2" in str(e.value)
 
 
-def test_invalid_data_format_structured_from_http(cloudevents_implementation):
+def test_invalid_data_format_structured_from_http(
+    cloudevents_implementation: PydanticImplementation,
+) -> None:
     headers = {"Content-Type": "application/cloudevents+json"}
     data = 20
     with pytest.raises(cloud_exceptions.InvalidStructuredJSON) as e:
-        cloudevents_implementation["from_http"](headers, data)
+        cloudevents_implementation["from_http"](headers, data)  # type: ignore[type-var] # intentionally wrong type # noqa: E501
     assert "Expected json of type (str, bytes, bytearray)" in str(e.value)
 
 
-def test_wrong_specversion_to_request(cloudevents_implementation):
+def test_wrong_specversion_to_request(
+    cloudevents_implementation: PydanticImplementation,
+) -> None:
     event = cloudevents_implementation["event"]({"source": "s", "type": "t"}, None)
     with pytest.raises(cloud_exceptions.InvalidRequiredFields) as e:
         event["specversion"] = "0.2"
@@ -513,7 +582,9 @@ def test_is_structured():
     assert not is_structured(headers)
 
 
-def test_empty_json_structured(cloudevents_implementation):
+def test_empty_json_structured(
+    cloudevents_implementation: PydanticImplementation,
+) -> None:
     headers = {"Content-Type": "application/cloudevents+json"}
     data = ""
     with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
@@ -521,7 +592,9 @@ def test_empty_json_structured(cloudevents_implementation):
     assert "Failed to read specversion from both headers and data" in str(e.value)
 
 
-def test_uppercase_headers_with_none_data_binary(cloudevents_implementation):
+def test_uppercase_headers_with_none_data_binary(
+    cloudevents_implementation: PydanticImplementation,
+) -> None:
     headers = {
         "Ce-Id": "my-id",
         "Ce-Source": "<event-source>",
@@ -538,7 +611,7 @@ def test_uppercase_headers_with_none_data_binary(cloudevents_implementation):
     assert new_data is None
 
 
-def test_generic_exception(cloudevents_implementation):
+def test_generic_exception(cloudevents_implementation: PydanticImplementation) -> None:
     headers = {"Content-Type": "application/cloudevents+json"}
     data = json.dumps(
         {
@@ -554,7 +627,7 @@ def test_generic_exception(cloudevents_implementation):
     e.errisinstance(cloud_exceptions.MissingRequiredFields)
 
     with pytest.raises(cloud_exceptions.GenericException) as e:
-        cloudevents_implementation["from_http"]({}, 123)
+        cloudevents_implementation["from_http"]({}, 123)  # type: ignore[type-var] # intentionally wrong type # noqa: E501
     e.errisinstance(cloud_exceptions.InvalidStructuredJSON)
 
     with pytest.raises(cloud_exceptions.GenericException) as e:
@@ -569,7 +642,9 @@ def test_generic_exception(cloudevents_implementation):
     e.errisinstance(cloud_exceptions.DataMarshallerError)
 
 
-def test_non_dict_data_no_headers_bug(cloudevents_implementation):
+def test_non_dict_data_no_headers_bug(
+    cloudevents_implementation: PydanticImplementation,
+) -> None:
     # Test for issue #116
     headers = {"Content-Type": "application/cloudevents+json"}
     data = "123"

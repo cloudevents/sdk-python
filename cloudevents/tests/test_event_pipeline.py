@@ -77,7 +77,7 @@ def test_object_event_v1():
     _, structured_body = m.ToRequest(event)
     assert isinstance(structured_body, bytes)
     structured_obj = json.loads(structured_body)
-    error_msg = f"Body was {structured_body}, obj is {structured_obj}"
+    error_msg = f"Body was {structured_body!r}, obj is {structured_obj}"
     assert isinstance(structured_obj, dict), error_msg
     assert isinstance(structured_obj["data"], dict), error_msg
     assert len(structured_obj["data"]) == 1, error_msg
