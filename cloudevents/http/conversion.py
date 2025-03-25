@@ -58,7 +58,7 @@ def from_http(
 
 
 def from_dict(
-    event: typing.Dict[str, typing.Any],
+    event: typing.Mapping[str, typing.Any],
 ) -> CloudEvent:
     """
     Constructs a CloudEvent from a dict `event` representation.

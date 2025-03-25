@@ -63,7 +63,7 @@ def from_json(
 
 
 def from_dict(
-    event: typing.Dict[str, typing.Any],
+    event: typing.Mapping[str, typing.Any],
 ) -> CloudEvent:
     """
     Construct an CloudEvent from a dict `event` representation.

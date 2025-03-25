@@ -34,11 +34,13 @@ class CloudEvent(abstract.CloudEvent):
 
     @classmethod
     def create(
-        cls, attributes: typing.Dict[str, typing.Any], data: typing.Optional[typing.Any]
+        cls,
+        attributes: typing.Mapping[str, typing.Any],
+        data: typing.Optional[typing.Any],
     ) -> "CloudEvent":
         return cls(attributes, data)
 
-    def __init__(self, attributes: typing.Dict[str, str], data: typing.Any = None):
+    def __init__(self, attributes: typing.Mapping[str, str], data: typing.Any = None):
         """
         Event Constructor
         :param attributes: a dict with cloudevent attributes. Minimally

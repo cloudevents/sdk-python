@@ -260,7 +260,7 @@ def best_effort_encode_attribute_value(value: typing.Any) -> typing.Any:
 
 def from_dict(
     event_type: typing.Type[AnyCloudEvent],
-    event: typing.Dict[str, typing.Any],
+    event: typing.Mapping[str, typing.Any],
 ) -> AnyCloudEvent:
     """
     Constructs an Event object of a given `event_type` from
