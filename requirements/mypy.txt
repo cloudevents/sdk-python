@@ -1,0 +1,5 @@
+mypy
+# mypy has the pydantic plugin enabled
+pydantic>=2.0.0,<3.0
+types-requests
+deprecation>=2.0,<3.0
