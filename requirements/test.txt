@@ -4,7 +4,12 @@ flake8-print
 pytest
 pytest-cov
 # web app tests
-sanic
+
+# sanic stopped supporting 3.8 in 24.12:
+# https://sanic.dev/en/release-notes/changelog.html#version-24120-
+sanic         ; python_version >= '3.9'
+sanic<24.12.0 ; python_version <  '3.9'
+
 sanic-testing
 aiohttp
 Pillow
