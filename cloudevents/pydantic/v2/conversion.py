@@ -22,7 +22,7 @@ from cloudevents.sdk import types
 
 
 def from_http(
-    headers: typing.Dict[str, str],
+    headers: types.SupportsDuplicateItems[str, str],
     data: typing.Optional[typing.AnyStr],
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> CloudEvent:

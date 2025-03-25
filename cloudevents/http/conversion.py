@@ -37,7 +37,7 @@ def from_json(
 
 
 def from_http(
-    headers: typing.Dict[str, str],
+    headers: types.SupportsDuplicateItems[str, str],
     data: typing.Optional[typing.Union[str, bytes]],
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> CloudEvent:

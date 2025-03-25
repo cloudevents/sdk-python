@@ -91,7 +91,7 @@ def from_json(
 
 def from_http(
     event_type: typing.Type[AnyCloudEvent],
-    headers: typing.Mapping[str, str],
+    headers: types.SupportsDuplicateItems[str, str],
     data: typing.Optional[typing.Union[str, bytes]],
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> AnyCloudEvent:
