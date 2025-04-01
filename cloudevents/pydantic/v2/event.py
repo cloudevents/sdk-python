@@ -175,6 +175,8 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
         *,
         strict: typing.Optional[bool] = None,
         context: typing.Optional[typing.Dict[str, Any]] = None,
+        by_alias: typing.Optional[bool] = None,
+        by_name: typing.Optional[bool] = None,
     ) -> "CloudEvent":
         return conversion.from_json(cls, json_data)
 
