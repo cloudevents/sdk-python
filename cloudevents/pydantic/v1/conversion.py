@@ -21,7 +21,9 @@ from cloudevents.sdk import types
 
 
 def from_http(
-    headers: typing.Dict[str, str],
+    headers: typing.Union[
+        typing.Mapping[str, str], types.SupportsDuplicateItems[str, str]
+    ],
     data: typing.Optional[typing.AnyStr],
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> CloudEvent:
@@ -63,7 +65,7 @@ def from_json(
 
 
 def from_dict(
-    event: typing.Dict[str, typing.Any],
+    event: typing.Mapping[str, typing.Any],
 ) -> CloudEvent:
     """
     Construct an CloudEvent from a dict `event` representation.

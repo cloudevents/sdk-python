@@ -111,11 +111,29 @@ def to_binary(
     return KafkaMessage(headers, message_key, data)
 
 
+@typing.overload
+def from_binary(
+    message: KafkaMessage,
+    event_type: None = None,
+    data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
+) -> http.CloudEvent:
+    pass
+
+
+@typing.overload
+def from_binary(
+    message: KafkaMessage,
+    event_type: typing.Type[AnyCloudEvent],
+    data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
+) -> AnyCloudEvent:
+    pass
+
+
 def from_binary(
     message: KafkaMessage,
     event_type: typing.Optional[typing.Type[AnyCloudEvent]] = None,
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
-) -> AnyCloudEvent:
+) -> typing.Union[http.CloudEvent, AnyCloudEvent]:
     """
     Returns a CloudEvent from a KafkaMessage in binary format.
 
@@ -144,10 +162,11 @@ def from_binary(
         raise cloud_exceptions.DataUnmarshallerError(
             f"Failed to unmarshall data with error: {type(e).__name__}('{e}')"
         )
+    result: typing.Union[http.CloudEvent, AnyCloudEvent]
     if event_type:
         result = event_type.create(attributes, data)
     else:
-        result = http.CloudEvent.create(attributes, data)  # type: ignore
+        result = http.CloudEvent.create(attributes, data)
     return result
 
 
@@ -210,12 +229,32 @@ def to_structured(
     return KafkaMessage(headers, message_key, value)
 
 
+@typing.overload
+def from_structured(
+    message: KafkaMessage,
+    event_type: None = None,
+    data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
+    envelope_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
+) -> http.CloudEvent:
+    pass
+
+
+@typing.overload
+def from_structured(
+    message: KafkaMessage,
+    event_type: typing.Type[AnyCloudEvent],
+    data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
+    envelope_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
+) -> AnyCloudEvent:
+    pass
+
+
 def from_structured(
     message: KafkaMessage,
     event_type: typing.Optional[typing.Type[AnyCloudEvent]] = None,
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
     envelope_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
-) -> AnyCloudEvent:
+) -> typing.Union[http.CloudEvent, AnyCloudEvent]:
     """
     Returns a CloudEvent from a KafkaMessage in structured format.
 
@@ -264,8 +303,9 @@ def from_structured(
             attributes["datacontenttype"] = val.decode()
         else:
             attributes[header.lower()] = val.decode()
+    result: typing.Union[AnyCloudEvent, http.CloudEvent]
     if event_type:
         result = event_type.create(attributes, data)
     else:
-        result = http.CloudEvent.create(attributes, data)  # type: ignore
+        result = http.CloudEvent.create(attributes, data)
     return result

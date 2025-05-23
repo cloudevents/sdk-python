@@ -19,6 +19,7 @@ import json
 import pytest
 
 from cloudevents import exceptions as cloud_exceptions
+from cloudevents.abstract.event import AnyCloudEvent
 from cloudevents.http import CloudEvent
 from cloudevents.kafka.conversion import (
     KafkaMessage,
@@ -36,7 +37,9 @@ def simple_serialize(data: dict) -> bytes:
 
 
 def simple_deserialize(data: bytes) -> dict:
-    return json.loads(data.decode())
+    value = json.loads(data.decode())
+    assert isinstance(value, dict)
+    return value
 
 
 def failing_func(*args):
@@ -47,7 +50,7 @@ class KafkaConversionTestBase:
     expected_data = {"name": "test", "amount": 1}
     expected_custom_mapped_key = "custom-key"
 
-    def custom_key_mapper(self, _) -> str:
+    def custom_key_mapper(self, _: AnyCloudEvent) -> str:
         return self.expected_custom_mapped_key
 
     @pytest.fixture

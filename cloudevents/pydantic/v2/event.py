@@ -44,7 +44,9 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
 
     @classmethod
     def create(
-        cls, attributes: typing.Dict[str, typing.Any], data: typing.Optional[typing.Any]
+        cls,
+        attributes: typing.Mapping[str, typing.Any],
+        data: typing.Optional[typing.Any],
     ) -> "CloudEvent":
         return cls(attributes, data)
 
@@ -103,7 +105,7 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
 
     def __init__(  # type: ignore[no-untyped-def]
         self,
-        attributes: typing.Optional[typing.Dict[str, typing.Any]] = None,
+        attributes: typing.Optional[typing.Mapping[str, typing.Any]] = None,
         data: typing.Optional[typing.Any] = None,
         **kwargs,
     ):
@@ -173,6 +175,8 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
         *,
         strict: typing.Optional[bool] = None,
         context: typing.Optional[typing.Dict[str, Any]] = None,
+        by_alias: typing.Optional[bool] = None,
+        by_name: typing.Optional[bool] = None,
     ) -> "CloudEvent":
         return conversion.from_json(cls, json_data)
 

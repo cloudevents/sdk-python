@@ -50,14 +50,14 @@ def test_from_request_wrong_unmarshaller():
     with pytest.raises(exceptions.InvalidDataUnmarshaller):
         m = marshaller.NewDefaultHTTPMarshaller()
         _ = m.FromRequest(
-            event=v1.Event(), headers={}, body="", data_unmarshaller=object()
+            event=v1.Event(), headers={}, body="", data_unmarshaller=object()  # type: ignore[arg-type] # intentionally wrong type # noqa: E501
         )
 
 
 def test_to_request_wrong_marshaller():
     with pytest.raises(exceptions.InvalidDataMarshaller):
         m = marshaller.NewDefaultHTTPMarshaller()
-        _ = m.ToRequest(v1.Event(), data_marshaller="")
+        _ = m.ToRequest(v1.Event(), data_marshaller="")  # type: ignore[arg-type] # intentionally wrong type # noqa: E501
 
 
 def test_from_request_cannot_read(binary_headers):

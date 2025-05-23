@@ -91,7 +91,9 @@ def from_json(
 
 def from_http(
     event_type: typing.Type[AnyCloudEvent],
-    headers: typing.Mapping[str, str],
+    headers: typing.Union[
+        typing.Mapping[str, str], types.SupportsDuplicateItems[str, str]
+    ],
     data: typing.Optional[typing.Union[str, bytes]],
     data_unmarshaller: typing.Optional[types.UnmarshallerType] = None,
 ) -> AnyCloudEvent:
@@ -260,7 +262,7 @@ def best_effort_encode_attribute_value(value: typing.Any) -> typing.Any:
 
 def from_dict(
     event_type: typing.Type[AnyCloudEvent],
-    event: typing.Dict[str, typing.Any],
+    event: typing.Mapping[str, typing.Any],
 ) -> AnyCloudEvent:
     """
     Constructs an Event object of a given `event_type` from
