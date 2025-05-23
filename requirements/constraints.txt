@@ -1,0 +1,10 @@
+# This is a requirements constraint file, see:
+# https://pip.pypa.io/en/stable/user_guide/#constraints-files
+
+# sanic stopped supporting 3.8 in 24.12:
+# https://sanic.dev/en/release-notes/changelog.html#version-24120-
+sanic<24.12.0 ; python_version == '3.8'
+
+# pydantic stopped supporting 3.8 in 2.11.0:
+# https://github.com/pydantic/pydantic/releases/tag/v2.11.0
+pydantic<2.11.0 ; python_version == '3.8'
