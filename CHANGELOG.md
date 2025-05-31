@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.0]
+
+### Changed
+
+- Dropped Python3.8 support while it has reached EOL. ([])
+
 ## [1.11.1]
 
 ### Fixed
