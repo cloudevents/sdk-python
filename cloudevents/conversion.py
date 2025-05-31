@@ -16,11 +16,12 @@ import enum
 import json
 import typing
 
-from cloudevents import exceptions as cloud_exceptions
 from cloudevents.abstract import AnyCloudEvent
 from cloudevents.sdk import converters, marshaller, types
 from cloudevents.sdk.converters import is_binary
 from cloudevents.sdk.event import v1, v03
+
+from cloudevents import exceptions as cloud_exceptions
 
 
 def _best_effort_serialize_to_json(  # type: ignore[no-untyped-def]

@@ -12,11 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from sanic import Sanic, response
-
 from cloudevents.sdk import converters, marshaller
 from cloudevents.sdk.event import v1
 from cloudevents.tests import data as test_data
+from sanic import Sanic, response
 
 m = marshaller.NewDefaultHTTPMarshaller()
 app = Sanic("test_with_sanic")

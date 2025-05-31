@@ -17,8 +17,6 @@ import datetime
 import json
 
 import pytest
-
-from cloudevents import exceptions as cloud_exceptions
 from cloudevents.abstract.event import AnyCloudEvent
 from cloudevents.http import CloudEvent
 from cloudevents.kafka.conversion import (
@@ -30,6 +28,8 @@ from cloudevents.kafka.conversion import (
 )
 from cloudevents.kafka.exceptions import KeyMapperError
 from cloudevents.sdk import types
+
+from cloudevents import exceptions as cloud_exceptions
 
 
 def simple_serialize(data: dict) -> bytes:

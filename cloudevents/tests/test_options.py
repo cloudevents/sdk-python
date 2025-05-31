@@ -13,7 +13,6 @@
 #    under the License.
 
 import pytest
-
 from cloudevents.sdk.event.opt import Option
 
 

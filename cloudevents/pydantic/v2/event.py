@@ -17,10 +17,9 @@ import json
 import typing
 from typing import Any
 
-from pydantic.deprecated import parse as _deprecated_parse
-
 from cloudevents.exceptions import PydanticFeatureNotInstalled
 from cloudevents.pydantic.fields_docs import FIELD_DESCRIPTIONS
+from pydantic.deprecated import parse as _deprecated_parse
 
 try:
     from pydantic import BaseModel, ConfigDict, Field, model_serializer
@@ -30,9 +29,10 @@ except ImportError:  # pragma: no cover # hard to test
         "Install it using pip install cloudevents[pydantic]"
     )
 
-from cloudevents import abstract, conversion
 from cloudevents.exceptions import IncompatibleArgumentsError
 from cloudevents.sdk.event import attribute
+
+from cloudevents import abstract, conversion
 
 
 class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore

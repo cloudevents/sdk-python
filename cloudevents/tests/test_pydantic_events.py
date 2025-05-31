@@ -18,12 +18,8 @@ import io
 import json
 import typing
 
-import pytest
-from pydantic import ValidationError as PydanticV2ValidationError
-from pydantic.v1 import ValidationError as PydanticV1ValidationError
-from sanic import Sanic, response
-
 import cloudevents.exceptions as cloud_exceptions
+import pytest
 from cloudevents.conversion import to_binary, to_structured
 from cloudevents.pydantic.v1.conversion import from_http as pydantic_v1_from_http
 from cloudevents.pydantic.v1.event import CloudEvent as PydanticV1CloudEvent
@@ -32,6 +28,9 @@ from cloudevents.pydantic.v2.event import CloudEvent as PydanticV2CloudEvent
 from cloudevents.sdk import converters, types
 from cloudevents.sdk.converters.binary import is_binary
 from cloudevents.sdk.converters.structured import is_structured
+from pydantic import ValidationError as PydanticV2ValidationError
+from pydantic.v1 import ValidationError as PydanticV1ValidationError
+from sanic import Sanic, response
 
 if typing.TYPE_CHECKING:
     from typing_extensions import TypeAlias

@@ -13,10 +13,9 @@
 #    under the License.
 import typing
 
-from deprecation import deprecated
-
 from cloudevents.sdk.converters import is_binary as _moved_is_binary
 from cloudevents.sdk.converters import is_structured as _moved_is_structured
+from deprecation import deprecated
 
 # THIS MODULE IS DEPRECATED, YOU SHOULD NOT ADD NEW FUNCTIONALLY HERE
 
