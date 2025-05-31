@@ -17,9 +17,8 @@ import typing
 import uuid
 
 import cloudevents.exceptions as cloud_exceptions
-from cloudevents.sdk.event import v1, v03
-
 from cloudevents import abstract
+from cloudevents.sdk.event import v1, v03
 
 _required_by_version = {
     "1.0": v1.Event._ce_required_fields,

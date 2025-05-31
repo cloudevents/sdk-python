@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import cloudevents.exceptions as cloud_exceptions
 import pytest
+
+import cloudevents.exceptions as cloud_exceptions
 from cloudevents.conversion import _json_or_string
 from cloudevents.http import CloudEvent
 

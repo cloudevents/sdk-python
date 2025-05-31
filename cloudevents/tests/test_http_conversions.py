@@ -17,6 +17,7 @@ import datetime
 import json
 
 import pytest
+
 from cloudevents.conversion import to_dict, to_json
 from cloudevents.http import CloudEvent, from_dict, from_json
 from cloudevents.sdk.event.attribute import SpecVersion

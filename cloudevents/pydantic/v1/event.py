@@ -32,10 +32,9 @@ except ImportError:  # pragma: no cover # hard to test
         "Install it using pip install cloudevents[pydantic]"
     )
 
+from cloudevents import abstract, conversion, http
 from cloudevents.exceptions import IncompatibleArgumentsError
 from cloudevents.sdk.event import attribute
-
-from cloudevents import abstract, conversion, http
 
 
 def _ce_json_dumps(  # type: ignore[no-untyped-def]
