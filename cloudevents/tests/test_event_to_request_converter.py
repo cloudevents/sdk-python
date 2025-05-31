@@ -15,6 +15,7 @@
 import json
 
 import pytest
+
 from cloudevents.sdk import converters, marshaller
 from cloudevents.sdk.event import v1, v03
 from cloudevents.tests import data

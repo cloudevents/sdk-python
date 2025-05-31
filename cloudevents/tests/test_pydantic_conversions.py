@@ -17,6 +17,9 @@ import datetime
 import json
 
 import pytest
+from pydantic import ValidationError as PydanticV2ValidationError
+from pydantic.v1 import ValidationError as PydanticV1ValidationError
+
 from cloudevents.conversion import to_json
 from cloudevents.pydantic.v1.conversion import from_dict as pydantic_v1_from_dict
 from cloudevents.pydantic.v1.conversion import from_json as pydantic_v1_from_json
@@ -25,8 +28,6 @@ from cloudevents.pydantic.v2.conversion import from_dict as pydantic_v2_from_dic
 from cloudevents.pydantic.v2.conversion import from_json as pydantic_v2_from_json
 from cloudevents.pydantic.v2.event import CloudEvent as PydanticV2CloudEvent
 from cloudevents.sdk.event.attribute import SpecVersion
-from pydantic import ValidationError as PydanticV2ValidationError
-from pydantic.v1 import ValidationError as PydanticV1ValidationError
 
 test_data = json.dumps({"data-key": "val"})
 test_attributes = {

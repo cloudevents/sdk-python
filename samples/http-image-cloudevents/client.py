@@ -15,6 +15,7 @@
 import sys
 
 import requests
+
 from cloudevents.conversion import to_binary, to_structured
 from cloudevents.http import CloudEvent
 

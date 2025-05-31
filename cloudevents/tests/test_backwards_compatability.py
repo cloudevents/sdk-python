@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import pytest
+
 from cloudevents.conversion import _best_effort_serialize_to_json
 from cloudevents.http import CloudEvent
 

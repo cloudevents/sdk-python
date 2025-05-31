@@ -18,15 +18,16 @@ import io
 import json
 import typing
 
-import cloudevents.exceptions as cloud_exceptions
 import pytest
+from sanic import Sanic, response
+
+import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http import CloudEvent, from_http, to_binary, to_structured
 from cloudevents.http.event_type import is_binary as deprecated_is_binary
 from cloudevents.http.event_type import is_structured as deprecated_is_structured
 from cloudevents.sdk import converters
 from cloudevents.sdk.converters.binary import is_binary
 from cloudevents.sdk.converters.structured import is_structured
-from sanic import Sanic, response
 
 invalid_test_headers = [
     {
