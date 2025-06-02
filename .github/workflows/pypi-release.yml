@@ -10,7 +10,7 @@ on:
 jobs:
   build_dist:
     name: Build source distribution
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,7 +27,7 @@ jobs:
       - name: Check metadata
         run: pipx run twine check dist/*
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     if: github.event_name == 'push'
     needs: [ build_dist ]
     steps:
@@ -35,9 +35,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: 'pip'
       - name: Install build dependencies
         run: pip install -U setuptools wheel build
