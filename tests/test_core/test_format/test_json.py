@@ -175,3 +175,43 @@ def test_read_cloud_event_from_json_with_attributes_only() -> None:
     assert result.get_dataschema() == "http://example.com/schema"
     assert result.get_subject() == "test_subject"
     assert result.get_data() is None
+
+
+def test_read_cloud_event_from_json_with_bytes_as_data() -> None:
+    data = '{"id": "123", "source": "source", "type": "type", "specversion": "1.0", "time": "2023-10-25T17:09:19.736166Z", "datacontenttype": "application/json", "dataschema": "http://example.com/schema", "subject": "test_subject", "data_base64": "dGVzdA=="}'.encode(
+        "utf-8"
+    )
+    formatter = JSONFormat()
+    result = formatter.read(CloudEvent, data)
+
+    assert result.get_id() == "123"
+    assert result.get_source() == "source"
+    assert result.get_type() == "type"
+    assert result.get_specversion() == "1.0"
+    assert result.get_time() == datetime(
+        2023, 10, 25, 17, 9, 19, 736166, tzinfo=timezone.utc
+    )
+    assert result.get_datacontenttype() == "application/json"
+    assert result.get_dataschema() == "http://example.com/schema"
+    assert result.get_subject() == "test_subject"
+    assert result.get_data() == b"test"
+
+
+def test_read_cloud_event_from_json_with_json_as_data() -> None:
+    data = '{"id": "123", "source": "source", "type": "type", "specversion": "1.0", "time": "2023-10-25T17:09:19.736166Z", "datacontenttype": "application/json", "dataschema": "http://example.com/schema", "subject": "test_subject", "data": {"key": "value"}}'.encode(
+        "utf-8"
+    )
+    formatter = JSONFormat()
+    result = formatter.read(CloudEvent, data)
+
+    assert result.get_id() == "123"
+    assert result.get_source() == "source"
+    assert result.get_type() == "type"
+    assert result.get_specversion() == "1.0"
+    assert result.get_time() == datetime(
+        2023, 10, 25, 17, 9, 19, 736166, tzinfo=timezone.utc
+    )
+    assert result.get_datacontenttype() == "application/json"
+    assert result.get_dataschema() == "http://example.com/schema"
+    assert result.get_subject() == "test_subject"
+    assert result.get_data() == {"key": "value"}

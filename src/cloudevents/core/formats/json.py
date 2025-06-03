@@ -19,7 +19,7 @@ from datetime import datetime
 from json import JSONEncoder, dumps, loads
 from typing import Any, Final, Pattern, Type, TypeVar, Union
 
-from dateutil.parser import isoparse
+from dateutil.parser import isoparse  # type: ignore[import-untyped]
 
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.formats.base import Format
@@ -67,9 +67,9 @@ class JSONFormat(Format):
         if "time" in event_attributes:
             event_attributes["time"] = isoparse(event_attributes["time"])
 
-        event_data: Union[str, bytes] = event_attributes.get("data")
+        event_data: Union[str, bytes] = event_attributes.pop("data", None)
         if event_data is None:
-            event_data_base64 = event_attributes.get("data_base64")
+            event_data_base64 = event_attributes.pop("data_base64", None)
             if event_data_base64 is not None:
                 event_data = base64.b64decode(event_data_base64)
 
@@ -93,6 +93,7 @@ class JSONFormat(Format):
                 datacontenttype = event_dict.get(
                     "datacontenttype", JSONFormat.CONTENT_TYPE
                 )
+                # Should we fail if we can't serialize data to JSON?
                 if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype):
                     event_dict["data"] = dumps(event_data)
                 else:
