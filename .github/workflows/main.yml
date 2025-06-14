@@ -37,3 +37,5 @@ jobs:
         run: python -m pip install -r requirements/dev.txt
       - name: Run tests
         run: python -m tox -e py  # Run tox using the version of Python in `PATH`
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
