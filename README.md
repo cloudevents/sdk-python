@@ -25,6 +25,12 @@ The CloudEvents SDK can be installed with pip:
 pip install cloudevents
 ```
 
+Or alternatively via conda:
+
+```
+conda install conda-forge::cloudevents
+``
+
 ## Sending CloudEvents
 
 Below we will provide samples on how to send cloudevents using the popular
