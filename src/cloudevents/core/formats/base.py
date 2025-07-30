@@ -19,6 +19,12 @@ from cloudevents.core.base import BaseCloudEvent
 
 
 class Format(Protocol):
-    def read(self, event_factory: Callable[[dict, Optional[Union[dict, str, bytes]]], BaseCloudEvent], data: Union[str, bytes]) -> BaseCloudEvent: ...
+    def read(
+        self,
+        event_factory: Callable[
+            [dict, Optional[Union[dict, str, bytes]]], BaseCloudEvent
+        ],
+        data: Union[str, bytes],
+    ) -> BaseCloudEvent: ...
 
     def write(self, event: BaseCloudEvent) -> bytes: ...

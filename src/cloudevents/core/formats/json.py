@@ -48,7 +48,13 @@ class JSONFormat(Format):
         r"^(application|text)/([a-zA-Z0-9\-\.]+\+)?json(;.*)?$"
     )
 
-    def read(self, event_factory: Callable[[dict, Optional[Union[dict, str, bytes]]], BaseCloudEvent], data: Union[str, bytes]) -> BaseCloudEvent:
+    def read(
+        self,
+        event_factory: Callable[
+            [dict, Optional[Union[dict, str, bytes]]], BaseCloudEvent
+        ],
+        data: Union[str, bytes],
+    ) -> BaseCloudEvent:
         """
         Read a CloudEvent from a JSON formatted byte string.
 
@@ -56,8 +62,9 @@ class JSONFormat(Format):
         :param data: The JSON formatted byte array.
         :return: The CloudEvent instance.
         """
+        decoded_data: str
         if isinstance(data, bytes):
-            decoded_data: str = data.decode("utf-8")
+            decoded_data = data.decode("utf-8")
         else:
             decoded_data = data
 

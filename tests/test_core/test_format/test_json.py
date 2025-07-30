@@ -233,7 +233,9 @@ def test_write_cloud_event_with_extension_attributes() -> None:
 
 
 def test_read_cloud_event_with_extension_attributes() -> None:
-    data = '{"id": "123", "source": "source", "type": "type", "specversion": "1.0", "customext1": "value1", "customext2": 123}'.encode("utf-8")
+    data = '{"id": "123", "source": "source", "type": "type", "specversion": "1.0", "customext1": "value1", "customext2": 123}'.encode(
+        "utf-8"
+    )
     formatter = JSONFormat()
     result = formatter.read(CloudEvent, data)
 
@@ -247,7 +249,7 @@ def test_write_cloud_event_with_different_json_content_types() -> None:
         ("text/json", {"key": "value"}),
         ("application/json; charset=utf-8", {"key": "value"}),
     ]
-    
+
     for content_type, data in test_cases:
         attributes = {
             "id": "123",
@@ -259,12 +261,14 @@ def test_write_cloud_event_with_different_json_content_types() -> None:
         event = CloudEvent(attributes=attributes, data=data)
         formatter = JSONFormat()
         result = formatter.write(event)
-        
+
         assert b'"data": {"key": "value"}' in result
 
 
 def test_read_cloud_event_with_string_data() -> None:
-    data = '{"id": "123", "source": "source", "type": "type", "specversion": "1.0", "data": "plain string data"}'.encode("utf-8")
+    data = '{"id": "123", "source": "source", "type": "type", "specversion": "1.0", "data": "plain string data"}'.encode(
+        "utf-8"
+    )
     formatter = JSONFormat()
     result = formatter.read(CloudEvent, data)
 
@@ -296,14 +300,16 @@ def test_write_cloud_event_with_unicode_data() -> None:
     event = CloudEvent(attributes=attributes, data="Hello 世界 🌍")
     formatter = JSONFormat()
     result = formatter.write(event)
-    
+
     decoded = result.decode("utf-8")
     assert '"data": "Hello' in decoded
     assert "Hello" in decoded
 
 
 def test_read_cloud_event_with_unicode_data() -> None:
-    data = '{"id": "123", "source": "source", "type": "type", "specversion": "1.0", "data": "Hello 世界 🌍"}'.encode("utf-8")
+    data = '{"id": "123", "source": "source", "type": "type", "specversion": "1.0", "data": "Hello 世界 🌍"}'.encode(
+        "utf-8"
+    )
     formatter = JSONFormat()
     result = formatter.read(CloudEvent, data)
 
