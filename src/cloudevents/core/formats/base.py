@@ -13,12 +13,12 @@
 #    under the License.
 
 
-from typing import Protocol, Union
+from typing import Callable, Optional, Protocol, Union
 
 from cloudevents.core.base import BaseCloudEvent
 
 
 class Format(Protocol):
-    def read(self, data: Union[str, bytes]) -> BaseCloudEvent: ...
+    def read(self, event_factory: Callable[[dict, Optional[Union[dict, str, bytes]]], BaseCloudEvent], data: Union[str, bytes]) -> BaseCloudEvent: ...
 
     def write(self, event: BaseCloudEvent) -> bytes: ...

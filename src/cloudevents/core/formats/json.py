@@ -17,14 +17,12 @@ import base64
 import re
 from datetime import datetime
 from json import JSONEncoder, dumps, loads
-from typing import Any, Final, Pattern, Type, TypeVar, Union
+from typing import Any, Callable, Final, Optional, Pattern, Union
 
 from dateutil.parser import isoparse  # type: ignore[import-untyped]
 
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.formats.base import Format
-
-T = TypeVar("T", bound=BaseCloudEvent)
 
 
 class _JSONEncoderWithDatetime(JSONEncoder):
@@ -47,13 +45,14 @@ class _JSONEncoderWithDatetime(JSONEncoder):
 class JSONFormat(Format):
     CONTENT_TYPE: Final[str] = "application/cloudevents+json"
     JSON_CONTENT_TYPE_PATTERN: Pattern[str] = re.compile(
-        r"^(application|text)\\/([a-zA-Z]+\\+)?json(;.*)*$"
+        r"^(application|text)/([a-zA-Z0-9\-\.]+\+)?json(;.*)?$"
     )
 
-    def read(self, event_klass: Type[T], data: Union[str, bytes]) -> T:
+    def read(self, event_factory: Callable[[dict, Optional[Union[dict, str, bytes]]], BaseCloudEvent], data: Union[str, bytes]) -> BaseCloudEvent:
         """
         Read a CloudEvent from a JSON formatted byte string.
 
+        :param event_factory: A factory function to create CloudEvent instances.
         :param data: The JSON formatted byte array.
         :return: The CloudEvent instance.
         """
@@ -67,16 +66,15 @@ class JSONFormat(Format):
         if "time" in event_attributes:
             event_attributes["time"] = isoparse(event_attributes["time"])
 
-        event_data: Union[str, bytes] = event_attributes.pop("data", None)
+        event_data: Union[dict, str, bytes, None] = event_attributes.pop("data", None)
         if event_data is None:
             event_data_base64 = event_attributes.pop("data_base64", None)
             if event_data_base64 is not None:
                 event_data = base64.b64decode(event_data_base64)
 
-        # disable mypy due to https://github.com/python/mypy/issues/9003
-        return event_klass(event_attributes, event_data)  # type: ignore
+        return event_factory(event_attributes, event_data)
 
-    def write(self, event: T) -> bytes:
+    def write(self, event: BaseCloudEvent) -> bytes:
         """
         Write a CloudEvent to a JSON formatted byte string.
 
@@ -90,12 +88,9 @@ class JSONFormat(Format):
             if isinstance(event_data, (bytes, bytearray)):
                 event_dict["data_base64"] = base64.b64encode(event_data).decode("utf-8")
             else:
-                datacontenttype = event_dict.get(
-                    "datacontenttype", JSONFormat.CONTENT_TYPE
-                )
-                # Should we fail if we can't serialize data to JSON?
+                datacontenttype = event_dict.get("datacontenttype", "application/json")
                 if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype):
-                    event_dict["data"] = dumps(event_data)
+                    event_dict["data"] = event_data
                 else:
                     event_dict["data"] = str(event_data)
 
