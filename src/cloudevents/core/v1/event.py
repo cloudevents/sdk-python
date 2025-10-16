@@ -37,26 +37,9 @@ OPTIONAL_ATTRIBUTES: Final[list[str]] = [
 
 
 class CloudEvent(BaseCloudEvent):
-    """
-    The CloudEvent Python wrapper contract exposing generically-available
-    properties and APIs.
-
-    Implementations might handle fields and have other APIs exposed but are
-    obliged to follow this contract.
-    """
-
     def __init__(
         self, attributes: dict[str, Any], data: Optional[Union[dict, str, bytes]] = None
     ) -> None:
-        """
-        Create a new CloudEvent instance.
-
-        :param attributes: The attributes of the CloudEvent instance.
-        :param data: The payload of the CloudEvent instance.
-
-        :raises ValueError: If any of the required attributes are missing or have invalid values.
-        :raises TypeError: If any of the attributes have invalid types.
-        """
         self._validate_attribute(attributes=attributes)
         self._attributes: dict[str, Any] = attributes
         self._data: Optional[Union[dict, str, bytes]] = data
@@ -246,90 +229,34 @@ class CloudEvent(BaseCloudEvent):
         return errors
 
     def get_id(self) -> str:
-        """
-        Retrieve the ID of the event.
-
-        :return: The ID of the event.
-        """
         return self._attributes["id"]  # type: ignore
 
     def get_source(self) -> str:
-        """
-        Retrieve the source of the event.
-
-        :return: The source of the event.
-        """
         return self._attributes["source"]  # type: ignore
 
     def get_type(self) -> str:
-        """
-        Retrieve the type of the event.
-
-        :return: The type of the event.
-        """
         return self._attributes["type"]  # type: ignore
 
     def get_specversion(self) -> str:
-        """
-        Retrieve the specversion of the event.
-
-        :return: The specversion of the event.
-        """
         return self._attributes["specversion"]  # type: ignore
 
     def get_datacontenttype(self) -> Optional[str]:
-        """
-        Retrieve the datacontenttype of the event.
-
-        :return: The datacontenttype of the event.
-        """
         return self._attributes.get("datacontenttype")
 
     def get_dataschema(self) -> Optional[str]:
-        """
-        Retrieve the dataschema of the event.
-
-        :return: The dataschema of the event.
-        """
         return self._attributes.get("dataschema")
 
     def get_subject(self) -> Optional[str]:
-        """
-        Retrieve the subject of the event.
-
-        :return: The subject of the event.
-        """
         return self._attributes.get("subject")
 
     def get_time(self) -> Optional[datetime]:
-        """
-        Retrieve the time of the event.
-
-        :return: The time of the event.
-        """
         return self._attributes.get("time")
 
     def get_extension(self, extension_name: str) -> Any:
-        """
-        Retrieve an extension attribute of the event.
-
-        :param extension_name: The name of the extension attribute.
-        :return: The value of the extension attribute.
-        """
         return self._attributes.get(extension_name)
 
     def get_data(self) -> Optional[Union[dict, str, bytes]]:
-        """
-        Retrieve data of the event.
-
-        :return: The data of the event.
-        """
         return self._data
 
     def get_attributes(self) -> dict[str, Any]:
-        """
-        Retrieve all attributes of the event.
-
-        :return: The attributes of the event.
-        """
         return self._attributes
