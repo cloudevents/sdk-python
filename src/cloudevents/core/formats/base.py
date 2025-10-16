@@ -19,12 +19,40 @@ from cloudevents.core.base import BaseCloudEvent
 
 
 class Format(Protocol):
+    """
+    Protocol defining the contract for CloudEvent format implementations.
+
+    Format implementations are responsible for serializing and deserializing CloudEvents
+    to and from specific wire formats (e.g., JSON, Avro, Protobuf). Each format must
+    implement both read and write operations to convert between CloudEvent objects and
+    their byte representations according to the CloudEvents specification.
+    """
+
     def read(
         self,
         event_factory: Callable[
             [dict, Optional[Union[dict, str, bytes]]], BaseCloudEvent
         ],
         data: Union[str, bytes],
-    ) -> BaseCloudEvent: ...
+    ) -> BaseCloudEvent:
+        """
+        Deserialize a CloudEvent from its wire format representation.
 
-    def write(self, event: BaseCloudEvent) -> bytes: ...
+        :param event_factory: A factory function that creates CloudEvent instances from
+            attributes and data. The factory should accept a dictionary of attributes and
+            optional event data (dict, str, or bytes).
+        :param data: The serialized CloudEvent data as a string or bytes.
+        :return: A CloudEvent instance constructed from the deserialized data.
+        :raises ValueError: If the data cannot be parsed or is invalid according to the format.
+        """
+        ...
+
+    def write(self, event: BaseCloudEvent) -> bytes:
+        """
+        Serialize a CloudEvent to its wire format representation.
+
+        :param event: The CloudEvent instance to serialize.
+        :return: The CloudEvent serialized as bytes in the format's wire representation.
+        :raises ValueError: If the event cannot be serialized according to the format.
+        """
+        ...
