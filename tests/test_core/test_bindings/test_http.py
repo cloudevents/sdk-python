@@ -13,6 +13,7 @@
 #    under the License.
 
 from datetime import datetime, timezone
+from typing import Any, Callable, Dict, Optional, Union
 
 import pytest
 
@@ -29,7 +30,7 @@ from cloudevents.core.v1.event import CloudEvent
 
 
 @pytest.fixture
-def minimal_attributes():
+def minimal_attributes() -> Dict[str, str]:
     """Minimal valid CloudEvent attributes"""
     return {
         "type": "com.example.test",
@@ -39,9 +40,12 @@ def minimal_attributes():
     }
 
 
-def create_event(extra_attrs=None, data=None):
+def create_event(
+    extra_attrs: Optional[Dict[str, Any]] = None,
+    data: Optional[Union[Dict[str, Any], str, bytes]] = None,
+) -> CloudEvent:
     """Helper to create CloudEvent with valid required attributes"""
-    attrs = {
+    attrs: Dict[str, Any] = {
         "type": "com.example.test",
         "source": "/test",
         "id": "test-id-123",
@@ -52,14 +56,14 @@ def create_event(extra_attrs=None, data=None):
     return CloudEvent(attributes=attrs, data=data)
 
 
-def test_http_message_creation():
+def test_http_message_creation() -> None:
     """Test basic HTTPMessage creation"""
     message = HTTPMessage(headers={"content-type": "application/json"}, body=b"test")
     assert message.headers == {"content-type": "application/json"}
     assert message.body == b"test"
 
 
-def test_http_message_immutable():
+def test_http_message_immutable() -> None:
     """Test that HTTPMessage is immutable (frozen dataclass)"""
     message = HTTPMessage(headers={"test": "value"}, body=b"data")
 
@@ -70,21 +74,21 @@ def test_http_message_immutable():
         message.body = b"new data"  # type: ignore
 
 
-def test_http_message_with_empty_headers():
+def test_http_message_with_empty_headers() -> None:
     """Test HTTPMessage with empty headers"""
     message = HTTPMessage(headers={}, body=b"test")
     assert message.headers == {}
     assert message.body == b"test"
 
 
-def test_http_message_with_empty_body():
+def test_http_message_with_empty_body() -> None:
     """Test HTTPMessage with empty body"""
     message = HTTPMessage(headers={"test": "value"}, body=b"")
     assert message.headers == {"test": "value"}
     assert message.body == b""
 
 
-def test_http_message_equality():
+def test_http_message_equality() -> None:
     """Test HTTPMessage equality comparison"""
     msg1 = HTTPMessage(headers={"test": "value"}, body=b"data")
     msg2 = HTTPMessage(headers={"test": "value"}, body=b"data")
@@ -94,14 +98,14 @@ def test_http_message_equality():
     assert msg1 != msg3
 
 
-def test_to_binary_returns_http_message():
+def test_to_binary_returns_http_message() -> None:
     """Test that to_binary returns an HTTPMessage instance"""
     event = create_event()
     message = to_binary(event, JSONFormat())
     assert isinstance(message, HTTPMessage)
 
 
-def test_to_binary_required_attributes():
+def test_to_binary_required_attributes() -> None:
     """Test to_binary with only required attributes"""
     event = create_event()
     message = to_binary(event, JSONFormat())
@@ -116,7 +120,7 @@ def test_to_binary_required_attributes():
     assert message.headers["ce-specversion"] == "1.0"
 
 
-def test_to_binary_with_optional_attributes():
+def test_to_binary_with_optional_attributes() -> None:
     """Test to_binary with optional attributes"""
     event = create_event(
         {"subject": "test-subject", "dataschema": "https://example.com/schema"},
@@ -129,7 +133,7 @@ def test_to_binary_with_optional_attributes():
     assert message.headers["ce-dataschema"] == "https%3A%2F%2Fexample.com%2Fschema"
 
 
-def test_to_binary_with_extensions():
+def test_to_binary_with_extensions() -> None:
     """Test to_binary with extension attributes"""
     event = create_event(
         {"customext": "custom-value", "anotherext": "another-value"},
@@ -141,7 +145,7 @@ def test_to_binary_with_extensions():
     assert message.headers["ce-anotherext"] == "another-value"
 
 
-def test_to_binary_with_json_data():
+def test_to_binary_with_json_data() -> None:
     """Test to_binary with dict (JSON) data"""
     event = create_event(
         {"datacontenttype": "application/json"},
@@ -153,7 +157,7 @@ def test_to_binary_with_json_data():
     assert message.headers["content-type"] == "application/json"
 
 
-def test_to_binary_with_string_data():
+def test_to_binary_with_string_data() -> None:
     """Test to_binary with string data"""
     event = create_event(
         {"datacontenttype": "text/plain"},
@@ -165,7 +169,7 @@ def test_to_binary_with_string_data():
     assert message.headers["content-type"] == "text/plain"
 
 
-def test_to_binary_with_bytes_data():
+def test_to_binary_with_bytes_data() -> None:
     """Test to_binary with bytes data"""
     event = create_event(
         {"datacontenttype": "application/octet-stream"},
@@ -177,7 +181,7 @@ def test_to_binary_with_bytes_data():
     assert message.headers["content-type"] == "application/octet-stream"
 
 
-def test_to_binary_with_none_data():
+def test_to_binary_with_none_data() -> None:
     """Test to_binary with None data"""
     event = create_event()
     message = to_binary(event, JSONFormat())
@@ -185,7 +189,7 @@ def test_to_binary_with_none_data():
     assert message.body == b""
 
 
-def test_to_binary_datetime_encoding():
+def test_to_binary_datetime_encoding() -> None:
     """Test to_binary with datetime (time attribute)"""
     dt = datetime(2023, 1, 15, 10, 30, 45, tzinfo=timezone.utc)
     event = create_event(
@@ -199,7 +203,7 @@ def test_to_binary_datetime_encoding():
     assert "2023-01-15T10%3A30%3A45Z" in message.headers["ce-time"]
 
 
-def test_to_binary_special_characters():
+def test_to_binary_special_characters() -> None:
     """Test to_binary with special characters in attributes"""
     event = create_event(
         {"subject": "Hello World!"},
@@ -213,7 +217,7 @@ def test_to_binary_special_characters():
     assert "Hello%20World%21" == message.headers["ce-subject"]
 
 
-def test_to_binary_datacontenttype_mapping():
+def test_to_binary_datacontenttype_mapping() -> None:
     """Test that datacontenttype maps to Content-Type header"""
     event = create_event(
         {"datacontenttype": "application/xml"},
@@ -225,7 +229,7 @@ def test_to_binary_datacontenttype_mapping():
     assert message.headers["content-type"] == "application/xml"
 
 
-def test_to_binary_no_ce_prefix_on_content_type():
+def test_to_binary_no_ce_prefix_on_content_type() -> None:
     """Test that Content-Type header does not have ce- prefix"""
     event = create_event(
         {"datacontenttype": "application/json"},
@@ -237,7 +241,7 @@ def test_to_binary_no_ce_prefix_on_content_type():
     assert "ce-datacontenttype" not in message.headers
 
 
-def test_to_binary_header_encoding():
+def test_to_binary_header_encoding() -> None:
     """Test percent encoding in headers"""
     event = create_event(
         {"subject": "test with spaces and special: chars"},
@@ -252,7 +256,7 @@ def test_to_binary_header_encoding():
     assert "%3A" in encoded_subject  # Encoded colon
 
 
-def test_from_binary_accepts_http_message():
+def test_from_binary_accepts_http_message() -> None:
     """Test that from_binary accepts HTTPMessage parameter"""
     message = HTTPMessage(
         headers={
@@ -267,7 +271,7 @@ def test_from_binary_accepts_http_message():
     assert event.get_type() == "com.example.test"
 
 
-def test_from_binary_required_attributes():
+def test_from_binary_required_attributes() -> None:
     """Test from_binary parsing required attributes"""
     message = HTTPMessage(
         headers={
@@ -286,7 +290,7 @@ def test_from_binary_required_attributes():
     assert event.get_specversion() == "1.0"
 
 
-def test_from_binary_with_optional_attributes():
+def test_from_binary_with_optional_attributes() -> None:
     """Test from_binary with optional attributes"""
     message = HTTPMessage(
         headers={
@@ -305,7 +309,7 @@ def test_from_binary_with_optional_attributes():
     assert event.get_dataschema() == "https://example.com/schema"
 
 
-def test_from_binary_with_extensions():
+def test_from_binary_with_extensions() -> None:
     """Test from_binary with extension attributes"""
     message = HTTPMessage(
         headers={
@@ -323,7 +327,7 @@ def test_from_binary_with_extensions():
     assert attributes["customext"] == "custom-value"
 
 
-def test_from_binary_with_json_data():
+def test_from_binary_with_json_data() -> None:
     """Test from_binary with JSON body"""
     message = HTTPMessage(
         headers={
@@ -343,7 +347,7 @@ def test_from_binary_with_json_data():
     assert data["count"] == 42
 
 
-def test_from_binary_with_text_data():
+def test_from_binary_with_text_data() -> None:
     """Test from_binary with text body"""
     message = HTTPMessage(
         headers={
@@ -361,7 +365,7 @@ def test_from_binary_with_text_data():
     assert data == "Hello World"
 
 
-def test_from_binary_with_bytes_data():
+def test_from_binary_with_bytes_data() -> None:
     """Test from_binary with binary body"""
     # Use bytes that are NOT valid UTF-8 to test binary handling
     message = HTTPMessage(
@@ -382,7 +386,7 @@ def test_from_binary_with_bytes_data():
     assert data == b"\xff\xfe\xfd\xfc"
 
 
-def test_from_binary_datetime_parsing():
+def test_from_binary_datetime_parsing() -> None:
     """Test from_binary parsing time attribute"""
     message = HTTPMessage(
         headers={
@@ -403,7 +407,7 @@ def test_from_binary_datetime_parsing():
     assert time.day == 15
 
 
-def test_from_binary_header_decoding():
+def test_from_binary_header_decoding() -> None:
     """Test percent decoding of headers"""
     message = HTTPMessage(
         headers={
@@ -421,7 +425,7 @@ def test_from_binary_header_decoding():
     assert event.get_subject() == "Hello World!"
 
 
-def test_from_binary_case_insensitive_headers():
+def test_from_binary_case_insensitive_headers() -> None:
     """Test that header parsing is case-insensitive"""
     message = HTTPMessage(
         headers={
@@ -439,7 +443,7 @@ def test_from_binary_case_insensitive_headers():
     assert event.get_source() == "/test"
 
 
-def test_from_binary_content_type_as_datacontenttype():
+def test_from_binary_content_type_as_datacontenttype() -> None:
     """Test that Content-Type header becomes datacontenttype attribute"""
     message = HTTPMessage(
         headers={
@@ -456,7 +460,7 @@ def test_from_binary_content_type_as_datacontenttype():
     assert event.get_datacontenttype() == "application/xml"
 
 
-def test_from_binary_round_trip():
+def test_from_binary_round_trip() -> None:
     """Test that to_binary followed by from_binary preserves the event"""
     original = create_event(
         {"subject": "round-trip", "datacontenttype": "application/json"},
@@ -479,14 +483,14 @@ def test_from_binary_round_trip():
     assert parsed.get_data() == original.get_data()
 
 
-def test_to_structured_returns_http_message():
+def test_to_structured_returns_http_message() -> None:
     """Test that to_structured returns an HTTPMessage instance"""
     event = create_event()
     message = to_structured(event, JSONFormat())
     assert isinstance(message, HTTPMessage)
 
 
-def test_to_structured_basic_event():
+def test_to_structured_basic_event() -> None:
     """Test to_structured with basic event"""
     event = create_event()
     message = to_structured(event, JSONFormat())
@@ -500,7 +504,7 @@ def test_to_structured_basic_event():
     assert b"com.example.test" in message.body
 
 
-def test_to_structured_content_type_header():
+def test_to_structured_content_type_header() -> None:
     """Test that to_structured sets correct Content-Type header"""
     event = create_event()
     message = to_structured(event, JSONFormat())
@@ -509,7 +513,7 @@ def test_to_structured_content_type_header():
     assert message.headers["content-type"] == "application/cloudevents+json"
 
 
-def test_to_structured_with_all_attributes():
+def test_to_structured_with_all_attributes() -> None:
     """Test to_structured with all attributes"""
     event = create_event(
         {
@@ -532,7 +536,7 @@ def test_to_structured_with_all_attributes():
     assert b'"data"' in message.body
 
 
-def test_to_structured_with_binary_data():
+def test_to_structured_with_binary_data() -> None:
     """Test to_structured with binary data"""
     event = create_event(
         data=b"\x00\x01\x02\x03",
@@ -544,7 +548,7 @@ def test_to_structured_with_binary_data():
     assert b'"data"' not in message.body  # Should not have 'data' field
 
 
-def test_from_structured_accepts_http_message():
+def test_from_structured_accepts_http_message() -> None:
     """Test that from_structured accepts HTTPMessage parameter"""
     message = HTTPMessage(
         headers={"content-type": "application/cloudevents+json"},
@@ -554,7 +558,7 @@ def test_from_structured_accepts_http_message():
     assert event.get_type() == "com.example.test"
 
 
-def test_from_structured_basic_event():
+def test_from_structured_basic_event() -> None:
     """Test from_structured with basic event"""
     message = HTTPMessage(
         headers={"content-type": "application/cloudevents+json"},
@@ -568,7 +572,7 @@ def test_from_structured_basic_event():
     assert event.get_specversion() == "1.0"
 
 
-def test_from_structured_round_trip():
+def test_from_structured_round_trip() -> None:
     """Test that to_structured followed by from_structured preserves the event"""
     original = create_event(
         {
@@ -595,7 +599,7 @@ def test_from_structured_round_trip():
     assert parsed.get_data() == original.get_data()
 
 
-def test_from_http_accepts_http_message():
+def test_from_http_accepts_http_message() -> None:
     """Test that from_http accepts HTTPMessage parameter"""
     message = HTTPMessage(
         headers={
@@ -610,7 +614,7 @@ def test_from_http_accepts_http_message():
     assert event.get_type() == "com.example.test"
 
 
-def test_from_http_detects_binary_mode():
+def test_from_http_detects_binary_mode() -> None:
     """Test that from_http detects binary mode from ce- headers"""
     message = HTTPMessage(
         headers={
@@ -627,7 +631,7 @@ def test_from_http_detects_binary_mode():
     assert event.get_source() == "/test"
 
 
-def test_from_http_detects_structured_mode():
+def test_from_http_detects_structured_mode() -> None:
     """Test that from_http detects structured mode when no ce- headers"""
     message = HTTPMessage(
         headers={"content-type": "application/cloudevents+json"},
@@ -639,7 +643,7 @@ def test_from_http_detects_structured_mode():
     assert event.get_source() == "/test"
 
 
-def test_from_http_binary_mode_with_content_type():
+def test_from_http_binary_mode_with_content_type() -> None:
     """Test from_http with binary mode and Content-Type"""
     message = HTTPMessage(
         headers={
@@ -659,7 +663,7 @@ def test_from_http_binary_mode_with_content_type():
     assert data["message"] == "Hello"
 
 
-def test_from_http_structured_mode_json():
+def test_from_http_structured_mode_json() -> None:
     """Test from_http with structured JSON event"""
     message = HTTPMessage(
         headers={"content-type": "application/cloudevents+json"},
@@ -669,10 +673,11 @@ def test_from_http_structured_mode_json():
 
     assert event.get_type() == "com.example.test"
     data = event.get_data()
+    assert isinstance(data, dict)
     assert data["msg"] == "Hi"
 
 
-def test_from_http_defaults_to_structured():
+def test_from_http_defaults_to_structured() -> None:
     """Test that from_http defaults to structured mode when ambiguous"""
     message = HTTPMessage(
         headers={"content-type": "application/json"},
@@ -684,7 +689,7 @@ def test_from_http_defaults_to_structured():
     assert event.get_type() == "com.example.test"
 
 
-def test_from_http_case_insensitive_detection():
+def test_from_http_case_insensitive_detection() -> None:
     """Test that from_http detection is case-insensitive"""
     message = HTTPMessage(
         headers={
@@ -701,7 +706,7 @@ def test_from_http_case_insensitive_detection():
     assert event.get_type() == "com.example.test"
 
 
-def test_from_http_mixed_headers():
+def test_from_http_mixed_headers() -> None:
     """Test from_http when both ce- headers and structured content are present"""
     message = HTTPMessage(
         headers={
@@ -720,7 +725,7 @@ def test_from_http_mixed_headers():
     assert event.get_source() == "/binary"
 
 
-def test_percent_encoding_special_chars():
+def test_percent_encoding_special_chars() -> None:
     """Test percent encoding of special characters"""
     event = create_event(
         {"subject": 'Hello World! "quotes" & special'},
@@ -735,7 +740,7 @@ def test_percent_encoding_special_chars():
     assert "&" not in encoded
 
 
-def test_percent_encoding_unicode():
+def test_percent_encoding_unicode() -> None:
     """Test percent encoding of unicode characters"""
     event = create_event(
         {"subject": "Hello 世界 🌍"},
@@ -750,7 +755,7 @@ def test_percent_encoding_unicode():
     assert "%" in encoded  # Should have percent-encoded bytes
 
 
-def test_percent_decoding_round_trip():
+def test_percent_decoding_round_trip() -> None:
     """Test that percent encoding/decoding is reversible"""
     original_subject = 'Test: "quotes", spaces & unicode 世界'
     event = create_event(
@@ -768,7 +773,7 @@ def test_percent_decoding_round_trip():
     assert parsed.get_subject() == original_subject
 
 
-def test_datetime_encoding_utc():
+def test_datetime_encoding_utc() -> None:
     """Test datetime encoding for UTC timezone"""
     dt_utc = datetime(2023, 6, 15, 14, 30, 45, tzinfo=timezone.utc)
     event = create_event(
@@ -782,7 +787,7 @@ def test_datetime_encoding_utc():
     assert "Z" in time_header or "%5A" in time_header  # Z or encoded Z
 
 
-def test_datetime_encoding_non_utc():
+def test_datetime_encoding_non_utc() -> None:
     """Test datetime encoding for non-UTC timezone"""
     from datetime import timedelta
 
@@ -802,7 +807,7 @@ def test_datetime_encoding_non_utc():
     assert "ce-time" in message.headers
 
 
-def test_datetime_parsing_rfc3339():
+def test_datetime_parsing_rfc3339() -> None:
     """Test parsing various RFC 3339 datetime formats"""
     test_cases = [
         "2023-01-15T10:30:45Z",
@@ -829,7 +834,7 @@ def test_datetime_parsing_rfc3339():
         assert isinstance(time, datetime)
 
 
-def test_http_binary_with_json_format():
+def test_http_binary_with_json_format() -> None:
     """Test complete binary mode flow with JSON format"""
     # Create event
     event = create_event(
@@ -859,10 +864,12 @@ def test_http_binary_with_json_format():
     # Verify round-trip
     assert parsed.get_type() == event.get_type()
     assert parsed.get_source() == event.get_source()
-    assert parsed.get_data()["orderId"] == "123"
+    parsed_data = parsed.get_data()
+    assert isinstance(parsed_data, dict)
+    assert parsed_data["orderId"] == "123"
 
 
-def test_http_structured_with_json_format():
+def test_http_structured_with_json_format() -> None:
     """Test complete structured mode flow with JSON format"""
     # Create event
     event = create_event(
@@ -892,13 +899,17 @@ def test_http_structured_with_json_format():
     # Verify round-trip
     assert parsed.get_type() == event.get_type()
     assert parsed.get_source() == event.get_source()
-    assert parsed.get_data()["userId"] == "user-456"
+    parsed_data = parsed.get_data()
+    assert isinstance(parsed_data, dict)
+    assert parsed_data["userId"] == "user-456"
 
 
-def test_custom_event_factory():
+def test_custom_event_factory() -> None:
     """Test using custom event factory function"""
 
-    def custom_factory(attributes, data):
+    def custom_factory(
+        attributes: Dict[str, Any], data: Optional[Union[Dict[str, Any], str, bytes]]
+    ) -> CloudEvent:
         # Custom factory that adds a prefix to the type
         attributes["type"] = f"custom.{attributes.get('type', 'unknown')}"
         return CloudEvent(attributes, data)
@@ -919,7 +930,7 @@ def test_custom_event_factory():
     assert event.get_type() == "custom.test.event"
 
 
-def test_real_world_scenario():
+def test_real_world_scenario() -> None:
     """Test a realistic end-to-end scenario"""
     # Simulate a webhook notification
     original_event = create_event(
@@ -951,6 +962,7 @@ def test_real_world_scenario():
     assert received_event.get_subject() == "refs/heads/main"
 
     data = received_event.get_data()
+    assert isinstance(data, dict)
     assert data["ref"] == "refs/heads/main"
     assert len(data["commits"]) == 2
     assert data["commits"][0]["message"] == "Fix bug"
