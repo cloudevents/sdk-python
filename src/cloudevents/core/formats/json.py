@@ -19,7 +19,7 @@ from datetime import datetime
 from json import JSONEncoder, dumps, loads
 from typing import Any, Callable, Dict, Final, Optional, Pattern, Union
 
-from dateutil.parser import isoparse
+from dateutil.parser import isoparse  # type: ignore[import-untyped]
 
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.formats.base import Format

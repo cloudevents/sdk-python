@@ -68,10 +68,10 @@ def test_http_message_immutable() -> None:
     message = HTTPMessage(headers={"test": "value"}, body=b"data")
 
     with pytest.raises(Exception):  # FrozenInstanceError
-        message.headers = {"new": "dict"}  # type: ignore
+        message.headers = {"new": "dict"}  # type: ignore[misc]
 
     with pytest.raises(Exception):  # FrozenInstanceError
-        message.body = b"new data"  # type: ignore
+        message.body = b"new data"  # type: ignore[misc]
 
 
 def test_http_message_with_empty_headers() -> None:
