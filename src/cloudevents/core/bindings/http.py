@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import Any, Callable, Dict, Optional, Union
 from urllib.parse import quote, unquote
 
-from dateutil.parser import isoparse  # type: ignore[import-untyped]
+from dateutil.parser import isoparse
 
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.formats.base import Format
