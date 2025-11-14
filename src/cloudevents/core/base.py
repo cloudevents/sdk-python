@@ -14,7 +14,7 @@
 
 
 from datetime import datetime
-from typing import Any, Optional, Protocol, Union
+from typing import Any, Dict, Optional, Protocol, Union
 
 
 class BaseCloudEvent(Protocol):
@@ -27,7 +27,9 @@ class BaseCloudEvent(Protocol):
     """
 
     def __init__(
-        self, attributes: dict[str, Any], data: Optional[Union[dict, str, bytes]] = None
+        self,
+        attributes: Dict[str, Any],
+        data: Optional[Union[Dict[str, Any], str, bytes]] = None,
     ) -> None:
         """
         Create a new CloudEvent instance.
@@ -113,7 +115,7 @@ class BaseCloudEvent(Protocol):
         """
         ...
 
-    def get_data(self) -> Optional[Union[dict, str, bytes]]:
+    def get_data(self) -> Optional[Union[Dict[str, Any], str, bytes]]:
         """
         Retrieve data of the event.
 

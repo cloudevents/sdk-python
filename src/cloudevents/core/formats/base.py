@@ -13,7 +13,7 @@
 #    under the License.
 
 
-from typing import Callable, Optional, Protocol, Union
+from typing import Any, Callable, Dict, Optional, Protocol, Union
 
 from cloudevents.core.base import BaseCloudEvent
 
@@ -31,7 +31,8 @@ class Format(Protocol):
     def read(
         self,
         event_factory: Callable[
-            [dict, Optional[Union[dict, str, bytes]]], BaseCloudEvent
+            [Dict[str, Any], Optional[Union[Dict[str, Any], str, bytes]]],
+            BaseCloudEvent,
         ],
         data: Union[str, bytes],
     ) -> BaseCloudEvent:
@@ -54,5 +55,39 @@ class Format(Protocol):
         :param event: The CloudEvent instance to serialize.
         :return: The CloudEvent serialized as bytes in the format's wire representation.
         :raises ValueError: If the event cannot be serialized according to the format.
+        """
+        ...
+
+    def write_data(
+        self,
+        data: Optional[Union[Dict[str, Any], str, bytes]],
+        datacontenttype: Optional[str],
+    ) -> bytes:
+        """
+        Serialize just the data payload for protocol bindings (e.g., HTTP binary mode).
+
+        :param data: Event data to serialize (dict, str, bytes, or None)
+        :param datacontenttype: Content type of the data
+        :return: Serialized data as bytes
+        """
+        ...
+
+    def read_data(
+        self, body: bytes, datacontenttype: Optional[str]
+    ) -> Optional[Union[Dict[str, Any], str, bytes]]:
+        """
+        Deserialize data payload from protocol bindings (e.g., HTTP binary mode).
+
+        :param body: HTTP body as bytes
+        :param datacontenttype: Content type of the data
+        :return: Deserialized data (dict for JSON, str for text, bytes for binary)
+        """
+        ...
+
+    def get_content_type(self) -> str:
+        """
+        Get the Content-Type header value for structured mode.
+
+        :return: Content type string for CloudEvents structured content mode
         """
         ...
