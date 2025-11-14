@@ -1,9 +1,8 @@
 name: CI
 
-on: [ push, pull_request ]
+on: [push, pull_request]
 
 jobs:
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -23,8 +22,8 @@ jobs:
   test:
     strategy:
       matrix:
-        python-version: [ '3.9', '3.10', '3.11', '3.12' ]
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        python-version: ["3.10", "3.11", "3.12"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
