@@ -15,7 +15,7 @@
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Final, Optional, Union
+from typing import Any, Final
 
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.v1.exceptions import (
@@ -40,11 +40,11 @@ class CloudEvent(BaseCloudEvent):
     def __init__(
         self,
         attributes: dict[str, Any],
-        data: Optional[Union[dict[str, Any], str, bytes]] = None,
+        data: dict[str, Any] | str | bytes | None = None,
     ) -> None:
         self._validate_attribute(attributes=attributes)
         self._attributes: dict[str, Any] = attributes
-        self._data: Optional[Union[dict[str, Any], str, bytes]] = data
+        self._data: dict[str, Any] | str | bytes | None = data
 
     @staticmethod
     def _validate_attribute(attributes: dict[str, Any]) -> None:
@@ -242,22 +242,22 @@ class CloudEvent(BaseCloudEvent):
     def get_specversion(self) -> str:
         return self._attributes["specversion"]  # type: ignore
 
-    def get_datacontenttype(self) -> Optional[str]:
+    def get_datacontenttype(self) -> str | None:
         return self._attributes.get("datacontenttype")
 
-    def get_dataschema(self) -> Optional[str]:
+    def get_dataschema(self) -> str | None:
         return self._attributes.get("dataschema")
 
-    def get_subject(self) -> Optional[str]:
+    def get_subject(self) -> str | None:
         return self._attributes.get("subject")
 
-    def get_time(self) -> Optional[datetime]:
+    def get_time(self) -> datetime | None:
         return self._attributes.get("time")
 
     def get_extension(self, extension_name: str) -> Any:
         return self._attributes.get(extension_name)
 
-    def get_data(self) -> Optional[Union[dict[str, Any], str, bytes]]:
+    def get_data(self) -> dict[str, Any] | str | bytes | None:
         return self._data
 
     def get_attributes(self) -> dict[str, Any]:

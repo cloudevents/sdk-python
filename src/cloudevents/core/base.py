@@ -12,9 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 from datetime import datetime
-from typing import Any, Optional, Protocol, Union
+from typing import Any, Protocol
 
 
 class BaseCloudEvent(Protocol):
@@ -29,7 +28,7 @@ class BaseCloudEvent(Protocol):
     def __init__(
         self,
         attributes: dict[str, Any],
-        data: Optional[Union[dict[str, Any], str, bytes]] = None,
+        data: dict[str, Any] | str | bytes | None = None,
     ) -> None:
         """
         Create a new CloudEvent instance.
@@ -74,7 +73,7 @@ class BaseCloudEvent(Protocol):
         """
         ...
 
-    def get_datacontenttype(self) -> Optional[str]:
+    def get_datacontenttype(self) -> str | None:
         """
         Retrieve the datacontenttype of the event.
 
@@ -82,7 +81,7 @@ class BaseCloudEvent(Protocol):
         """
         ...
 
-    def get_dataschema(self) -> Optional[str]:
+    def get_dataschema(self) -> str | None:
         """
         Retrieve the dataschema of the event.
 
@@ -90,7 +89,7 @@ class BaseCloudEvent(Protocol):
         """
         ...
 
-    def get_subject(self) -> Optional[str]:
+    def get_subject(self) -> str | None:
         """
         Retrieve the subject of the event.
 
@@ -98,7 +97,7 @@ class BaseCloudEvent(Protocol):
         """
         ...
 
-    def get_time(self) -> Optional[datetime]:
+    def get_time(self) -> datetime | None:
         """
         Retrieve the time of the event.
 
@@ -115,7 +114,7 @@ class BaseCloudEvent(Protocol):
         """
         ...
 
-    def get_data(self) -> Optional[Union[dict[str, Any], str, bytes]]:
+    def get_data(self) -> dict[str, Any] | str | bytes | None:
         """
         Retrieve data of the event.
 

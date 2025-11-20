@@ -14,7 +14,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Callable, Final, Optional, Union
+from typing import Any, Callable, Final
 from urllib.parse import quote, unquote
 
 from dateutil.parser import isoparse
@@ -140,7 +140,7 @@ def from_binary(
     message: HTTPMessage,
     event_format: Format,
     event_factory: Callable[
-        [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]], BaseCloudEvent
+        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
     ],
 ) -> BaseCloudEvent:
     """
@@ -221,7 +221,7 @@ def from_structured(
     message: HTTPMessage,
     event_format: Format,
     event_factory: Callable[
-        [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]], BaseCloudEvent
+        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
     ],
 ) -> BaseCloudEvent:
     """
@@ -252,7 +252,7 @@ def from_http(
     message: HTTPMessage,
     event_format: Format,
     event_factory: Callable[
-        [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]], BaseCloudEvent
+        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
     ],
 ) -> BaseCloudEvent:
     """

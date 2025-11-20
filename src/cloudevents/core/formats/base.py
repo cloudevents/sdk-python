@@ -12,8 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-from typing import Any, Callable, Optional, Protocol, Union
+from typing import Any, Callable, Protocol
 
 from cloudevents.core.base import BaseCloudEvent
 
@@ -31,10 +30,10 @@ class Format(Protocol):
     def read(
         self,
         event_factory: Callable[
-            [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]],
+            [dict[str, Any], dict[str, Any] | str | bytes | None],
             BaseCloudEvent,
         ],
-        data: Union[str, bytes],
+        data: str | bytes,
     ) -> BaseCloudEvent:
         """
         Deserialize a CloudEvent from its wire format representation.
@@ -60,8 +59,8 @@ class Format(Protocol):
 
     def write_data(
         self,
-        data: Optional[Union[dict[str, Any], str, bytes]],
-        datacontenttype: Optional[str],
+        data: dict[str, Any] | str | bytes | None,
+        datacontenttype: str | None,
     ) -> bytes:
         """
         Serialize just the data payload for protocol bindings (e.g., HTTP binary mode).
@@ -73,8 +72,8 @@ class Format(Protocol):
         ...
 
     def read_data(
-        self, body: bytes, datacontenttype: Optional[str]
-    ) -> Optional[Union[dict[str, Any], str, bytes]]:
+        self, body: bytes, datacontenttype: str | None
+    ) -> dict[str, Any] | str | bytes | None:
         """
         Deserialize data payload from protocol bindings (e.g., HTTP binary mode).
 

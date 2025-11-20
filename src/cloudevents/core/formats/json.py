@@ -12,12 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 import base64
 import re
 from datetime import datetime
 from json import JSONEncoder, dumps, loads
-from typing import Any, Callable, Final, Optional, Pattern, Union
+from typing import Any, Callable, Final, Pattern
 
 from dateutil.parser import isoparse
 
@@ -51,10 +50,10 @@ class JSONFormat(Format):
     def read(
         self,
         event_factory: Callable[
-            [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]],
+            [dict[str, Any], dict[str, Any] | str | bytes | None],
             BaseCloudEvent,
         ],
-        data: Union[str, bytes],
+        data: str | bytes,
     ) -> BaseCloudEvent:
         """
         Read a CloudEvent from a JSON formatted byte string.
@@ -74,7 +73,7 @@ class JSONFormat(Format):
         if "time" in event_attributes:
             event_attributes["time"] = isoparse(event_attributes["time"])
 
-        event_data: Union[dict[str, Any], str, bytes, None] = event_attributes.pop(
+        event_data: dict[str, Any] | str | bytes | None = event_attributes.pop(
             "data", None
         )
         if event_data is None:
@@ -108,8 +107,8 @@ class JSONFormat(Format):
 
     def write_data(
         self,
-        data: Optional[Union[dict[str, Any], str, bytes]],
-        datacontenttype: Optional[str],
+        data: dict[str, Any] | str | bytes | None,
+        datacontenttype: str | None,
     ) -> bytes:
         """
         Serialize just the data payload for HTTP binary mode.
@@ -143,8 +142,8 @@ class JSONFormat(Format):
         return str(data).encode("utf-8")
 
     def read_data(
-        self, body: bytes, datacontenttype: Optional[str]
-    ) -> Optional[Union[dict[str, Any], str, bytes]]:
+        self, body: bytes, datacontenttype: str | None
+    ) -> dict[str, Any] | str | bytes | None:
         """
         Deserialize data payload from HTTP binary mode body.
 

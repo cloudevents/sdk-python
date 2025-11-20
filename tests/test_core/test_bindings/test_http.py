@@ -13,7 +13,7 @@
 #    under the License.
 
 from datetime import datetime, timezone
-from typing import Any, Optional, Union
+from typing import Any
 
 import pytest
 
@@ -41,8 +41,8 @@ def minimal_attributes() -> dict[str, str]:
 
 
 def create_event(
-    extra_attrs: Optional[dict[str, Any]] = None,
-    data: Optional[Union[dict[str, Any], str, bytes]] = None,
+    extra_attrs: dict[str, Any] | None = None,
+    data: dict[str, Any] | str | bytes | None = None,
 ) -> CloudEvent:
     """Helper to create CloudEvent with valid required attributes"""
     attrs: dict[str, Any] = {
@@ -908,7 +908,7 @@ def test_custom_event_factory() -> None:
     """Test using custom event factory function"""
 
     def custom_factory(
-        attributes: dict[str, Any], data: Optional[Union[dict[str, Any], str, bytes]]
+        attributes: dict[str, Any], data: dict[str, Any] | str | bytes | None
     ) -> CloudEvent:
         # Custom factory that adds a prefix to the type
         attributes["type"] = f"custom.{attributes.get('type', 'unknown')}"
