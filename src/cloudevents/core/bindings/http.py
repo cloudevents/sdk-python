@@ -288,10 +288,7 @@ def from_http(
     :param event_factory: Factory function to create CloudEvent instances
     :return: CloudEvent instance
     """
-    normalized_headers = _normalize_headers(message.headers)
-
-    for header_name in normalized_headers.keys():
-        if header_name.startswith(CE_PREFIX):
-            return from_binary(message, event_format, event_factory)
+    if any(key.lower().startswith(CE_PREFIX) for key in message.headers.keys()):
+        return from_binary(message, event_format, event_factory)
 
     return from_structured(message, event_format, event_factory)
