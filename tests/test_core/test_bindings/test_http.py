@@ -13,7 +13,7 @@
 #    under the License.
 
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import pytest
 
@@ -30,7 +30,7 @@ from cloudevents.core.v1.event import CloudEvent
 
 
 @pytest.fixture
-def minimal_attributes() -> Dict[str, str]:
+def minimal_attributes() -> dict[str, str]:
     """Minimal valid CloudEvent attributes"""
     return {
         "type": "com.example.test",
@@ -41,11 +41,11 @@ def minimal_attributes() -> Dict[str, str]:
 
 
 def create_event(
-    extra_attrs: Optional[Dict[str, Any]] = None,
-    data: Optional[Union[Dict[str, Any], str, bytes]] = None,
+    extra_attrs: Optional[dict[str, Any]] = None,
+    data: Optional[Union[dict[str, Any], str, bytes]] = None,
 ) -> CloudEvent:
     """Helper to create CloudEvent with valid required attributes"""
-    attrs: Dict[str, Any] = {
+    attrs: dict[str, Any] = {
         "type": "com.example.test",
         "source": "/test",
         "id": "test-id-123",
@@ -68,10 +68,10 @@ def test_http_message_immutable() -> None:
     message = HTTPMessage(headers={"test": "value"}, body=b"data")
 
     with pytest.raises(Exception):  # FrozenInstanceError
-        message.headers = {"new": "dict"}  # type: ignore[misc]
+        message.headers = {"new": "dict"}
 
     with pytest.raises(Exception):  # FrozenInstanceError
-        message.body = b"new data"  # type: ignore[misc]
+        message.body = b"new data"
 
 
 def test_http_message_with_empty_headers() -> None:
@@ -908,7 +908,7 @@ def test_custom_event_factory() -> None:
     """Test using custom event factory function"""
 
     def custom_factory(
-        attributes: Dict[str, Any], data: Optional[Union[Dict[str, Any], str, bytes]]
+        attributes: dict[str, Any], data: Optional[Union[dict[str, Any], str, bytes]]
     ) -> CloudEvent:
         # Custom factory that adds a prefix to the type
         attributes["type"] = f"custom.{attributes.get('type', 'unknown')}"

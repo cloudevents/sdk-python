@@ -13,7 +13,7 @@
 #    under the License.
 
 
-from typing import Any, Callable, Dict, Optional, Protocol, Union
+from typing import Any, Callable, Optional, Protocol, Union
 
 from cloudevents.core.base import BaseCloudEvent
 
@@ -31,7 +31,7 @@ class Format(Protocol):
     def read(
         self,
         event_factory: Callable[
-            [Dict[str, Any], Optional[Union[Dict[str, Any], str, bytes]]],
+            [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]],
             BaseCloudEvent,
         ],
         data: Union[str, bytes],
@@ -60,7 +60,7 @@ class Format(Protocol):
 
     def write_data(
         self,
-        data: Optional[Union[Dict[str, Any], str, bytes]],
+        data: Optional[Union[dict[str, Any], str, bytes]],
         datacontenttype: Optional[str],
     ) -> bytes:
         """
@@ -74,7 +74,7 @@ class Format(Protocol):
 
     def read_data(
         self, body: bytes, datacontenttype: Optional[str]
-    ) -> Optional[Union[Dict[str, Any], str, bytes]]:
+    ) -> Optional[Union[dict[str, Any], str, bytes]]:
         """
         Deserialize data payload from protocol bindings (e.g., HTTP binary mode).
 

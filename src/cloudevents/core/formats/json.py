@@ -17,7 +17,7 @@ import base64
 import re
 from datetime import datetime
 from json import JSONEncoder, dumps, loads
-from typing import Any, Callable, Dict, Final, Optional, Pattern, Union
+from typing import Any, Callable, Final, Optional, Pattern, Union
 
 from dateutil.parser import isoparse
 
@@ -51,7 +51,7 @@ class JSONFormat(Format):
     def read(
         self,
         event_factory: Callable[
-            [Dict[str, Any], Optional[Union[Dict[str, Any], str, bytes]]],
+            [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]],
             BaseCloudEvent,
         ],
         data: Union[str, bytes],
@@ -74,7 +74,7 @@ class JSONFormat(Format):
         if "time" in event_attributes:
             event_attributes["time"] = isoparse(event_attributes["time"])
 
-        event_data: Union[Dict[str, Any], str, bytes, None] = event_attributes.pop(
+        event_data: Union[dict[str, Any], str, bytes, None] = event_attributes.pop(
             "data", None
         )
         if event_data is None:
@@ -108,7 +108,7 @@ class JSONFormat(Format):
 
     def write_data(
         self,
-        data: Optional[Union[Dict[str, Any], str, bytes]],
+        data: Optional[Union[dict[str, Any], str, bytes]],
         datacontenttype: Optional[str],
     ) -> bytes:
         """
@@ -144,7 +144,7 @@ class JSONFormat(Format):
 
     def read_data(
         self, body: bytes, datacontenttype: Optional[str]
-    ) -> Optional[Union[Dict[str, Any], str, bytes]]:
+    ) -> Optional[Union[dict[str, Any], str, bytes]]:
         """
         Deserialize data payload from HTTP binary mode body.
 
@@ -164,7 +164,7 @@ class JSONFormat(Format):
         ):
             try:
                 decoded = body.decode("utf-8")
-                parsed: Dict[str, Any] = loads(decoded)
+                parsed: dict[str, Any] = loads(decoded)
                 return parsed
             except (ValueError, UnicodeDecodeError):
                 # If JSON parsing fails, fall through to other handling

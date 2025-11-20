@@ -14,7 +14,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Final, Optional, Union
 from urllib.parse import quote, unquote
 
 from dateutil.parser import isoparse
@@ -22,8 +22,8 @@ from dateutil.parser import isoparse
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.formats.base import Format
 
-CE_PREFIX: str = "ce-"
-CONTENT_TYPE_HEADER: str = "content-type"
+CE_PREFIX: Final[str] = "ce-"
+CONTENT_TYPE_HEADER: Final[str] = "content-type"
 
 
 @dataclass(frozen=True)
@@ -40,11 +40,11 @@ class HTTPMessage:
         body: HTTP body as bytes
     """
 
-    headers: Dict[str, str]
+    headers: dict[str, str]
     body: bytes
 
 
-def _normalize_headers(headers: Dict[str, str]) -> Dict[str, str]:
+def _normalize_headers(headers: dict[str, str]) -> dict[str, str]:
     """
     Normalize HTTP headers by converting all keys to lowercase.
 
@@ -116,7 +116,7 @@ def to_binary(event: BaseCloudEvent, event_format: Format) -> HTTPMessage:
     :param event_format: Format implementation for data serialization
     :return: HTTPMessage with ce-prefixed headers and event data as body
     """
-    headers: Dict[str, str] = {}
+    headers: dict[str, str] = {}
     attributes = event.get_attributes()
 
     for attr_name, attr_value in attributes.items():
@@ -140,7 +140,7 @@ def from_binary(
     message: HTTPMessage,
     event_format: Format,
     event_factory: Callable[
-        [Dict[str, Any], Optional[Union[Dict[str, Any], str, bytes]]], BaseCloudEvent
+        [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]], BaseCloudEvent
     ],
 ) -> BaseCloudEvent:
     """
@@ -168,7 +168,7 @@ def from_binary(
     """
     normalized_headers = _normalize_headers(message.headers)
 
-    attributes: Dict[str, Any] = {}
+    attributes: dict[str, Any] = {}
 
     for header_name, header_value in normalized_headers.items():
         if header_name.startswith(CE_PREFIX):
@@ -221,7 +221,7 @@ def from_structured(
     message: HTTPMessage,
     event_format: Format,
     event_factory: Callable[
-        [Dict[str, Any], Optional[Union[Dict[str, Any], str, bytes]]], BaseCloudEvent
+        [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]], BaseCloudEvent
     ],
 ) -> BaseCloudEvent:
     """
@@ -252,7 +252,7 @@ def from_http(
     message: HTTPMessage,
     event_format: Format,
     event_factory: Callable[
-        [Dict[str, Any], Optional[Union[Dict[str, Any], str, bytes]]], BaseCloudEvent
+        [dict[str, Any], Optional[Union[dict[str, Any], str, bytes]]], BaseCloudEvent
     ],
 ) -> BaseCloudEvent:
     """
