@@ -158,7 +158,6 @@ def from_binary(
     """
     attributes: dict[str, Any] = {}
 
-    # Single pass: normalize headers and extract attributes
     for header_name, header_value in message.headers.items():
         normalized_name = header_name.lower()
 
