@@ -44,16 +44,6 @@ class HTTPMessage:
     body: bytes
 
 
-def _normalize_headers(headers: dict[str, str]) -> dict[str, str]:
-    """
-    Normalize HTTP headers by converting all keys to lowercase.
-
-    :param headers: Original headers dictionary
-    :return: New dictionary with lowercase header names
-    """
-    return {key.lower(): value for key, value in headers.items()}
-
-
 def _encode_header_value(value: Any) -> str:
     """
     Encode a CloudEvent attribute value for use in an HTTP header.
@@ -166,17 +156,17 @@ def from_binary(
     :param event_factory: Factory function to create CloudEvent instances
     :return: CloudEvent instance
     """
-    normalized_headers = _normalize_headers(message.headers)
-
     attributes: dict[str, Any] = {}
 
-    for header_name, header_value in normalized_headers.items():
-        if header_name.startswith(CE_PREFIX):
-            attr_name = header_name[len(CE_PREFIX) :]
-            attributes[attr_name] = _decode_header_value(attr_name, header_value)
+    # Single pass: normalize headers and extract attributes
+    for header_name, header_value in message.headers.items():
+        normalized_name = header_name.lower()
 
-    if CONTENT_TYPE_HEADER in normalized_headers:
-        attributes["datacontenttype"] = normalized_headers[CONTENT_TYPE_HEADER]
+        if normalized_name.startswith(CE_PREFIX):
+            attr_name = normalized_name[len(CE_PREFIX) :]
+            attributes[attr_name] = _decode_header_value(attr_name, header_value)
+        elif normalized_name == CONTENT_TYPE_HEADER:
+            attributes["datacontenttype"] = header_value
 
     datacontenttype = attributes.get("datacontenttype")
     data = event_format.read_data(message.body, datacontenttype)
