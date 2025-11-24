@@ -12,14 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 import base64
 import re
 from datetime import datetime
 from json import JSONEncoder, dumps, loads
-from typing import Any, Callable, Final, Optional, Pattern, Union
+from typing import Any, Callable, Final, Pattern
 
-from dateutil.parser import isoparse  # type: ignore[import-untyped]
+from dateutil.parser import isoparse
 
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.formats.base import Format
@@ -51,9 +50,10 @@ class JSONFormat(Format):
     def read(
         self,
         event_factory: Callable[
-            [dict, Optional[Union[dict, str, bytes]]], BaseCloudEvent
+            [dict[str, Any], dict[str, Any] | str | bytes | None],
+            BaseCloudEvent,
         ],
-        data: Union[str, bytes],
+        data: str | bytes,
     ) -> BaseCloudEvent:
         """
         Read a CloudEvent from a JSON formatted byte string.
@@ -73,7 +73,9 @@ class JSONFormat(Format):
         if "time" in event_attributes:
             event_attributes["time"] = isoparse(event_attributes["time"])
 
-        event_data: Union[dict, str, bytes, None] = event_attributes.pop("data", None)
+        event_data: dict[str, Any] | str | bytes | None = event_attributes.pop(
+            "data", None
+        )
         if event_data is None:
             event_data_base64 = event_attributes.pop("data_base64", None)
             if event_data_base64 is not None:
@@ -102,3 +104,82 @@ class JSONFormat(Format):
                     event_dict["data"] = str(event_data)
 
         return dumps(event_dict, cls=_JSONEncoderWithDatetime).encode("utf-8")
+
+    def write_data(
+        self,
+        data: dict[str, Any] | str | bytes | None,
+        datacontenttype: str | None,
+    ) -> bytes:
+        """
+        Serialize just the data payload for HTTP binary mode.
+
+        This method is used by HTTP binary content mode to serialize only the event
+        data (not the attributes) into the HTTP body.
+
+        :param data: Event data to serialize (dict, str, bytes, or None)
+        :param datacontenttype: Content type of the data
+        :return: Serialized data as bytes
+        """
+        if data is None:
+            return b""
+
+        # If data is already bytes, return as-is
+        if isinstance(data, (bytes, bytearray)):
+            return bytes(data)
+
+        # If data is a string, encode as UTF-8
+        if isinstance(data, str):
+            return data.encode("utf-8")
+
+        # If data is a dict and content type is JSON, serialize as JSON
+        if isinstance(data, dict):
+            if datacontenttype and re.match(
+                JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype
+            ):
+                return dumps(data, cls=_JSONEncoderWithDatetime).encode("utf-8")
+
+        # Default: convert to string and encode
+        return str(data).encode("utf-8")
+
+    def read_data(
+        self, body: bytes, datacontenttype: str | None
+    ) -> dict[str, Any] | str | bytes | None:
+        """
+        Deserialize data payload from HTTP binary mode body.
+
+        This method is used by HTTP binary content mode to deserialize the HTTP body
+        into event data based on the content type.
+
+        :param body: HTTP body as bytes
+        :param datacontenttype: Content type of the data
+        :return: Deserialized data (dict for JSON, str for text, bytes for binary)
+        """
+        if not body or len(body) == 0:
+            return None
+
+        # If content type indicates JSON, try to parse as JSON
+        if datacontenttype and re.match(
+            JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype
+        ):
+            try:
+                decoded = body.decode("utf-8")
+                parsed: dict[str, Any] = loads(decoded)
+                return parsed
+            except (ValueError, UnicodeDecodeError):
+                # If JSON parsing fails, fall through to other handling
+                pass
+
+        # Try to decode as UTF-8 string
+        try:
+            return body.decode("utf-8")
+        except UnicodeDecodeError:
+            # If UTF-8 decoding fails, return as bytes
+            return body
+
+    def get_content_type(self) -> str:
+        """
+        Get the Content-Type header value for structured mode.
+
+        :return: Content type string for CloudEvents structured content mode
+        """
+        return self.CONTENT_TYPE

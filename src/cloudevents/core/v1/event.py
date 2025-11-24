@@ -15,7 +15,7 @@
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Final, Optional, Union
+from typing import Any, Final
 
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.v1.exceptions import (
@@ -38,11 +38,13 @@ OPTIONAL_ATTRIBUTES: Final[list[str]] = [
 
 class CloudEvent(BaseCloudEvent):
     def __init__(
-        self, attributes: dict[str, Any], data: Optional[Union[dict, str, bytes]] = None
+        self,
+        attributes: dict[str, Any],
+        data: dict[str, Any] | str | bytes | None = None,
     ) -> None:
         self._validate_attribute(attributes=attributes)
         self._attributes: dict[str, Any] = attributes
-        self._data: Optional[Union[dict, str, bytes]] = data
+        self._data: dict[str, Any] | str | bytes | None = data
 
     @staticmethod
     def _validate_attribute(attributes: dict[str, Any]) -> None:
@@ -68,7 +70,7 @@ class CloudEvent(BaseCloudEvent):
         :param attributes: The attributes of the CloudEvent instance.
         :return: A dictionary of validation error messages.
         """
-        errors = defaultdict(list)
+        errors: dict[str, list[BaseCloudEventException]] = defaultdict(list)
 
         if "id" not in attributes:
             errors["id"].append(MissingRequiredAttributeError(attribute_name="id"))
@@ -128,7 +130,7 @@ class CloudEvent(BaseCloudEvent):
         :param attributes: The attributes of the CloudEvent instance.
         :return: A dictionary of validation error messages.
         """
-        errors = defaultdict(list)
+        errors: dict[str, list[BaseCloudEventException]] = defaultdict(list)
 
         if "time" in attributes:
             if not isinstance(attributes["time"], datetime):
@@ -198,7 +200,7 @@ class CloudEvent(BaseCloudEvent):
         :param attributes: The attributes of the CloudEvent instance.
         :return: A dictionary of validation error messages.
         """
-        errors = defaultdict(list)
+        errors: dict[str, list[BaseCloudEventException]] = defaultdict(list)
         extension_attributes = [
             key
             for key in attributes.keys()
@@ -240,22 +242,22 @@ class CloudEvent(BaseCloudEvent):
     def get_specversion(self) -> str:
         return self._attributes["specversion"]  # type: ignore
 
-    def get_datacontenttype(self) -> Optional[str]:
+    def get_datacontenttype(self) -> str | None:
         return self._attributes.get("datacontenttype")
 
-    def get_dataschema(self) -> Optional[str]:
+    def get_dataschema(self) -> str | None:
         return self._attributes.get("dataschema")
 
-    def get_subject(self) -> Optional[str]:
+    def get_subject(self) -> str | None:
         return self._attributes.get("subject")
 
-    def get_time(self) -> Optional[datetime]:
+    def get_time(self) -> datetime | None:
         return self._attributes.get("time")
 
     def get_extension(self, extension_name: str) -> Any:
         return self._attributes.get(extension_name)
 
-    def get_data(self) -> Optional[Union[dict, str, bytes]]:
+    def get_data(self) -> dict[str, Any] | str | bytes | None:
         return self._data
 
     def get_attributes(self) -> dict[str, Any]:
