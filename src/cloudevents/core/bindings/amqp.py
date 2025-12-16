@@ -21,7 +21,10 @@ from dateutil.parser import isoparse
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.formats.base import Format
 
-CE_PREFIX: Final[str] = "cloudEvents_"
+# AMQP CloudEvents spec allows both cloudEvents_ and cloudEvents: prefixes
+# The underscore variant is preferred for JMS 2.0 compatibility
+CE_PREFIX_UNDERSCORE: Final[str] = "cloudEvents_"
+CE_PREFIX_COLON: Final[str] = "cloudEvents:"
 CONTENT_TYPE_PROPERTY: Final[str] = "content-type"
 
 
@@ -99,6 +102,9 @@ def to_binary(event: BaseCloudEvent, event_format: Format) -> AMQPMessage:
     (milliseconds since Unix epoch), while boolean and integer values are preserved
     as native types.
 
+    Note: Per AMQP CloudEvents spec, attributes may use 'cloudEvents_' or 'cloudEvents:'
+    prefix. This implementation uses 'cloudEvents_' for JMS 2.0 compatibility.
+
     Example:
         >>> from cloudevents.core.v1.event import CloudEvent
         >>> from cloudevents.core.formats.json import JSONFormat
@@ -124,7 +130,7 @@ def to_binary(event: BaseCloudEvent, event_format: Format) -> AMQPMessage:
         if attr_name == "datacontenttype":
             properties[CONTENT_TYPE_PROPERTY] = str(attr_value)
         else:
-            property_name = f"{CE_PREFIX}{attr_name}"
+            property_name = f"{CE_PREFIX_UNDERSCORE}{attr_name}"
             # Encode datetime to AMQP timestamp (milliseconds since epoch)
             # Other types (bool, int, str, bytes) use native AMQP types
             application_properties[property_name] = _encode_amqp_value(attr_value)
@@ -150,11 +156,12 @@ def from_binary(
     """
     Parse an AMQP binary content mode message to a CloudEvent.
 
-    Extracts CloudEvent attributes from cloudEvents_-prefixed AMQP application
-    properties and treats the AMQP 'content-type' property as the 'datacontenttype'
-    attribute. The application-data section is parsed as event data according to
-    the content type. The 'time' attribute accepts both AMQP timestamp (int milliseconds)
-    and ISO 8601 string, while other native AMQP types (boolean, integer) are preserved.
+    Extracts CloudEvent attributes from AMQP application properties with either
+    'cloudEvents_' or 'cloudEvents:' prefix (per AMQP CloudEvents spec), and treats
+    the AMQP 'content-type' property as the 'datacontenttype' attribute. The
+    application-data section is parsed as event data according to the content type.
+    The 'time' attribute accepts both AMQP timestamp (int milliseconds) and ISO 8601
+    string, while other native AMQP types (boolean, integer) are preserved.
 
     Example:
         >>> from cloudevents.core.v1.event import CloudEvent
@@ -180,8 +187,15 @@ def from_binary(
     attributes: dict[str, Any] = {}
 
     for prop_name, prop_value in message.application_properties.items():
-        if prop_name.startswith(CE_PREFIX):
-            attr_name = prop_name[len(CE_PREFIX) :]
+        # Check for both cloudEvents_ and cloudEvents: prefixes
+        attr_name = None
+
+        if prop_name.startswith(CE_PREFIX_UNDERSCORE):
+            attr_name = prop_name[len(CE_PREFIX_UNDERSCORE) :]
+        elif prop_name.startswith(CE_PREFIX_COLON):
+            attr_name = prop_name[len(CE_PREFIX_COLON) :]
+
+        if attr_name:
             # Decode timestamp (int or ISO 8601 string) to datetime, preserve other native types
             attributes[attr_name] = _decode_amqp_value(attr_name, prop_value)
 

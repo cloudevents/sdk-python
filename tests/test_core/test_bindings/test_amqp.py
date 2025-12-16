@@ -664,3 +664,213 @@ def test_from_binary_ignores_non_cloudevents_properties() -> None:
     # get_extension returns None for missing extensions
     assert event.get_extension("custom_property") is None
     assert event.get_extension("another_prop") is None
+
+
+def test_from_binary_with_colon_prefix() -> None:
+    """Test from_binary accepts cloudEvents: prefix per AMQP spec"""
+    message = AMQPMessage(
+        properties={"content-type": "application/json"},
+        application_properties={
+            "cloudEvents:type": "com.example.test",
+            "cloudEvents:source": "/test",
+            "cloudEvents:id": "test-123",
+            "cloudEvents:specversion": "1.0",
+        },
+        application_data=b'{"message": "Hello"}',
+    )
+    event = from_binary(message, JSONFormat(), CloudEvent)
+
+    assert event.get_type() == "com.example.test"
+    assert event.get_source() == "/test"
+    assert event.get_id() == "test-123"
+    assert event.get_specversion() == "1.0"
+    assert event.get_data() == {"message": "Hello"}
+
+
+def test_from_binary_colon_prefix_with_extensions() -> None:
+    """Test from_binary with cloudEvents: prefix handles extensions"""
+    message = AMQPMessage(
+        properties={},
+        application_properties={
+            "cloudEvents:type": "test",
+            "cloudEvents:source": "/test",
+            "cloudEvents:id": "123",
+            "cloudEvents:specversion": "1.0",
+            "cloudEvents:customext": "custom-value",
+            "cloudEvents:boolext": True,
+            "cloudEvents:intext": 42,
+        },
+        application_data=b"{}",
+    )
+    event = from_binary(message, JSONFormat(), CloudEvent)
+
+    assert event.get_extension("customext") == "custom-value"
+    assert event.get_extension("boolext") is True
+    assert event.get_extension("intext") == 42
+
+
+def test_from_binary_colon_prefix_with_datetime() -> None:
+    """Test from_binary with cloudEvents: prefix handles datetime"""
+    dt = datetime(2023, 1, 15, 10, 30, 45, tzinfo=timezone.utc)
+    timestamp_ms = int(dt.timestamp() * 1000)
+
+    message = AMQPMessage(
+        properties={},
+        application_properties={
+            "cloudEvents:type": "test",
+            "cloudEvents:source": "/test",
+            "cloudEvents:id": "123",
+            "cloudEvents:specversion": "1.0",
+            "cloudEvents:time": timestamp_ms,  # AMQP timestamp
+        },
+        application_data=b"{}",
+    )
+    event = from_binary(message, JSONFormat(), CloudEvent)
+
+    assert event.get_time() == dt
+
+
+def test_from_binary_colon_prefix_round_trip() -> None:
+    """Test round-trip with cloudEvents: prefix (manual construction)"""
+    # Create event with underscore prefix
+    original_event = create_event(
+        extra_attrs={"customext": "value", "datacontenttype": "application/json"},
+        data={"message": "test"},
+    )
+    message_underscore = to_binary(original_event, JSONFormat())
+
+    # Manually construct message with colon prefix (simulate receiving from another system)
+    message_colon = AMQPMessage(
+        properties=message_underscore.properties,
+        application_properties={
+            # Convert underscore to colon prefix
+            key.replace("cloudEvents_", "cloudEvents:"): value
+            for key, value in message_underscore.application_properties.items()
+        },
+        application_data=message_underscore.application_data,
+    )
+
+    # Should parse correctly
+    recovered = from_binary(message_colon, JSONFormat(), CloudEvent)
+
+    assert recovered.get_type() == original_event.get_type()
+    assert recovered.get_source() == original_event.get_source()
+    assert recovered.get_extension("customext") == "value"
+    assert recovered.get_data() == {"message": "test"}
+
+
+def test_from_binary_mixed_prefixes_accepted() -> None:
+    """Test from_binary accepts mixed cloudEvents_ and cloudEvents: prefixes"""
+    message = AMQPMessage(
+        properties={},
+        application_properties={
+            "cloudEvents_type": "test",  # Underscore
+            "cloudEvents:source": "/test",  # Colon - mixed is OK
+            "cloudEvents_id": "123",
+            "cloudEvents_specversion": "1.0",
+        },
+        application_data=b"{}",
+    )
+
+    event = from_binary(message, JSONFormat(), CloudEvent)
+
+    # Should extract all attributes regardless of prefix
+    assert event.get_type() == "test"
+    assert event.get_source() == "/test"
+    assert event.get_id() == "123"
+    assert event.get_specversion() == "1.0"
+
+
+def test_from_amqp_with_colon_prefix_binary_mode() -> None:
+    """Test from_amqp detects binary mode with cloudEvents: prefix"""
+    message = AMQPMessage(
+        properties={"content-type": "application/json"},
+        application_properties={
+            "cloudEvents:type": "test",
+            "cloudEvents:source": "/test",
+            "cloudEvents:id": "123",
+            "cloudEvents:specversion": "1.0",
+        },
+        application_data=b'{"data": "value"}',
+    )
+
+    event = from_amqp(message, JSONFormat(), CloudEvent)
+
+    assert event.get_type() == "test"
+    assert event.get_source() == "/test"
+    assert event.get_data() == {"data": "value"}
+
+
+def test_from_amqp_mixed_prefixes_accepted() -> None:
+    """Test from_amqp accepts mixed prefixes"""
+    message = AMQPMessage(
+        properties={"content-type": "application/json"},
+        application_properties={
+            "cloudEvents_type": "test",
+            "cloudEvents:source": "/test",  # Mixed is OK
+            "cloudEvents_id": "123",
+            "cloudEvents_specversion": "1.0",
+        },
+        application_data=b"{}",
+    )
+
+    event = from_amqp(message, JSONFormat(), CloudEvent)
+
+    assert event.get_type() == "test"
+    assert event.get_source() == "/test"
+
+
+def test_from_binary_all_underscore_prefix_valid() -> None:
+    """Test from_binary accepts all cloudEvents_ prefix (baseline)"""
+    message = AMQPMessage(
+        properties={},
+        application_properties={
+            "cloudEvents_type": "test",
+            "cloudEvents_source": "/test",
+            "cloudEvents_id": "123",
+            "cloudEvents_specversion": "1.0",
+        },
+        application_data=b"{}",
+    )
+
+    event = from_binary(message, JSONFormat(), CloudEvent)
+    assert event.get_type() == "test"
+
+
+def test_from_binary_all_colon_prefix_valid() -> None:
+    """Test from_binary accepts all cloudEvents: prefix"""
+    message = AMQPMessage(
+        properties={},
+        application_properties={
+            "cloudEvents:type": "test",
+            "cloudEvents:source": "/test",
+            "cloudEvents:id": "123",
+            "cloudEvents:specversion": "1.0",
+        },
+        application_data=b"{}",
+    )
+
+    event = from_binary(message, JSONFormat(), CloudEvent)
+    assert event.get_type() == "test"
+
+
+def test_from_binary_colon_prefix_ignores_non_ce_properties() -> None:
+    """Test from_binary with colon prefix ignores non-CloudEvents properties"""
+    message = AMQPMessage(
+        properties={},
+        application_properties={
+            "cloudEvents:type": "test",
+            "cloudEvents:source": "/test",
+            "cloudEvents:id": "123",
+            "cloudEvents:specversion": "1.0",
+            "customProperty": "ignored",  # No prefix
+            "anotherProp": 123,
+        },
+        application_data=b"{}",
+    )
+
+    event = from_binary(message, JSONFormat(), CloudEvent)
+
+    assert event.get_type() == "test"
+    assert event.get_extension("customProperty") is None
+    assert event.get_extension("anotherProp") is None
