@@ -12,20 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.core.bindings.http import (
-    HTTPMessage,
-    from_binary,
-    from_http,
-    from_structured,
-    to_binary,
-    to_structured,
-)
+"""
+CloudEvents protocol bindings.
 
-__all__ = [
-    "HTTPMessage",
-    "to_binary",
-    "from_binary",
-    "to_structured",
-    "from_structured",
-    "from_http",
-]
+This package provides protocol-specific bindings for CloudEvents, including HTTP and Kafka.
+Each binding module provides functions to convert CloudEvents to/from protocol-specific messages.
+"""
