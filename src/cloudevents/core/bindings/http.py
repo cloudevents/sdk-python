@@ -23,6 +23,8 @@ from cloudevents.core.bindings.common import (
     encode_header_value,
 )
 from cloudevents.core.formats.base import Format
+from cloudevents.core.formats.json import JSONFormat
+from cloudevents.core.v1.event import CloudEvent
 
 CE_PREFIX: Final[str] = "ce-"
 
@@ -244,3 +246,116 @@ def from_http(
         return from_binary(message, event_format, event_factory)
 
     return from_structured(message, event_format, event_factory)
+
+
+def to_binary_event(
+    event: BaseCloudEvent,
+    event_format: Format | None = None,
+) -> HTTPMessage:
+    """
+    Convenience wrapper for to_binary with JSON format as default.
+
+    Example:
+        >>> from cloudevents.core.v1.event import CloudEvent
+        >>> from cloudevents.core.bindings import http
+        >>>
+        >>> event = CloudEvent(
+        ...     attributes={"type": "com.example.test", "source": "/test"},
+        ...     data={"message": "Hello"}
+        ... )
+        >>> message = http.to_binary_event(event)
+
+    :param event: The CloudEvent to convert
+    :param event_format: Format implementation (defaults to JSONFormat)
+    :return: HTTPMessage with ce-prefixed headers
+    """
+    if event_format is None:
+        event_format = JSONFormat()
+    return to_binary(event, event_format)
+
+
+def from_binary_event(
+    message: HTTPMessage,
+    event_format: Format | None = None,
+) -> BaseCloudEvent:
+    """
+    Convenience wrapper for from_binary with JSON format and CloudEvent as defaults.
+
+    Example:
+        >>> from cloudevents.core.bindings import http
+        >>> event = http.from_binary_event(message)
+
+    :param message: HTTPMessage to parse
+    :param event_format: Format implementation (defaults to JSONFormat)
+    :return: CloudEvent instance
+    """
+    if event_format is None:
+        event_format = JSONFormat()
+    return from_binary(message, event_format, CloudEvent)
+
+
+def to_structured_event(
+    event: BaseCloudEvent,
+    event_format: Format | None = None,
+) -> HTTPMessage:
+    """
+    Convenience wrapper for to_structured with JSON format as default.
+
+    Example:
+        >>> from cloudevents.core.v1.event import CloudEvent
+        >>> from cloudevents.core.bindings import http
+        >>>
+        >>> event = CloudEvent(
+        ...     attributes={"type": "com.example.test", "source": "/test"},
+        ...     data={"message": "Hello"}
+        ... )
+        >>> message = http.to_structured_event(event)
+
+    :param event: The CloudEvent to convert
+    :param event_format: Format implementation (defaults to JSONFormat)
+    :return: HTTPMessage with structured content
+    """
+    if event_format is None:
+        event_format = JSONFormat()
+    return to_structured(event, event_format)
+
+
+def from_structured_event(
+    message: HTTPMessage,
+    event_format: Format | None = None,
+) -> BaseCloudEvent:
+    """
+    Convenience wrapper for from_structured with JSON format and CloudEvent as defaults.
+
+    Example:
+        >>> from cloudevents.core.bindings import http
+        >>> event = http.from_structured_event(message)
+
+    :param message: HTTPMessage to parse
+    :param event_format: Format implementation (defaults to JSONFormat)
+    :return: CloudEvent instance
+    """
+    if event_format is None:
+        event_format = JSONFormat()
+    return from_structured(message, event_format, CloudEvent)
+
+
+def from_http_event(
+    message: HTTPMessage,
+    event_format: Format | None = None,
+) -> BaseCloudEvent:
+    """
+    Convenience wrapper for from_http with JSON format and CloudEvent as defaults.
+    Auto-detects binary or structured mode.
+
+    Example:
+        >>> from cloudevents.core.bindings import http
+        >>> event = http.from_http_event(message)
+
+    :param message: HTTPMessage to parse
+    :param event_format: Format implementation (defaults to JSONFormat)
+    :return: CloudEvent instance
+    """
+    if event_format is None:
+        event_format = JSONFormat()
+    return from_http(message, event_format, CloudEvent)

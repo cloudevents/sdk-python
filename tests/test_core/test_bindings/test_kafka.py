@@ -21,10 +21,15 @@ from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.bindings.kafka import (
     KafkaMessage,
     from_binary,
+    from_binary_event,
     from_kafka,
+    from_kafka_event,
     from_structured,
+    from_structured_event,
     to_binary,
+    to_binary_event,
     to_structured,
+    to_structured_event,
 )
 from cloudevents.core.formats.json import JSONFormat
 from cloudevents.core.v1.event import CloudEvent
@@ -618,3 +623,163 @@ def test_string_key_vs_bytes_key() -> None:
     event2 = create_event()
     msg2 = to_binary(event2, JSONFormat(), key_mapper=bytes_mapper)
     assert msg2.key == b"bytes-key"
+
+
+def test_to_binary_with_defaults() -> None:
+    """Test to_binary_event convenience wrapper using default JSONFormat"""
+    event = create_event(
+        extra_attrs={"datacontenttype": "application/json"},
+        data={"message": "Hello"},
+    )
+
+    message = to_binary_event(event)
+
+    assert "ce_type" in message.headers
+    assert message.headers["ce_type"] == b"com.example.test"
+    assert b'"message"' in message.value
+    assert b'"Hello"' in message.value
+
+
+def test_to_structured_with_defaults() -> None:
+    """Test to_structured_event convenience wrapper using default JSONFormat"""
+    event = create_event(data={"message": "Hello"})
+
+    message = to_structured_event(event)
+
+    assert "content-type" in message.headers
+    assert message.headers["content-type"] == b"application/cloudevents+json"
+    assert b'"type"' in message.value
+    assert b'"com.example.test"' in message.value
+    assert b'"data"' in message.value
+
+
+def test_from_binary_with_defaults() -> None:
+    """Test from_binary_event convenience wrapper using default JSONFormat and CloudEvent factory"""
+    message = KafkaMessage(
+        headers={
+            "ce_type": b"com.example.test",
+            "ce_source": b"%2Ftest",
+            "ce_id": b"123",
+            "ce_specversion": b"1.0",
+            "content-type": b"application/json",
+        },
+        key=None,
+        value=b'{"message": "Hello"}',
+    )
+
+    # Call wrapper function (should use defaults)
+    event = from_binary_event(message)
+
+    assert isinstance(event, CloudEvent)
+    assert event.get_type() == "com.example.test"
+    assert event.get_source() == "/test"
+    assert event.get_id() == "123"
+    assert event.get_data() == {"message": "Hello"}
+
+
+def test_from_structured_with_defaults() -> None:
+    """Test from_structured_event convenience wrapper using default JSONFormat and CloudEvent factory"""
+    message = KafkaMessage(
+        headers={"content-type": b"application/cloudevents+json"},
+        key=None,
+        value=b'{"type": "com.example.test", "source": "/test", "id": "123", "specversion": "1.0", "data": {"message": "Hello"}}',
+    )
+
+    # Call wrapper function (should use defaults)
+    event = from_structured_event(message)
+
+    assert isinstance(event, CloudEvent)
+    assert event.get_type() == "com.example.test"
+    assert event.get_source() == "/test"
+    assert event.get_id() == "123"
+    assert event.get_data() == {"message": "Hello"}
+
+
+def test_from_kafka_with_defaults_binary() -> None:
+    """Test from_kafka_event convenience wrapper with auto-detection (binary mode)"""
+    message = KafkaMessage(
+        headers={
+            "ce_type": b"com.example.test",
+            "ce_source": b"%2Ftest",
+            "ce_id": b"123",
+            "ce_specversion": b"1.0",
+        },
+        key=None,
+        value=b'{"message": "Hello"}',
+    )
+
+    # Call wrapper function (should use defaults and detect binary mode)
+    event = from_kafka_event(message)
+
+    assert isinstance(event, CloudEvent)
+    assert event.get_type() == "com.example.test"
+    assert event.get_source() == "/test"
+
+
+def test_from_kafka_with_defaults_structured() -> None:
+    """Test from_kafka_event convenience wrapper with auto-detection (structured mode)"""
+    message = KafkaMessage(
+        headers={"content-type": b"application/cloudevents+json"},
+        key=None,
+        value=b'{"type": "com.example.test", "source": "/test", "id": "123", "specversion": "1.0"}',
+    )
+
+    # Call wrapper function (should use defaults and detect structured mode)
+    event = from_kafka_event(message)
+
+    assert isinstance(event, CloudEvent)
+    assert event.get_type() == "com.example.test"
+    assert event.get_source() == "/test"
+
+
+def test_convenience_roundtrip_binary() -> None:
+    """Test complete roundtrip using convenience wrapper functions with binary mode"""
+    original_event = create_event(
+        extra_attrs={"datacontenttype": "application/json"},
+        data={"message": "Roundtrip test"},
+    )
+
+    # Convert to message using wrapper
+    message = to_binary_event(original_event)
+
+    # Convert back using wrapper
+    recovered_event = from_binary_event(message)
+
+    assert recovered_event.get_type() == original_event.get_type()
+    assert recovered_event.get_source() == original_event.get_source()
+    assert recovered_event.get_id() == original_event.get_id()
+    assert recovered_event.get_data() == original_event.get_data()
+
+
+def test_convenience_roundtrip_structured() -> None:
+    """Test complete roundtrip using convenience wrapper functions with structured mode"""
+    original_event = create_event(
+        extra_attrs={"datacontenttype": "application/json"},
+        data={"message": "Roundtrip test"},
+    )
+
+    # Convert to message using wrapper
+    message = to_structured_event(original_event)
+
+    # Convert back using wrapper
+    recovered_event = from_structured_event(message)
+
+    assert recovered_event.get_type() == original_event.get_type()
+    assert recovered_event.get_source() == original_event.get_source()
+    assert recovered_event.get_id() == original_event.get_id()
+    assert recovered_event.get_data() == original_event.get_data()
+
+
+def test_convenience_with_explicit_format_override() -> None:
+    """Test that wrapper functions can override format (still flexible)"""
+    event = create_event(
+        extra_attrs={"datacontenttype": "application/json"},
+        data={"message": "Hello"},
+    )
+
+    # Explicitly pass JSONFormat to wrapper function
+    message = to_binary_event(event, JSONFormat())
+    recovered = from_binary_event(message, JSONFormat())
+
+    assert recovered.get_type() == event.get_type()
+    assert recovered.get_data() == event.get_data()
