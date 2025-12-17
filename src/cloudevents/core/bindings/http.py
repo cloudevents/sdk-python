@@ -13,9 +13,9 @@
 #    under the License.
 
 from dataclasses import dataclass
-from typing import Any, Callable, Final
+from typing import Any, Final
 
-from cloudevents.core.base import BaseCloudEvent
+from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.bindings.common import (
     CONTENT_TYPE_HEADER,
     DATACONTENTTYPE_ATTR,
@@ -92,9 +92,7 @@ def to_binary(event: BaseCloudEvent, event_format: Format) -> HTTPMessage:
 def from_binary(
     message: HTTPMessage,
     event_format: Format,
-    event_factory: Callable[
-        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
-    ],
+    event_factory: EventFactory,
 ) -> BaseCloudEvent:
     """
     Parse an HTTP binary content mode message to a CloudEvent.
@@ -172,9 +170,7 @@ def to_structured(event: BaseCloudEvent, event_format: Format) -> HTTPMessage:
 def from_structured(
     message: HTTPMessage,
     event_format: Format,
-    event_factory: Callable[
-        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
-    ],
+    event_factory: EventFactory,
 ) -> BaseCloudEvent:
     """
     Parse an HTTP structured content mode message to a CloudEvent.
@@ -203,9 +199,7 @@ def from_structured(
 def from_http(
     message: HTTPMessage,
     event_format: Format,
-    event_factory: Callable[
-        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
-    ],
+    event_factory: EventFactory,
 ) -> BaseCloudEvent:
     """
     Parse an HTTP message to a CloudEvent with automatic mode detection.

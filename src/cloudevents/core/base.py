@@ -13,7 +13,21 @@
 #    under the License.
 
 from datetime import datetime
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
+
+EventFactory = Callable[
+    [dict[str, Any], dict[str, Any] | str | bytes | None], "BaseCloudEvent"
+]
+"""
+Type alias for a callable that creates a BaseCloudEvent from attributes and data.
+
+Args:
+    attributes: The CloudEvent attributes (required fields like id, source, type, etc.)
+    data: The CloudEvent data payload (optional)
+
+Returns:
+    A BaseCloudEvent instance
+"""
 
 
 class BaseCloudEvent(Protocol):

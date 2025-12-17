@@ -14,11 +14,11 @@
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Callable, Final
+from typing import Any, Final
 
 from dateutil.parser import isoparse
 
-from cloudevents.core.base import BaseCloudEvent
+from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.formats.base import Format
 
 # AMQP CloudEvents spec allows both cloudEvents_ and cloudEvents: prefixes
@@ -149,9 +149,7 @@ def to_binary(event: BaseCloudEvent, event_format: Format) -> AMQPMessage:
 def from_binary(
     message: AMQPMessage,
     event_format: Format,
-    event_factory: Callable[
-        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
-    ],
+    event_factory: EventFactory,
 ) -> BaseCloudEvent:
     """
     Parse an AMQP binary content mode message to a CloudEvent.
@@ -250,9 +248,7 @@ def to_structured(event: BaseCloudEvent, event_format: Format) -> AMQPMessage:
 def from_structured(
     message: AMQPMessage,
     event_format: Format,
-    event_factory: Callable[
-        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
-    ],
+    event_factory: EventFactory,
 ) -> BaseCloudEvent:
     """
     Parse an AMQP structured content mode message to a CloudEvent.
@@ -283,9 +279,7 @@ def from_structured(
 def from_amqp(
     message: AMQPMessage,
     event_format: Format,
-    event_factory: Callable[
-        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
-    ],
+    event_factory: EventFactory,
 ) -> BaseCloudEvent:
     """
     Parse an AMQP message to a CloudEvent with automatic mode detection.
