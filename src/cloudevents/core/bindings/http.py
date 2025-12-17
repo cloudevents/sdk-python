@@ -277,7 +277,7 @@ def to_binary_event(
 def from_binary_event(
     message: HTTPMessage,
     event_format: Format | None = None,
-) -> BaseCloudEvent:
+) -> CloudEvent:
     """
     Convenience wrapper for from_binary with JSON format and CloudEvent as defaults.
 
@@ -323,7 +323,7 @@ def to_structured_event(
 def from_structured_event(
     message: HTTPMessage,
     event_format: Format | None = None,
-) -> BaseCloudEvent:
+) -> CloudEvent:
     """
     Convenience wrapper for from_structured with JSON format and CloudEvent as defaults.
 
@@ -343,7 +343,7 @@ def from_structured_event(
 def from_http_event(
     message: HTTPMessage,
     event_format: Format | None = None,
-) -> BaseCloudEvent:
+) -> CloudEvent:
     """
     Convenience wrapper for from_http with JSON format and CloudEvent as defaults.
     Auto-detects binary or structured mode.
