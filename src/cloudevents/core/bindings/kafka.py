@@ -15,7 +15,7 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Final
 
-from cloudevents.core.base import BaseCloudEvent
+from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.bindings.common import (
     CONTENT_TYPE_HEADER,
     DATACONTENTTYPE_ATTR,
@@ -125,9 +125,7 @@ def to_binary(
 def from_binary(
     message: KafkaMessage,
     event_format: Format,
-    event_factory: Callable[
-        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
-    ],
+    event_factory: EventFactory,
 ) -> BaseCloudEvent:
     """
     Parse a Kafka binary content mode message to a CloudEvent.
@@ -228,9 +226,7 @@ def to_structured(
 def from_structured(
     message: KafkaMessage,
     event_format: Format,
-    event_factory: Callable[
-        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
-    ],
+    event_factory: EventFactory,
 ) -> BaseCloudEvent:
     """
     Parse a Kafka structured content mode message to a CloudEvent.
@@ -276,9 +272,7 @@ def from_structured(
 def from_kafka(
     message: KafkaMessage,
     event_format: Format,
-    event_factory: Callable[
-        [dict[str, Any], dict[str, Any] | str | bytes | None], BaseCloudEvent
-    ],
+    event_factory: EventFactory,
 ) -> BaseCloudEvent:
     """
     Parse a Kafka message to a CloudEvent with automatic mode detection.

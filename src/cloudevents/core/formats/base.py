@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from typing import Any, Callable, Protocol
+from typing import Any, Protocol
 
-from cloudevents.core.base import BaseCloudEvent
+from cloudevents.core.base import BaseCloudEvent, EventFactory
 
 
 class Format(Protocol):
@@ -29,10 +29,7 @@ class Format(Protocol):
 
     def read(
         self,
-        event_factory: Callable[
-            [dict[str, Any], dict[str, Any] | str | bytes | None],
-            BaseCloudEvent,
-        ],
+        event_factory: EventFactory,
         data: str | bytes,
     ) -> BaseCloudEvent:
         """

@@ -16,11 +16,11 @@ import base64
 import re
 from datetime import datetime
 from json import JSONEncoder, dumps, loads
-from typing import Any, Callable, Final, Pattern
+from typing import Any, Final, Pattern
 
 from dateutil.parser import isoparse
 
-from cloudevents.core.base import BaseCloudEvent
+from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.formats.base import Format
 
 
@@ -49,10 +49,7 @@ class JSONFormat(Format):
 
     def read(
         self,
-        event_factory: Callable[
-            [dict[str, Any], dict[str, Any] | str | bytes | None],
-            BaseCloudEvent,
-        ],
+        event_factory: EventFactory,
         data: str | bytes,
     ) -> BaseCloudEvent:
         """
