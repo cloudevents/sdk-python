@@ -24,7 +24,7 @@ resp = requests.get(
 image_bytes = resp.content
 
 
-def send_binary_cloud_event(url: str):
+def send_binary_cloud_event(url: str) -> None:
     # Create cloudevent
     attributes = {
         "type": "com.example.string",
@@ -41,7 +41,7 @@ def send_binary_cloud_event(url: str):
     print(f"Sent {event['id']} of type {event['type']}")
 
 
-def send_structured_cloud_event(url: str):
+def send_structured_cloud_event(url: str) -> None:
     # Create cloudevent
     attributes = {
         "type": "com.example.base64",

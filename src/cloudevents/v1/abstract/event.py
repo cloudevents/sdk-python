@@ -32,7 +32,7 @@ class CloudEvent:
     @classmethod
     def create(
         cls: typing.Type[AnyCloudEvent],
-        attributes: typing.Dict[str, typing.Any],
+        attributes: typing.Mapping[str, typing.Any],
         data: typing.Optional[typing.Any],
     ) -> AnyCloudEvent:
         """

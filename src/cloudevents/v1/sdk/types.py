@@ -14,9 +14,25 @@
 
 import typing
 
+_K_co = typing.TypeVar("_K_co", covariant=True)
+_V_co = typing.TypeVar("_V_co", covariant=True)
+
 # Use consistent types for marshal and unmarshal functions across
 # both JSON and Binary format.
 
 MarshallerType = typing.Callable[[typing.Any], typing.AnyStr]
 
 UnmarshallerType = typing.Callable[[typing.AnyStr], typing.Any]
+
+
+class SupportsDuplicateItems(typing.Protocol[_K_co, _V_co]):
+    """
+    Dict-like objects with an items() method that may produce duplicate keys.
+    """
+
+    # This is wider than _typeshed.SupportsItems, which expects items() to
+    # return type an AbstractSet. werkzeug's Headers class satisfies this type,
+    # but not _typeshed.SupportsItems.
+
+    def items(self) -> typing.Iterable[typing.Tuple[_K_co, _V_co]]:
+        pass
