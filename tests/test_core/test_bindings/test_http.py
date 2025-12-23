@@ -20,10 +20,15 @@ import pytest
 from cloudevents.core.bindings.http import (
     HTTPMessage,
     from_binary,
+    from_binary_event,
     from_http,
+    from_http_event,
     from_structured,
+    from_structured_event,
     to_binary,
+    to_binary_event,
     to_structured,
+    to_structured_event,
 )
 from cloudevents.core.formats.json import JSONFormat
 from cloudevents.core.v1.event import CloudEvent
@@ -966,3 +971,155 @@ def test_real_world_scenario() -> None:
     assert data["ref"] == "refs/heads/main"
     assert len(data["commits"]) == 2
     assert data["commits"][0]["message"] == "Fix bug"
+
+
+def test_to_binary_with_defaults() -> None:
+    """Test to_binary_event convenience wrapper using default JSONFormat"""
+    event = create_event(
+        extra_attrs={"datacontenttype": "application/json"},
+        data={"message": "Hello"},
+    )
+
+    message = to_binary_event(event)
+
+    assert "ce-type" in message.headers
+    assert message.headers["ce-type"] == "com.example.test"
+    assert b'"message"' in message.body
+    assert b'"Hello"' in message.body
+
+
+def test_to_structured_with_defaults() -> None:
+    """Test to_structured_event convenience wrapper using default JSONFormat"""
+    event = create_event(data={"message": "Hello"})
+
+    message = to_structured_event(event)
+
+    assert "content-type" in message.headers
+    assert message.headers["content-type"] == "application/cloudevents+json"
+    assert b'"type"' in message.body
+    assert b'"com.example.test"' in message.body
+    assert b'"data"' in message.body
+
+
+def test_from_binary_with_defaults() -> None:
+    """Test from_binary_event convenience wrapper using default JSONFormat and CloudEvent factory"""
+    message = HTTPMessage(
+        headers={
+            "ce-type": "com.example.test",
+            "ce-source": "/test",
+            "ce-id": "123",
+            "ce-specversion": "1.0",
+            "content-type": "application/json",
+        },
+        body=b'{"message": "Hello"}',
+    )
+
+    event = from_binary_event(message)
+
+    assert isinstance(event, CloudEvent)
+    assert event.get_type() == "com.example.test"
+    assert event.get_source() == "/test"
+    assert event.get_id() == "123"
+    assert event.get_data() == {"message": "Hello"}
+
+
+def test_from_structured_with_defaults() -> None:
+    """Test from_structured_event convenience wrapper using default JSONFormat and CloudEvent factory"""
+    message = HTTPMessage(
+        headers={"content-type": "application/cloudevents+json"},
+        body=b'{"type": "com.example.test", "source": "/test", "id": "123", "specversion": "1.0", "data": {"message": "Hello"}}',
+    )
+
+    event = from_structured_event(message)
+
+    assert isinstance(event, CloudEvent)
+    assert event.get_type() == "com.example.test"
+    assert event.get_source() == "/test"
+    assert event.get_id() == "123"
+    assert event.get_data() == {"message": "Hello"}
+
+
+def test_from_http_with_defaults_binary() -> None:
+    """Test from_http_event convenience wrapper with auto-detection (binary mode)"""
+    message = HTTPMessage(
+        headers={
+            "ce-type": "com.example.test",
+            "ce-source": "/test",
+            "ce-id": "123",
+            "ce-specversion": "1.0",
+        },
+        body=b'{"message": "Hello"}',
+    )
+
+    event = from_http_event(message)
+
+    assert isinstance(event, CloudEvent)
+    assert event.get_type() == "com.example.test"
+    assert event.get_source() == "/test"
+
+
+def test_from_http_with_defaults_structured() -> None:
+    """Test from_http_event convenience wrapper with auto-detection (structured mode)"""
+    message = HTTPMessage(
+        headers={"content-type": "application/cloudevents+json"},
+        body=b'{"type": "com.example.test", "source": "/test", "id": "123", "specversion": "1.0"}',
+    )
+
+    # Call wrapper function (should use defaults and detect structured mode)
+    event = from_http_event(message)
+
+    assert isinstance(event, CloudEvent)
+    assert event.get_type() == "com.example.test"
+    assert event.get_source() == "/test"
+
+
+def test_convenience_roundtrip_binary() -> None:
+    """Test complete roundtrip using convenience wrapper functions with binary mode"""
+    original_event = create_event(
+        extra_attrs={"datacontenttype": "application/json"},
+        data={"message": "Roundtrip test"},
+    )
+
+    # Convert to message using wrapper
+    message = to_binary_event(original_event)
+
+    # Convert back using wrapper
+    recovered_event = from_binary_event(message)
+
+    assert recovered_event.get_type() == original_event.get_type()
+    assert recovered_event.get_source() == original_event.get_source()
+    assert recovered_event.get_id() == original_event.get_id()
+    assert recovered_event.get_data() == original_event.get_data()
+
+
+def test_convenience_roundtrip_structured() -> None:
+    """Test complete roundtrip using convenience wrapper functions with structured mode"""
+    original_event = create_event(
+        extra_attrs={"datacontenttype": "application/json"},
+        data={"message": "Roundtrip test"},
+    )
+
+    # Convert to message using wrapper
+    message = to_structured_event(original_event)
+
+    # Convert back using wrapper
+    recovered_event = from_structured_event(message)
+
+    assert recovered_event.get_type() == original_event.get_type()
+    assert recovered_event.get_source() == original_event.get_source()
+    assert recovered_event.get_id() == original_event.get_id()
+    assert recovered_event.get_data() == original_event.get_data()
+
+
+def test_convenience_with_explicit_format_override() -> None:
+    """Test that wrapper functions can override format (still flexible)"""
+    event = create_event(
+        extra_attrs={"datacontenttype": "application/json"},
+        data={"message": "Hello"},
+    )
+
+    message = to_binary_event(event, JSONFormat())
+    recovered = from_binary_event(message, JSONFormat())
+
+    assert recovered.get_type() == event.get_type()
+    assert recovered.get_data() == event.get_data()
