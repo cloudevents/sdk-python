@@ -228,7 +228,7 @@ def from_structured(
         structure = envelope_unmarshaller(message.value)
     except Exception as e:
         raise cloud_exceptions.DataUnmarshallerError(
-            "Failed to unmarshall message with error: " f"{type(e).__name__}('{e}')"
+            f"Failed to unmarshall message with error: {type(e).__name__}('{e}')"
         )
 
     attributes: typing.Dict[str, typing.Any] = {}
@@ -247,7 +247,7 @@ def from_structured(
                 decoded_value = value
         except Exception as e:
             raise cloud_exceptions.DataUnmarshallerError(
-                "Failed to unmarshall data with error: " f"{type(e).__name__}('{e}')"
+                f"Failed to unmarshall data with error: {type(e).__name__}('{e}')"
             )
         if name == "data":
             data = decoded_value

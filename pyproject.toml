@@ -32,7 +32,6 @@ keywords = [
     "Serverless",
 ]
 dependencies = [
-    "ruff>=0.6.8",
     "python-dateutil>=2.8.2",
 ]
 
@@ -47,15 +46,16 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.3",
-    "mypy>=1.11.2",
-    "isort>=5.13.2",
-    "flake8>=7.1.1",
-    "pep8-naming>=0.14.1",
+    "ruff>=0.14.10",
+    "pytest>=9.0.2",
+    "mypy>=1.19.1",
+    "isort>=7.0.0",
+    "flake8>=7.3.0",
+    "pep8-naming>=0.15.1",
     "flake8-print>=5.0.0",
-    "pre-commit>=3.8.0",
-    "pytest-cov>=5.0.0",
-    "types-python-dateutil>=2.9.0.20241003",
+    "pre-commit>=4.5.1",
+    "pytest-cov>=7.0.0",
+    "types-python-dateutil>=2.9.0.20251115",
 ]
 
 [tool.uv.pip]

@@ -10,16 +10,16 @@ on:
 jobs:
   build_dist:
     name: Build source distribution
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Build SDist and wheel
         run: pipx run build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: artifact
           path: dist/*
@@ -27,21 +27,21 @@ jobs:
       - name: Check metadata
         run: pipx run twine check dist/*
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push'
     needs: [ build_dist ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: 'pip'
       - name: Install build dependencies
         run: pip install -U setuptools wheel build
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           # unpacks default artifact into dist/
           # if `name: artifact` is omitted, the action will create extra parent dir

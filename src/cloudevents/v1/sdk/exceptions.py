@@ -36,6 +36,7 @@ class NoSuchConverter(Exception):
 class UnsupportedEventConverter(Exception):
     def __init__(self, content_type):
         super().__init__(
-            "Unable to identify valid event converter "
-            "for content-type: '{0}'".format(content_type)
+            "Unable to identify valid event converter for content-type: '{0}'".format(
+                content_type
+            )
         )
