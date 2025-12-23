@@ -24,7 +24,7 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Build SDist and wheel
-        run: uv run build
+        run: uv build
 
       - uses: actions/upload-artifact@v5
         with:
@@ -32,7 +32,7 @@ jobs:
           path: dist/*
 
       - name: Check metadata
-        run: uv run twine check dist/*
+        run: uvx twine check dist/*
   publish:
     runs-on: ubuntu-24.04
     if: github.event_name == 'push'
