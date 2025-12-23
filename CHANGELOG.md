@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.1]
+
+- Added Python 3.14 support ([#256])
+
 ## [1.12.0]
 
 ### Changed
@@ -302,3 +306,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#240]: https://github.com/cloudevents/sdk-python/pull/240
 [#248]: https://github.com/cloudevents/sdk-python/pull/248
 [#249]: https://github.com/cloudevents/sdk-python/pull/249
+[#256]: https://github.com/cloudevents/sdk-python/pull/256
