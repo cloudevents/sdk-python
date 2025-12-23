@@ -245,8 +245,7 @@ class BaseEvent(EventGetterSetter):
                     decoded_value = value
             except Exception as e:
                 raise cloud_exceptions.DataUnmarshallerError(
-                    "Failed to unmarshall data with error: "
-                    f"{type(e).__name__}('{e}')"
+                    f"Failed to unmarshall data with error: {type(e).__name__}('{e}')"
                 )
             self.Set(name, decoded_value)
 
