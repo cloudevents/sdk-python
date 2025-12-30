@@ -114,7 +114,10 @@ exclude = [
 [tool.ruff.lint]
 ignore = ["E731"]
 extend-ignore = ["E203"]
-select = ["I"]
+select = [
+    "I",    # isort - import sorting
+    "F401", # unused imports
+]
 
 
 [tool.pytest.ini_options]
