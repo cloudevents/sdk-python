@@ -12,8 +12,4 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""This package contains the core functionality of the CloudEvents spec."""
-
-# CloudEvents specification version constants
-SPECVERSION_V1_0 = "1.0"
-SPECVERSION_V0_3 = "0.3"
+"""CloudEvents v0.3 implementation module."""

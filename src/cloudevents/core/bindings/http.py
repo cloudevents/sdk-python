@@ -15,16 +15,17 @@
 from dataclasses import dataclass
 from typing import Any, Final
 
+from cloudevents.core import SPECVERSION_V1_0
 from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.bindings.common import (
     CONTENT_TYPE_HEADER,
     DATACONTENTTYPE_ATTR,
     decode_header_value,
     encode_header_value,
+    get_event_factory_for_version,
 )
 from cloudevents.core.formats.base import Format
 from cloudevents.core.formats.json import JSONFormat
-from cloudevents.core.v1.event import CloudEvent
 
 CE_PREFIX: Final[str] = "ce-"
 
@@ -94,10 +95,13 @@ def to_binary(event: BaseCloudEvent, event_format: Format) -> HTTPMessage:
 def from_binary(
     message: HTTPMessage,
     event_format: Format,
-    event_factory: EventFactory,
+    event_factory: EventFactory | None = None,
 ) -> BaseCloudEvent:
     """
     Parse an HTTP binary content mode message to a CloudEvent.
+
+    Auto-detects the CloudEvents version from the 'ce-specversion' header
+    and uses the appropriate event factory if not explicitly provided.
 
     Extracts CloudEvent attributes from ce-prefixed HTTP headers and treats the
     'Content-Type' header as the 'datacontenttype' attribute. The HTTP body is
@@ -116,7 +120,7 @@ def from_binary(
 
     :param message: HTTPMessage to parse
     :param event_format: Format implementation for data deserialization
-    :param event_factory: Factory function to create CloudEvent instances
+    :param event_factory: Factory function to create CloudEvent instances (auto-detected if None)
     :return: CloudEvent instance
     """
     attributes: dict[str, Any] = {}
@@ -129,6 +133,11 @@ def from_binary(
             attributes[attr_name] = decode_header_value(attr_name, header_value)
         elif normalized_name == CONTENT_TYPE_HEADER:
             attributes[DATACONTENTTYPE_ATTR] = header_value
+
+    # Auto-detect version if factory not provided
+    if event_factory is None:
+        specversion = attributes.get("specversion", SPECVERSION_V1_0)
+        event_factory = get_event_factory_for_version(specversion)
 
     datacontenttype = attributes.get(DATACONTENTTYPE_ATTR)
     data = event_format.read_data(message.body, datacontenttype)
@@ -172,7 +181,7 @@ def to_structured(event: BaseCloudEvent, event_format: Format) -> HTTPMessage:
 def from_structured(
     message: HTTPMessage,
     event_format: Format,
-    event_factory: EventFactory,
+    event_factory: EventFactory | None = None,
 ) -> BaseCloudEvent:
     """
     Parse an HTTP structured content mode message to a CloudEvent.
@@ -180,31 +189,42 @@ def from_structured(
     Deserializes the CloudEvent from the HTTP body using the specified format.
     Any ce-prefixed headers are ignored as the body contains all event metadata.
 
+    If event_factory is not provided, version detection is delegated to the format
+    implementation, which will auto-detect based on the 'specversion' field.
+
     Example:
         >>> from cloudevents.core.v1.event import CloudEvent
         >>> from cloudevents.core.formats.json import JSONFormat
         >>>
+        >>> # Explicit factory (recommended for performance)
         >>> message = HTTPMessage(
         ...     headers={"content-type": "application/cloudevents+json"},
         ...     body=b'{"type": "com.example.test", "source": "/test", ...}'
         ... )
         >>> event = from_structured(message, JSONFormat(), CloudEvent)
+        >>>
+        >>> # Auto-detect version (convenient)
+        >>> event = from_structured(message, JSONFormat())
 
     :param message: HTTPMessage to parse
     :param event_format: Format implementation for deserialization
-    :param event_factory: Factory function to create CloudEvent instances
+    :param event_factory: Factory function to create CloudEvent instances.
+                         If None, the format will auto-detect the version.
     :return: CloudEvent instance
     """
+    # Delegate version detection to format layer
     return event_format.read(event_factory, message.body)
 
 
 def from_http(
     message: HTTPMessage,
     event_format: Format,
-    event_factory: EventFactory,
+    event_factory: EventFactory | None = None,
 ) -> BaseCloudEvent:
     """
     Parse an HTTP message to a CloudEvent with automatic mode detection.
+
+    Auto-detects CloudEvents version and uses appropriate event factory if not provided.
 
     Automatically detects whether the message uses binary or structured content mode:
     - If any ce- prefixed headers are present → binary mode
@@ -233,7 +253,7 @@ def from_http(
 
     :param message: HTTPMessage to parse
     :param event_format: Format implementation for deserialization
-    :param event_factory: Factory function to create CloudEvent instances
+    :param event_factory: Factory function to create CloudEvent instances (auto-detected if None)
     :return: CloudEvent instance
     """
     if any(key.lower().startswith(CE_PREFIX) for key in message.headers.keys()):
@@ -271,9 +291,11 @@ def to_binary_event(
 def from_binary_event(
     message: HTTPMessage,
     event_format: Format | None = None,
-) -> CloudEvent:
+) -> BaseCloudEvent:
     """
-    Convenience wrapper for from_binary with JSON format and CloudEvent as defaults.
+    Convenience wrapper for from_binary with JSON format and auto-detection.
+
+    Auto-detects CloudEvents version (v0.3 or v1.0) from headers.
 
     Example:
         >>> from cloudevents.core.bindings import http
@@ -281,11 +303,11 @@ def from_binary_event(
 
     :param message: HTTPMessage to parse
     :param event_format: Format implementation (defaults to JSONFormat)
-    :return: CloudEvent instance
+    :return: CloudEvent instance (v0.3 or v1.0 based on specversion)
     """
     if event_format is None:
         event_format = JSONFormat()
-    return from_binary(message, event_format, CloudEvent)
+    return from_binary(message, event_format, None)
 
 
 def to_structured_event(
@@ -317,9 +339,11 @@ def to_structured_event(
 def from_structured_event(
     message: HTTPMessage,
     event_format: Format | None = None,
-) -> CloudEvent:
+) -> BaseCloudEvent:
     """
-    Convenience wrapper for from_structured with JSON format and CloudEvent as defaults.
+    Convenience wrapper for from_structured with JSON format and auto-detection.
+
+    Auto-detects CloudEvents version (v0.3 or v1.0) from body.
 
     Example:
         >>> from cloudevents.core.bindings import http
@@ -327,20 +351,20 @@ def from_structured_event(
 
     :param message: HTTPMessage to parse
     :param event_format: Format implementation (defaults to JSONFormat)
-    :return: CloudEvent instance
+    :return: CloudEvent instance (v0.3 or v1.0 based on specversion)
     """
     if event_format is None:
         event_format = JSONFormat()
-    return from_structured(message, event_format, CloudEvent)
+    return from_structured(message, event_format, None)
 
 
 def from_http_event(
     message: HTTPMessage,
     event_format: Format | None = None,
-) -> CloudEvent:
+) -> BaseCloudEvent:
     """
-    Convenience wrapper for from_http with JSON format and CloudEvent as defaults.
-    Auto-detects binary or structured mode.
+    Convenience wrapper for from_http with JSON format and auto-detection.
+    Auto-detects binary or structured mode, and CloudEvents version.
 
     Example:
         >>> from cloudevents.core.bindings import http
@@ -348,8 +372,8 @@ def from_http_event(
 
     :param message: HTTPMessage to parse
     :param event_format: Format implementation (defaults to JSONFormat)
-    :return: CloudEvent instance
+    :return: CloudEvent instance (v0.3 or v1.0 based on specversion)
     """
     if event_format is None:
         event_format = JSONFormat()
-    return from_http(message, event_format, CloudEvent)
+    return from_http(message, event_format, None)

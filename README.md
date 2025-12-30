@@ -10,6 +10,7 @@ will) break with every update.
 This SDK current supports the following versions of CloudEvents:
 
 - v1.0
+- v0.3
 
 ## Python SDK
 

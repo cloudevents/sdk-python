@@ -17,7 +17,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any, Final
 
-from cloudevents.core import SPECVERSION_V1_0
+from cloudevents.core import SPECVERSION_V0_3
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.exceptions import (
     BaseCloudEventException,
@@ -31,18 +31,34 @@ from cloudevents.core.exceptions import (
 REQUIRED_ATTRIBUTES: Final[list[str]] = ["id", "source", "type", "specversion"]
 OPTIONAL_ATTRIBUTES: Final[list[str]] = [
     "datacontenttype",
-    "dataschema",
+    "datacontentencoding",
+    "schemaurl",
     "subject",
     "time",
 ]
 
 
 class CloudEvent(BaseCloudEvent):
+    """
+    CloudEvents v0.3 implementation.
+
+    This class represents a CloudEvent conforming to the v0.3 specification.
+    See https://github.com/cloudevents/spec/blob/v0.3/spec.md for details.
+    """
+
     def __init__(
         self,
         attributes: dict[str, Any],
         data: dict[str, Any] | str | bytes | None = None,
     ) -> None:
+        """
+        Create a new CloudEvent v0.3 instance.
+
+        :param attributes: The attributes of the CloudEvent instance.
+        :param data: The payload of the CloudEvent instance.
+
+        :raises CloudEventValidationError: If any of the required attributes are missing or have invalid values.
+        """
         self._validate_attribute(attributes=attributes)
         self._attributes: dict[str, Any] = attributes
         self._data: dict[str, Any] | str | bytes | None = data
@@ -50,9 +66,9 @@ class CloudEvent(BaseCloudEvent):
     @staticmethod
     def _validate_attribute(attributes: dict[str, Any]) -> None:
         """
-        Validates the attributes of the CloudEvent as per the CloudEvents specification.
+        Validates the attributes of the CloudEvent as per the CloudEvents v0.3 specification.
 
-        See https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#required-attributes
+        See https://github.com/cloudevents/spec/blob/v0.3/spec.md#required-attributes
         """
         errors: dict[str, list[BaseCloudEventException]] = defaultdict(list)
         errors.update(CloudEvent._validate_required_attributes(attributes=attributes))
@@ -112,11 +128,11 @@ class CloudEvent(BaseCloudEvent):
                     attribute_name="specversion", expected_type=str
                 )
             )
-        if attributes.get("specversion") != SPECVERSION_V1_0:
+        if attributes.get("specversion") != SPECVERSION_V0_3:
             errors["specversion"].append(
                 InvalidAttributeValueError(
                     attribute_name="specversion",
-                    msg=f"Attribute 'specversion' must be '{SPECVERSION_V1_0}'",
+                    msg=f"Attribute 'specversion' must be '{SPECVERSION_V0_3}'",
                 )
             )
         return errors
@@ -175,18 +191,32 @@ class CloudEvent(BaseCloudEvent):
                         msg="Attribute 'datacontenttype' must not be empty",
                     )
                 )
-        if "dataschema" in attributes:
-            if not isinstance(attributes["dataschema"], str):
-                errors["dataschema"].append(
+        if "datacontentencoding" in attributes:
+            if not isinstance(attributes["datacontentencoding"], str):
+                errors["datacontentencoding"].append(
                     InvalidAttributeTypeError(
-                        attribute_name="dataschema", expected_type=str
+                        attribute_name="datacontentencoding", expected_type=str
                     )
                 )
-            if not attributes["dataschema"]:
-                errors["dataschema"].append(
+            if not attributes["datacontentencoding"]:
+                errors["datacontentencoding"].append(
                     InvalidAttributeValueError(
-                        attribute_name="dataschema",
-                        msg="Attribute 'dataschema' must not be empty",
+                        attribute_name="datacontentencoding",
+                        msg="Attribute 'datacontentencoding' must not be empty",
+                    )
+                )
+        if "schemaurl" in attributes:
+            if not isinstance(attributes["schemaurl"], str):
+                errors["schemaurl"].append(
+                    InvalidAttributeTypeError(
+                        attribute_name="schemaurl", expected_type=str
+                    )
+                )
+            if not attributes["schemaurl"]:
+                errors["schemaurl"].append(
+                    InvalidAttributeValueError(
+                        attribute_name="schemaurl",
+                        msg="Attribute 'schemaurl' must not be empty",
                     )
                 )
         return errors
@@ -247,7 +277,13 @@ class CloudEvent(BaseCloudEvent):
         return self._attributes.get("datacontenttype")
 
     def get_dataschema(self) -> str | None:
-        return self._attributes.get("dataschema")
+        """
+        Get the dataschema attribute.
+
+        Note: In v0.3, this is called 'schemaurl'. This method provides
+        compatibility with the BaseCloudEvent interface.
+        """
+        return self._attributes.get("schemaurl")
 
     def get_subject(self) -> str | None:
         return self._attributes.get("subject")
@@ -263,3 +299,21 @@ class CloudEvent(BaseCloudEvent):
 
     def get_attributes(self) -> dict[str, Any]:
         return self._attributes
+
+    # v0.3 specific methods
+
+    def get_datacontentencoding(self) -> str | None:
+        """
+        Get the datacontentencoding attribute (v0.3 only).
+
+        This attribute was removed in v1.0.
+        """
+        return self._attributes.get("datacontentencoding")
+
+    def get_schemaurl(self) -> str | None:
+        """
+        Get the schemaurl attribute (v0.3 only).
+
+        This attribute was renamed to 'dataschema' in v1.0.
+        """
+        return self._attributes.get("schemaurl")

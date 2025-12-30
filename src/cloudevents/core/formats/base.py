@@ -29,7 +29,7 @@ class Format(Protocol):
 
     def read(
         self,
-        event_factory: EventFactory,
+        event_factory: EventFactory | None,
         data: str | bytes,
     ) -> BaseCloudEvent:
         """
@@ -38,6 +38,7 @@ class Format(Protocol):
         :param event_factory: A factory function that creates CloudEvent instances from
             attributes and data. The factory should accept a dictionary of attributes and
             optional event data (dict, str, or bytes).
+            If None, the format implementation should auto-detect the version from the data.
         :param data: The serialized CloudEvent data as a string or bytes.
         :return: A CloudEvent instance constructed from the deserialized data.
         :raises ValueError: If the data cannot be parsed or is invalid according to the format.

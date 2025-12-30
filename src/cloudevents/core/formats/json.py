@@ -20,6 +20,7 @@ from typing import Any, Final, Pattern
 
 from dateutil.parser import isoparse
 
+from cloudevents.core import SPECVERSION_V0_3, SPECVERSION_V1_0
 from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.formats.base import Format
 
@@ -49,13 +50,18 @@ class JSONFormat(Format):
 
     def read(
         self,
-        event_factory: EventFactory,
+        event_factory: EventFactory | None,
         data: str | bytes,
     ) -> BaseCloudEvent:
         """
         Read a CloudEvent from a JSON formatted byte string.
 
+        Supports both v0.3 and v1.0 CloudEvents:
+        - v0.3: Uses 'datacontentencoding' attribute with 'data' field
+        - v1.0: Uses 'data_base64' field (no datacontentencoding)
+
         :param event_factory: A factory function to create CloudEvent instances.
+                             If None, automatically detects version from 'specversion' field.
         :param data: The JSON formatted byte array.
         :return: The CloudEvent instance.
         """
@@ -67,12 +73,33 @@ class JSONFormat(Format):
 
         event_attributes = loads(decoded_data)
 
+        # Auto-detect version if factory not provided
+        if event_factory is None:
+            from cloudevents.core.bindings.common import get_event_factory_for_version
+
+            specversion = event_attributes.get("specversion", SPECVERSION_V1_0)
+            event_factory = get_event_factory_for_version(specversion)
+
         if "time" in event_attributes:
             event_attributes["time"] = isoparse(event_attributes["time"])
 
+        # Handle data field based on version
+        specversion = event_attributes.get("specversion", SPECVERSION_V1_0)
         event_data: dict[str, Any] | str | bytes | None = event_attributes.pop(
             "data", None
         )
+
+        # v0.3: Check for datacontentencoding attribute
+        if (
+            specversion == SPECVERSION_V0_3
+            and "datacontentencoding" in event_attributes
+        ):
+            encoding = event_attributes.get("datacontentencoding", "").lower()
+            if encoding == "base64" and isinstance(event_data, str):
+                # Decode base64 encoded data in v0.3
+                event_data = base64.b64decode(event_data)
+
+        # v1.0: Check for data_base64 field (when data is None)
         if event_data is None:
             event_data_base64 = event_attributes.pop("data_base64", None)
             if event_data_base64 is not None:
@@ -84,15 +111,29 @@ class JSONFormat(Format):
         """
         Write a CloudEvent to a JSON formatted byte string.
 
+        Supports both v0.3 and v1.0 CloudEvents:
+        - v0.3: Uses 'datacontentencoding: base64' with base64-encoded 'data' field
+        - v1.0: Uses 'data_base64' field (no datacontentencoding)
+
         :param event: The CloudEvent to write.
         :return: The CloudEvent as a JSON formatted byte array.
         """
         event_data = event.get_data()
         event_dict: dict[str, Any] = dict(event.get_attributes())
+        specversion = event_dict.get("specversion", SPECVERSION_V1_0)
 
         if event_data is not None:
             if isinstance(event_data, (bytes, bytearray)):
-                event_dict["data_base64"] = base64.b64encode(event_data).decode("utf-8")
+                # Handle binary data based on version
+                if specversion == SPECVERSION_V0_3:
+                    # v0.3: Use datacontentencoding with base64-encoded data field
+                    event_dict["datacontentencoding"] = "base64"
+                    event_dict["data"] = base64.b64encode(event_data).decode("utf-8")
+                else:
+                    # v1.0: Use data_base64 field
+                    event_dict["data_base64"] = base64.b64encode(event_data).decode(
+                        "utf-8"
+                    )
             else:
                 datacontenttype = event_dict.get("datacontenttype", "application/json")
                 if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype):

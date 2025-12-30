@@ -18,7 +18,9 @@ from typing import Any, Final
 
 from dateutil.parser import isoparse
 
+from cloudevents.core import SPECVERSION_V1_0
 from cloudevents.core.base import BaseCloudEvent, EventFactory
+from cloudevents.core.bindings.common import get_event_factory_for_version
 from cloudevents.core.formats.base import Format
 
 # AMQP CloudEvents spec allows both cloudEvents_ and cloudEvents: prefixes
@@ -149,10 +151,13 @@ def to_binary(event: BaseCloudEvent, event_format: Format) -> AMQPMessage:
 def from_binary(
     message: AMQPMessage,
     event_format: Format,
-    event_factory: EventFactory,
+    event_factory: EventFactory | None = None,
 ) -> BaseCloudEvent:
     """
     Parse an AMQP binary content mode message to a CloudEvent.
+
+    Auto-detects the CloudEvents version from the application properties
+    and uses the appropriate event factory if not explicitly provided.
 
     Extracts CloudEvent attributes from AMQP application properties with either
     'cloudEvents_' or 'cloudEvents:' prefix (per AMQP CloudEvents spec), and treats
@@ -199,6 +204,11 @@ def from_binary(
 
     if CONTENT_TYPE_PROPERTY in message.properties:
         attributes["datacontenttype"] = message.properties[CONTENT_TYPE_PROPERTY]
+
+    # Auto-detect version if factory not provided
+    if event_factory is None:
+        specversion = attributes.get("specversion", SPECVERSION_V1_0)
+        event_factory = get_event_factory_for_version(specversion)
 
     datacontenttype = attributes.get("datacontenttype")
     data = event_format.read_data(message.application_data, datacontenttype)
@@ -248,7 +258,7 @@ def to_structured(event: BaseCloudEvent, event_format: Format) -> AMQPMessage:
 def from_structured(
     message: AMQPMessage,
     event_format: Format,
-    event_factory: EventFactory,
+    event_factory: EventFactory | None = None,
 ) -> BaseCloudEvent:
     """
     Parse an AMQP structured content mode message to a CloudEvent.
@@ -257,32 +267,43 @@ def from_structured(
     specified format. Any cloudEvents_-prefixed application properties are ignored
     as the application-data contains all event metadata.
 
+    If event_factory is not provided, version detection is delegated to the format
+    implementation, which will auto-detect based on the 'specversion' field.
+
     Example:
         >>> from cloudevents.core.v1.event import CloudEvent
         >>> from cloudevents.core.formats.json import JSONFormat
         >>>
+        >>> # Explicit factory
         >>> message = AMQPMessage(
         ...     properties={"content-type": "application/cloudevents+json"},
         ...     application_properties={},
         ...     application_data=b'{"type": "com.example.test", "source": "/test", ...}'
         ... )
         >>> event = from_structured(message, JSONFormat(), CloudEvent)
+        >>>
+        >>> # Auto-detect version
+        >>> event = from_structured(message, JSONFormat())
 
     :param message: AMQPMessage to parse
     :param event_format: Format implementation for deserialization
-    :param event_factory: Factory function to create CloudEvent instances
+    :param event_factory: Factory function to create CloudEvent instances.
+                         If None, the format will auto-detect the version.
     :return: CloudEvent instance
     """
+    # Delegate version detection to format layer
     return event_format.read(event_factory, message.application_data)
 
 
 def from_amqp(
     message: AMQPMessage,
     event_format: Format,
-    event_factory: EventFactory,
+    event_factory: EventFactory | None = None,
 ) -> BaseCloudEvent:
     """
     Parse an AMQP message to a CloudEvent with automatic mode detection.
+
+    Auto-detects CloudEvents version and uses appropriate event factory if not provided.
 
     Automatically detects whether the message uses binary or structured content mode:
     - If content-type starts with "application/cloudevents" → structured mode
@@ -313,7 +334,7 @@ def from_amqp(
 
     :param message: AMQPMessage to parse
     :param event_format: Format implementation for deserialization
-    :param event_factory: Factory function to create CloudEvent instances
+    :param event_factory: Factory function to create CloudEvent instances (auto-detected if None)
     :return: CloudEvent instance
     """
     content_type = message.properties.get(CONTENT_TYPE_PROPERTY, "")
