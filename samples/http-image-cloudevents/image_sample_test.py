@@ -22,11 +22,11 @@ from image_sample_server import app
 from PIL import Image
 
 from cloudevents.core.bindings.http import (
-    CloudEvent,
     from_http_event,
     to_binary_event,
     to_structured_event,
 )
+from cloudevents.core.v1.event import CloudEvent
 
 image_fileobj = io.BytesIO(image_bytes)
 image_expected_shape = (1880, 363)

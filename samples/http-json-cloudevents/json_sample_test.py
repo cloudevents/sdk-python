@@ -16,10 +16,10 @@ import pytest
 from json_sample_server import app
 
 from cloudevents.core.bindings.http import (
-    CloudEvent,
     to_binary_event,
     to_structured_event,
 )
+from cloudevents.core.v1.event import CloudEvent
 
 
 @pytest.fixture

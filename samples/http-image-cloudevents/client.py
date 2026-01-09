@@ -17,10 +17,10 @@ import sys
 import requests
 
 from cloudevents.core.bindings.http import (
-    CloudEvent,
     to_binary_event,
     to_structured_event,
 )
+from cloudevents.core.v1.event import CloudEvent
 
 resp = requests.get(
     "https://raw.githubusercontent.com/cncf/artwork/master/projects/cloudevents/horizontal/color/cloudevents-horizontal-color.png"  # noqa
