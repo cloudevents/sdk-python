@@ -25,6 +25,11 @@ from urllib.parse import quote, unquote
 
 from dateutil.parser import isoparse
 
+from cloudevents.core.base import EventFactory
+from cloudevents.core.spec import SPECVERSION_V0_3
+from cloudevents.core.v03.event import CloudEvent as CloudEventV03
+from cloudevents.core.v1.event import CloudEvent
+
 TIME_ATTR: Final[str] = "time"
 CONTENT_TYPE_HEADER: Final[str] = "content-type"
 DATACONTENTTYPE_ATTR: Final[str] = "datacontenttype"
@@ -66,3 +71,19 @@ def decode_header_value(attr_name: str, value: str) -> Any:
         return isoparse(decoded)
 
     return decoded
+
+
+def get_event_factory_for_version(specversion: str) -> EventFactory:
+    """
+    Get the appropriate event factory based on the CloudEvents specification version.
+
+    This function returns the CloudEvent class implementation for the specified
+    version. Used by protocol bindings for automatic version detection.
+
+    :param specversion: The CloudEvents specification version (e.g., "0.3" or "1.0")
+    :return: EventFactory for the specified version (defaults to v1.0 for unknown versions)
+    """
+    if specversion == SPECVERSION_V0_3:
+        return CloudEventV03
+    # Default to v1.0 for unknown versions
+    return CloudEvent

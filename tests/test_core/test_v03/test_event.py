@@ -24,7 +24,7 @@ from cloudevents.core.exceptions import (
     InvalidAttributeValueError,
     MissingRequiredAttributeError,
 )
-from cloudevents.core.v1.event import CloudEvent
+from cloudevents.core.v03.event import CloudEvent
 
 
 def test_missing_required_attributes() -> None:
@@ -50,7 +50,7 @@ def test_missing_required_attributes() -> None:
             str(InvalidAttributeTypeError("specversion", str)),
             str(
                 InvalidAttributeValueError(
-                    "specversion", "Attribute 'specversion' must be '1.0'"
+                    "specversion", "Attribute 'specversion' must be '0.3'"
                 )
             ),
         ],
@@ -60,6 +60,22 @@ def test_missing_required_attributes() -> None:
         key: [str(e) for e in value] for key, value in e.value.errors.items()
     }
     assert actual_errors == expected_errors
+
+
+def test_invalid_specversion() -> None:
+    """Test that v0.3 CloudEvent rejects non-0.3 specversion"""
+    with pytest.raises(CloudEventValidationError) as e:
+        CloudEvent(
+            {
+                "id": "1",
+                "source": "/",
+                "type": "test",
+                "specversion": "1.0",  # Wrong version!
+            }
+        )
+
+    assert "specversion" in e.value.errors
+    assert any("must be '0.3'" in str(err) for err in e.value.errors["specversion"])
 
 
 @pytest.mark.parametrize(
@@ -94,7 +110,7 @@ def test_time_validation(time: Any, expected_error: dict) -> None:
                 "id": "1",
                 "source": "/",
                 "type": "test",
-                "specversion": "1.0",
+                "specversion": "0.3",
                 "time": time,
             }
         )
@@ -132,7 +148,7 @@ def test_subject_validation(subject: Any, expected_error: dict) -> None:
                 "id": "1",
                 "source": "/",
                 "type": "test",
-                "specversion": "1.0",
+                "specversion": "0.3",
                 "subject": subject,
             }
         )
@@ -176,7 +192,7 @@ def test_datacontenttype_validation(datacontenttype: Any, expected_error: dict) 
                 "id": "1",
                 "source": "/",
                 "type": "test",
-                "specversion": "1.0",
+                "specversion": "0.3",
                 "datacontenttype": datacontenttype,
             }
         )
@@ -188,19 +204,24 @@ def test_datacontenttype_validation(datacontenttype: Any, expected_error: dict) 
 
 
 @pytest.mark.parametrize(
-    "dataschema,expected_error",
+    "datacontentencoding,expected_error",
     [
         (
             1234,
-            {"dataschema": [str(InvalidAttributeTypeError("dataschema", str))]},
+            {
+                "datacontentencoding": [
+                    str(InvalidAttributeTypeError("datacontentencoding", str))
+                ]
+            },
         ),
         (
             "",
             {
-                "dataschema": [
+                "datacontentencoding": [
                     str(
                         InvalidAttributeValueError(
-                            "dataschema", "Attribute 'dataschema' must not be empty"
+                            "datacontentencoding",
+                            "Attribute 'datacontentencoding' must not be empty",
                         )
                     )
                 ]
@@ -208,15 +229,58 @@ def test_datacontenttype_validation(datacontenttype: Any, expected_error: dict) 
         ),
     ],
 )
-def test_dataschema_validation(dataschema: Any, expected_error: dict) -> None:
+def test_datacontentencoding_validation(
+    datacontentencoding: Any, expected_error: dict
+) -> None:
+    """Test v0.3 specific datacontentencoding attribute validation"""
     with pytest.raises(CloudEventValidationError) as e:
         CloudEvent(
             {
                 "id": "1",
                 "source": "/",
                 "type": "test",
-                "specversion": "1.0",
-                "dataschema": dataschema,
+                "specversion": "0.3",
+                "datacontentencoding": datacontentencoding,
+            }
+        )
+
+    actual_errors = {
+        key: [str(e) for e in value] for key, value in e.value.errors.items()
+    }
+    assert actual_errors == expected_error
+
+
+@pytest.mark.parametrize(
+    "schemaurl,expected_error",
+    [
+        (
+            1234,
+            {"schemaurl": [str(InvalidAttributeTypeError("schemaurl", str))]},
+        ),
+        (
+            "",
+            {
+                "schemaurl": [
+                    str(
+                        InvalidAttributeValueError(
+                            "schemaurl", "Attribute 'schemaurl' must not be empty"
+                        )
+                    )
+                ]
+            },
+        ),
+    ],
+)
+def test_schemaurl_validation(schemaurl: Any, expected_error: dict) -> None:
+    """Test v0.3 specific schemaurl attribute validation"""
+    with pytest.raises(CloudEventValidationError) as e:
+        CloudEvent(
+            {
+                "id": "1",
+                "source": "/",
+                "type": "test",
+                "specversion": "0.3",
+                "schemaurl": schemaurl,
             }
         )
 
@@ -283,7 +347,7 @@ def test_custom_extension(extension_name: str, expected_error: dict) -> None:
                 "id": "1",
                 "source": "/",
                 "type": "test",
-                "specversion": "1.0",
+                "specversion": "0.3",
                 extension_name: "value",
             }
         )
@@ -294,13 +358,15 @@ def test_custom_extension(extension_name: str, expected_error: dict) -> None:
     assert actual_errors == expected_error
 
 
-def test_cloud_event_constructor() -> None:
+def test_cloud_event_v03_constructor() -> None:
+    """Test creating a v0.3 CloudEvent with all attributes"""
     id = "1"
     source = "/source"
     type = "com.test.type"
-    specversion = "1.0"
+    specversion = "0.3"
     datacontenttype = "application/json"
-    dataschema = "http://example.com/schema"
+    datacontentencoding = "base64"
+    schemaurl = "http://example.com/schema.json"
     subject = "test_subject"
     time = datetime.now(tz=timezone.utc)
     data = {"key": "value"}
@@ -313,7 +379,8 @@ def test_cloud_event_constructor() -> None:
             "type": type,
             "specversion": specversion,
             "datacontenttype": datacontenttype,
-            "dataschema": dataschema,
+            "datacontentencoding": datacontentencoding,
+            "schemaurl": schemaurl,
             "subject": subject,
             "time": time,
             "customextension": customextension,
@@ -326,8 +393,46 @@ def test_cloud_event_constructor() -> None:
     assert event.get_type() == type
     assert event.get_specversion() == specversion
     assert event.get_datacontenttype() == datacontenttype
-    assert event.get_dataschema() == dataschema
+    assert event.get_datacontentencoding() == datacontentencoding
+    assert event.get_schemaurl() == schemaurl
     assert event.get_subject() == subject
     assert event.get_time() == time
     assert event.get_extension("customextension") == customextension
     assert event.get_data() == data
+
+
+def test_get_dataschema_returns_schemaurl() -> None:
+    """Test that get_dataschema() returns schemaurl for v0.3 compatibility"""
+    event = CloudEvent(
+        attributes={
+            "id": "1",
+            "source": "/source",
+            "type": "com.test.type",
+            "specversion": "0.3",
+            "schemaurl": "http://example.com/schema.json",
+        }
+    )
+
+    # get_dataschema should return the schemaurl value for compatibility
+    assert event.get_dataschema() == "http://example.com/schema.json"
+    assert event.get_schemaurl() == "http://example.com/schema.json"
+
+
+def test_v03_minimal_event() -> None:
+    """Test creating a minimal v0.3 CloudEvent"""
+    event = CloudEvent(
+        attributes={
+            "id": "test-123",
+            "source": "https://example.com/source",
+            "type": "com.example.test",
+            "specversion": "0.3",
+        }
+    )
+
+    assert event.get_id() == "test-123"
+    assert event.get_source() == "https://example.com/source"
+    assert event.get_type() == "com.example.test"
+    assert event.get_specversion() == "0.3"
+    assert event.get_data() is None
+    assert event.get_datacontentencoding() is None
+    assert event.get_schemaurl() is None

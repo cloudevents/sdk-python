@@ -21,10 +21,11 @@ from cloudevents.core.bindings.common import (
     DATACONTENTTYPE_ATTR,
     decode_header_value,
     encode_header_value,
+    get_event_factory_for_version,
 )
 from cloudevents.core.formats.base import Format
 from cloudevents.core.formats.json import JSONFormat
-from cloudevents.core.v1.event import CloudEvent
+from cloudevents.core.spec import SPECVERSION_V1_0
 
 CE_PREFIX: Final[str] = "ce_"
 PARTITIONKEY_ATTR: Final[str] = "partitionkey"
@@ -127,10 +128,13 @@ def to_binary(
 def from_binary(
     message: KafkaMessage,
     event_format: Format,
-    event_factory: EventFactory,
+    event_factory: EventFactory | None = None,
 ) -> BaseCloudEvent:
     """
     Parse a Kafka binary content mode message to a CloudEvent.
+
+    Auto-detects the CloudEvents version from the 'ce_specversion' header
+    and uses the appropriate event factory if not explicitly provided.
 
     Extracts CloudEvent attributes from ce_-prefixed Kafka headers and treats the
     'content-type' header as the 'datacontenttype' attribute. The Kafka message value
@@ -175,6 +179,11 @@ def from_binary(
             else message.key
         )
         attributes[PARTITIONKEY_ATTR] = key_value
+
+    # Auto-detect version if factory not provided
+    if event_factory is None:
+        specversion = attributes.get("specversion", SPECVERSION_V1_0)
+        event_factory = get_event_factory_for_version(specversion)
 
     datacontenttype = attributes.get(DATACONTENTTYPE_ATTR)
     data = event_format.read_data(message.value, datacontenttype)
@@ -228,7 +237,7 @@ def to_structured(
 def from_structured(
     message: KafkaMessage,
     event_format: Format,
-    event_factory: EventFactory,
+    event_factory: EventFactory | None = None,
 ) -> BaseCloudEvent:
     """
     Parse a Kafka structured content mode message to a CloudEvent.
@@ -237,22 +246,31 @@ def from_structured(
     Any ce_-prefixed headers are ignored as the value contains all event metadata.
     If the message has a key, it is added as the 'partitionkey' extension attribute.
 
+    If event_factory is not provided, version detection is delegated to the format
+    implementation, which will auto-detect based on the 'specversion' field.
+
     Example:
         >>> from cloudevents.core.v1.event import CloudEvent
         >>> from cloudevents.core.formats.json import JSONFormat
         >>>
+        >>> # Explicit factory
         >>> message = KafkaMessage(
         ...     headers={"content-type": b"application/cloudevents+json"},
         ...     key=b"partition-key-123",
         ...     value=b'{"type": "com.example.test", "source": "/test", ...}'
         ... )
         >>> event = from_structured(message, JSONFormat(), CloudEvent)
+        >>>
+        >>> # Auto-detect version
+        >>> event = from_structured(message, JSONFormat())
 
     :param message: KafkaMessage to parse
     :param event_format: Format implementation for deserialization
-    :param event_factory: Factory function to create CloudEvent instances
+    :param event_factory: Factory function to create CloudEvent instances.
+                         If None, the format will auto-detect the version.
     :return: CloudEvent instance
     """
+    # Delegate version detection to format layer
     event = event_format.read(event_factory, message.value)
 
     # If message has a key, we need to add it as partitionkey extension attribute
@@ -266,7 +284,8 @@ def from_structured(
         attributes = event.get_attributes()
         attributes[PARTITIONKEY_ATTR] = key_value
         data = event.get_data()
-        event = event_factory(attributes, data)
+
+        event = type(event)(attributes, data)
 
     return event
 
@@ -274,10 +293,12 @@ def from_structured(
 def from_kafka(
     message: KafkaMessage,
     event_format: Format,
-    event_factory: EventFactory,
+    event_factory: EventFactory | None = None,
 ) -> BaseCloudEvent:
     """
     Parse a Kafka message to a CloudEvent with automatic mode detection.
+
+    Auto-detects CloudEvents version and uses appropriate event factory if not provided.
 
     Automatically detects whether the message uses binary or structured content mode:
     - If any ce_ prefixed headers are present → binary mode
@@ -308,7 +329,7 @@ def from_kafka(
 
     :param message: KafkaMessage to parse
     :param event_format: Format implementation for deserialization
-    :param event_factory: Factory function to create CloudEvent instances
+    :param event_factory: Factory function to create CloudEvent instances (auto-detected if None)
     :return: CloudEvent instance
     """
     for header_name in message.headers.keys():
@@ -349,9 +370,11 @@ def to_binary_event(
 def from_binary_event(
     message: KafkaMessage,
     event_format: Format | None = None,
-) -> CloudEvent:
+) -> BaseCloudEvent:
     """
-    Convenience wrapper for from_binary with JSON format and CloudEvent as defaults.
+    Convenience wrapper for from_binary with JSON format and auto-detection.
+
+    Auto-detects CloudEvents version (v0.3 or v1.0) from headers.
 
     Example:
         >>> from cloudevents.core.bindings import kafka
@@ -359,11 +382,11 @@ def from_binary_event(
 
     :param message: KafkaMessage to parse
     :param event_format: Format implementation (defaults to JSONFormat)
-    :return: CloudEvent instance
+    :return: CloudEvent instance (v0.3 or v1.0 based on specversion)
     """
     if event_format is None:
         event_format = JSONFormat()
-    return from_binary(message, event_format, CloudEvent)
+    return from_binary(message, event_format, None)
 
 
 def to_structured_event(
@@ -397,9 +420,11 @@ def to_structured_event(
 def from_structured_event(
     message: KafkaMessage,
     event_format: Format | None = None,
-) -> CloudEvent:
+) -> BaseCloudEvent:
     """
-    Convenience wrapper for from_structured with JSON format and CloudEvent as defaults.
+    Convenience wrapper for from_structured with JSON format and auto-detection.
+
+    Auto-detects CloudEvents version (v0.3 or v1.0) from message body.
 
     Example:
         >>> from cloudevents.core.bindings import kafka
@@ -407,20 +432,20 @@ def from_structured_event(
 
     :param message: KafkaMessage to parse
     :param event_format: Format implementation (defaults to JSONFormat)
-    :return: CloudEvent instance
+    :return: CloudEvent instance (v0.3 or v1.0 based on specversion)
     """
     if event_format is None:
         event_format = JSONFormat()
-    return from_structured(message, event_format, CloudEvent)
+    return from_structured(message, event_format, None)
 
 
 def from_kafka_event(
     message: KafkaMessage,
     event_format: Format | None = None,
-) -> CloudEvent:
+) -> BaseCloudEvent:
     """
-    Convenience wrapper for from_kafka with JSON format and CloudEvent as defaults.
-    Auto-detects binary or structured mode.
+    Convenience wrapper for from_kafka with JSON format and auto-detection.
+    Auto-detects binary or structured mode, and CloudEvents version.
 
     Example:
         >>> from cloudevents.core.bindings import kafka
@@ -428,8 +453,8 @@ def from_kafka_event(
 
     :param message: KafkaMessage to parse
     :param event_format: Format implementation (defaults to JSONFormat)
-    :return: CloudEvent instance
+    :return: CloudEvent instance (v0.3 or v1.0 based on specversion)
     """
     if event_format is None:
         event_format = JSONFormat()
-    return from_kafka(message, event_format, CloudEvent)
+    return from_kafka(message, event_format, None)

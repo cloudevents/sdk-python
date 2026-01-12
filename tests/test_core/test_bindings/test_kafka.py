@@ -783,3 +783,35 @@ def test_convenience_with_explicit_format_override() -> None:
 
     assert recovered.get_type() == event.get_type()
     assert recovered.get_data() == event.get_data()
+
+
+def test_from_structured_with_key_auto_detect_v1() -> None:
+    """Test that auto-detection works when message has key (v1.0)"""
+    message = KafkaMessage(
+        headers={"content-type": b"application/cloudevents+json"},
+        key=b"partition-key-123",
+        value=b'{"specversion":"1.0","type":"com.example.test","source":"/test","id":"123"}',
+    )
+
+    # Auto-detect version (factory=None)
+    event = from_structured(message, JSONFormat())
+
+    assert event.get_type() == "com.example.test"
+    assert event.get_extension("partitionkey") == "partition-key-123"
+    assert event.get_attributes()["specversion"] == "1.0"
+
+
+def test_from_structured_with_key_auto_detect_v03() -> None:
+    """Test that auto-detection works when message has key (v0.3)"""
+    message = KafkaMessage(
+        headers={"content-type": b"application/cloudevents+json"},
+        key=b"partition-key-456",
+        value=b'{"specversion":"0.3","type":"com.example.test","source":"/test","id":"456"}',
+    )
+
+    # Auto-detect version (factory=None)
+    event = from_structured(message, JSONFormat())
+
+    assert event.get_type() == "com.example.test"
+    assert event.get_extension("partitionkey") == "partition-key-456"
+    assert event.get_attributes()["specversion"] == "0.3"
