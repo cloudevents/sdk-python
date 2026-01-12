@@ -11,5 +11,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from typing import Literal
 
-"""This package contains the core functionality of the CloudEvents spec."""
+SpecVersion = Literal["1.0", "0.3"]
+SPECVERSION_V1_0 = "1.0"
+SPECVERSION_V0_3 = "0.3"

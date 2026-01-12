@@ -20,9 +20,9 @@ from typing import Any, Final, Pattern
 
 from dateutil.parser import isoparse
 
-from cloudevents.core import SPECVERSION_V0_3, SPECVERSION_V1_0
 from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.formats.base import Format
+from cloudevents.core.spec import SPECVERSION_V0_3, SPECVERSION_V1_0
 
 
 class _JSONEncoderWithDatetime(JSONEncoder):

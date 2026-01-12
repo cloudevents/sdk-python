@@ -25,8 +25,8 @@ from urllib.parse import quote, unquote
 
 from dateutil.parser import isoparse
 
-from cloudevents.core import SPECVERSION_V0_3
 from cloudevents.core.base import EventFactory
+from cloudevents.core.spec import SPECVERSION_V0_3
 from cloudevents.core.v03.event import CloudEvent as CloudEventV03
 from cloudevents.core.v1.event import CloudEvent
 

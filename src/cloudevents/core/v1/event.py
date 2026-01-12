@@ -17,7 +17,6 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any, Final
 
-from cloudevents.core import SPECVERSION_V1_0
 from cloudevents.core.base import BaseCloudEvent
 from cloudevents.core.exceptions import (
     BaseCloudEventException,
@@ -27,6 +26,7 @@ from cloudevents.core.exceptions import (
     InvalidAttributeValueError,
     MissingRequiredAttributeError,
 )
+from cloudevents.core.spec import SPECVERSION_V1_0
 
 REQUIRED_ATTRIBUTES: Final[list[str]] = ["id", "source", "type", "specversion"]
 OPTIONAL_ATTRIBUTES: Final[list[str]] = [

@@ -18,10 +18,10 @@ from typing import Any, Final
 
 from dateutil.parser import isoparse
 
-from cloudevents.core import SPECVERSION_V1_0
 from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.bindings.common import get_event_factory_for_version
 from cloudevents.core.formats.base import Format
+from cloudevents.core.spec import SPECVERSION_V1_0
 
 # AMQP CloudEvents spec allows both cloudEvents_ and cloudEvents: prefixes
 # The underscore variant is preferred for JMS 2.0 compatibility

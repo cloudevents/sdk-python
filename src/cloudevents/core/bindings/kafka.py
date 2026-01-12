@@ -15,7 +15,6 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Final
 
-from cloudevents.core import SPECVERSION_V1_0
 from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.bindings.common import (
     CONTENT_TYPE_HEADER,
@@ -26,6 +25,7 @@ from cloudevents.core.bindings.common import (
 )
 from cloudevents.core.formats.base import Format
 from cloudevents.core.formats.json import JSONFormat
+from cloudevents.core.spec import SPECVERSION_V1_0
 
 CE_PREFIX: Final[str] = "ce_"
 PARTITIONKEY_ATTR: Final[str] = "partitionkey"
