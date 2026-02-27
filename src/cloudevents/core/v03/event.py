@@ -13,8 +13,9 @@
 #    under the License.
 
 import re
+import uuid
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Final
 
 from cloudevents.core.base import BaseCloudEvent
@@ -59,6 +60,13 @@ class CloudEvent(BaseCloudEvent):
 
         :raises CloudEventValidationError: If any of the required attributes are missing or have invalid values.
         """
+        if "specversion" not in attributes:
+            attributes["specversion"] = SPECVERSION_V0_3
+        if "id" not in attributes:
+            attributes["id"] = str(uuid.uuid4())
+        if "time" not in attributes:
+            attributes["time"] = datetime.now(timezone.utc)
+
         self._validate_attribute(attributes=attributes)
         self._attributes: dict[str, Any] = attributes
         self._data: dict[str, Any] | str | bytes | None = data

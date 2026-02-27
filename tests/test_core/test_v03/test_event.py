@@ -32,11 +32,6 @@ def test_missing_required_attributes() -> None:
         CloudEvent({})
 
     expected_errors = {
-        "id": [
-            str(MissingRequiredAttributeError("id")),
-            str(InvalidAttributeValueError("id", "Attribute 'id' must not be None")),
-            str(InvalidAttributeTypeError("id", str)),
-        ],
         "source": [
             str(MissingRequiredAttributeError("source")),
             str(InvalidAttributeTypeError("source", str)),
@@ -44,15 +39,6 @@ def test_missing_required_attributes() -> None:
         "type": [
             str(MissingRequiredAttributeError("type")),
             str(InvalidAttributeTypeError("type", str)),
-        ],
-        "specversion": [
-            str(MissingRequiredAttributeError("specversion")),
-            str(InvalidAttributeTypeError("specversion", str)),
-            str(
-                InvalidAttributeValueError(
-                    "specversion", "Attribute 'specversion' must be '0.3'"
-                )
-            ),
         ],
     }
 
@@ -356,6 +342,65 @@ def test_custom_extension(extension_name: str, expected_error: dict) -> None:
         key: [str(e) for e in value] for key, value in e.value.errors.items()
     }
     assert actual_errors == expected_error
+
+
+def test_default_specversion() -> None:
+    event = CloudEvent(
+        attributes={"source": "/source", "type": "test", "id": "1"},
+    )
+    assert event.get_specversion() == "0.3"
+
+
+def test_default_id() -> None:
+    event = CloudEvent(
+        attributes={"source": "/source", "type": "test", "specversion": "0.3"},
+    )
+    assert isinstance(event.get_id(), str)
+    assert len(event.get_id()) == 36  # UUID4 format
+
+
+def test_default_id_is_unique() -> None:
+    event1 = CloudEvent(attributes={"source": "/s", "type": "t"})
+    event2 = CloudEvent(attributes={"source": "/s", "type": "t"})
+    assert event1.get_id() != event2.get_id()
+
+
+def test_default_time() -> None:
+    before = datetime.now(tz=timezone.utc)
+    event = CloudEvent(
+        attributes={"source": "/source", "type": "test", "specversion": "0.3"},
+    )
+    after = datetime.now(tz=timezone.utc)
+    assert event.get_time() is not None
+    assert before <= event.get_time() <= after
+    assert event.get_time().tzinfo is not None
+
+
+def test_explicit_values_override_defaults() -> None:
+    custom_time = datetime(2024, 6, 15, 12, 0, 0, tzinfo=timezone.utc)
+    event = CloudEvent(
+        attributes={
+            "source": "/source",
+            "type": "test",
+            "specversion": "0.3",
+            "id": "my-custom-id",
+            "time": custom_time,
+        },
+    )
+    assert event.get_id() == "my-custom-id"
+    assert event.get_time() == custom_time
+    assert event.get_specversion() == "0.3"
+
+
+def test_minimal_event_with_defaults() -> None:
+    event = CloudEvent(
+        attributes={"source": "/source", "type": "test"},
+    )
+    assert event.get_source() == "/source"
+    assert event.get_type() == "test"
+    assert event.get_specversion() == "0.3"
+    assert event.get_id() is not None
+    assert event.get_time() is not None
 
 
 def test_cloud_event_v03_constructor() -> None:
