@@ -13,8 +13,9 @@
 #    under the License.
 
 import re
+import uuid
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Final
 
 from cloudevents.core.base import BaseCloudEvent
@@ -52,13 +53,20 @@ class CloudEvent(BaseCloudEvent):
         data: dict[str, Any] | str | bytes | None = None,
     ) -> None:
         """
-        Create a new CloudEvent v0.3 instance.
-
         :param attributes: The attributes of the CloudEvent instance.
+            If not provided, ``specversion`` defaults to ``"0.3"``,
+            ``id`` to a UUID4, and ``time`` to the current UTC timestamp.
         :param data: The payload of the CloudEvent instance.
-
-        :raises CloudEventValidationError: If any of the required attributes are missing or have invalid values.
+        :raises CloudEventValidationError: If any of the required attributes
+            are missing or have invalid values.
         """
+        if "specversion" not in attributes:
+            attributes["specversion"] = SPECVERSION_V0_3
+        if "id" not in attributes:
+            attributes["id"] = str(uuid.uuid4())
+        if "time" not in attributes:
+            attributes["time"] = datetime.now(timezone.utc)
+
         self._validate_attribute(attributes=attributes)
         self._attributes: dict[str, Any] = attributes
         self._data: dict[str, Any] | str | bytes | None = data

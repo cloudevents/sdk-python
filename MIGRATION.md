@@ -15,7 +15,7 @@ v2 is a ground-up rewrite with four fundamental shifts:
 
 1. **Protocol-based design** -- `BaseCloudEvent` is a `Protocol`, not a base class. Events expose explicit getter methods instead of dict-like access.
 2. **Explicit serialization** -- Implicit JSON handling with marshaller callbacks is replaced by a `Format` protocol. `JSONFormat` is the built-in implementation; you can write your own.
-3. **No auto-generated attributes** -- v1 auto-generated `id` (UUID), `time` (UTC now), and `specversion` ("1.0") if omitted. v2 requires all required attributes to be provided explicitly.
+3. **Same auto-generated attributes** -- Like v1, v2 auto-generates `id` (UUID4), `time` (UTC now), and `specversion` (`"1.0"` or `"0.3"`) if omitted. Only `type` and `source` are strictly required.
 4. **Strict validation** -- Events are validated at construction time. Extension attribute names must be 1-20 lowercase alphanumeric characters. `time` must be a timezone-aware `datetime`.
 
 ## Creating Events
@@ -35,18 +35,11 @@ event = CloudEvent(
 **v2:**
 
 ```python
-import uuid
 from cloudevents.core.v1.event import CloudEvent
 
-# All required attributes must be explicit
+# id, specversion, and time are auto-generated (just like v1)
 event = CloudEvent(
-    attributes={
-        "type": "com.example.test",
-        "source": "/myapp",
-        "id": str(uuid.uuid4()),
-        "specversion": "1.0",
-        # "time" is optional and NOT auto-generated
-    },
+    attributes={"type": "com.example.test", "source": "/myapp"},
     data={"message": "Hello"},
 )
 ```
@@ -326,7 +319,7 @@ from cloudevents.core.exceptions import (
 
 ```python
 try:
-    event = CloudEvent(attributes={"source": "/test"})  # missing type, id, specversion
+    event = CloudEvent(attributes={"source": "/test"})  # missing type
 except CloudEventValidationError as e:
     # e.errors is a dict[str, list[BaseCloudEventException]]
     for attr_name, errors in e.errors.items():
@@ -339,9 +332,6 @@ except CloudEventValidationError as e:
 |---|---|---|
 | Pydantic integration | `from cloudevents.pydantic import CloudEvent` | Removed -- use the core `CloudEvent` directly |
 | Dict-like event access | `event["source"]`, `event["x"] = y` | `event.get_source()`, `event.get_extension("x")` |
-| Auto-generated `id` | Automatic UUID4 | Provide explicitly |
-| Auto-generated `time` | Automatic UTC timestamp | Provide explicitly or omit |
-| Auto-generated `specversion` | Defaults to `"1.0"` | Provide explicitly |
 | `from_dict()` | `from cloudevents.http import from_dict` | Construct `CloudEvent(attributes=d)` directly |
 | `to_dict()` | `from cloudevents.conversion import to_dict` | `event.get_attributes()` + `event.get_data()` |
 | `from_json()` | `from cloudevents.http import from_json` | `JSONFormat().read(None, json_bytes)` |
