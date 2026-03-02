@@ -207,7 +207,7 @@ def to_structured(
         raise cloud_exceptions.DataMarshallerError(
             f"Failed to marshall data with error: {type(e).__name__}('{e}')"
         )
-    if isinstance(data, (bytes, bytes, memoryview)):
+    if isinstance(data, (bytes, bytearray, memoryview)):
         attrs["data_base64"] = base64.b64encode(data).decode("ascii")
     else:
         attrs["data"] = data
