@@ -93,9 +93,7 @@ def test_to_binary_required_attributes() -> None:
     assert "ce_type" in message.headers
     assert message.headers["ce_type"] == b"com.example.test"
     assert "ce_source" in message.headers
-    assert (
-        message.headers["ce_source"] == b"%2Ftest"
-    )  # Forward slash is percent-encoded
+    assert message.headers["ce_source"] == b"/test"
     assert "ce_id" in message.headers
     assert message.headers["ce_id"] == b"test-id-123"
     assert "ce_specversion" in message.headers
@@ -111,8 +109,7 @@ def test_to_binary_with_optional_attributes() -> None:
     message = to_binary(event, JSONFormat())
 
     assert message.headers["ce_subject"] == b"test-subject"
-    # All special characters including : and / are percent-encoded
-    assert message.headers["ce_dataschema"] == b"https%3A%2F%2Fexample.com%2Fschema"
+    assert message.headers["ce_dataschema"] == b"https://example.com/schema"
 
 
 def test_to_binary_with_extensions() -> None:
@@ -171,8 +168,7 @@ def test_to_binary_datetime_encoding() -> None:
     message = to_binary(event, JSONFormat())
 
     assert "ce_time" in message.headers
-    # Should be ISO 8601 with Z suffix, percent-encoded
-    assert b"2023-01-15T10%3A30%3A45Z" in message.headers["ce_time"]
+    assert message.headers["ce_time"] == b"2023-01-15T10:30:45Z"
 
 
 def test_to_binary_special_characters() -> None:
@@ -181,7 +177,7 @@ def test_to_binary_special_characters() -> None:
     message = to_binary(event, JSONFormat())
 
     assert "ce_subject" in message.headers
-    assert b"%" in message.headers["ce_subject"]  # Percent encoding present
+    assert message.headers["ce_subject"] == b'Hello World! "quotes" & special'
 
 
 def test_to_binary_datacontenttype_mapping() -> None:
@@ -228,7 +224,7 @@ def test_from_binary_required_attributes() -> None:
     message = KafkaMessage(
         headers={
             "ce_type": b"com.example.test",
-            "ce_source": b"%2Ftest",
+            "ce_source": b"/test",
             "ce_id": b"test-123",
             "ce_specversion": b"1.0",
         },
@@ -238,7 +234,7 @@ def test_from_binary_required_attributes() -> None:
     event = from_binary(message, JSONFormat(), CloudEvent)
 
     assert event.get_type() == "com.example.test"
-    assert event.get_source() == "/test"  # Percent-decoded
+    assert event.get_source() == "/test"
     assert event.get_id() == "test-123"
     assert event.get_specversion() == "1.0"
 
@@ -252,7 +248,7 @@ def test_from_binary_with_optional_attributes() -> None:
             "ce_id": b"123",
             "ce_specversion": b"1.0",
             "ce_subject": b"test-subject",
-            "ce_dataschema": b"https%3A%2F%2Fexample.com%2Fschema",
+            "ce_dataschema": b"https://example.com/schema",
         },
         key=None,
         value=b"",
@@ -260,7 +256,7 @@ def test_from_binary_with_optional_attributes() -> None:
     event = from_binary(message, JSONFormat(), CloudEvent)
 
     assert event.get_subject() == "test-subject"
-    assert event.get_dataschema() == "https://example.com/schema"  # Percent-decoded
+    assert event.get_dataschema() == "https://example.com/schema"
 
 
 def test_from_binary_with_extensions() -> None:
@@ -310,7 +306,7 @@ def test_from_binary_datetime_parsing() -> None:
             "ce_source": b"/test",
             "ce_id": b"123",
             "ce_specversion": b"1.0",
-            "ce_time": b"2023-01-15T10%3A30%3A45Z",
+            "ce_time": b"2023-01-15T10:30:45Z",
         },
         key=None,
         value=b"",
@@ -658,7 +654,7 @@ def test_from_binary_with_defaults() -> None:
     message = KafkaMessage(
         headers={
             "ce_type": b"com.example.test",
-            "ce_source": b"%2Ftest",
+            "ce_source": b"/test",
             "ce_id": b"123",
             "ce_specversion": b"1.0",
             "content-type": b"application/json",
@@ -700,7 +696,7 @@ def test_from_kafka_with_defaults_binary() -> None:
     message = KafkaMessage(
         headers={
             "ce_type": b"com.example.test",
-            "ce_source": b"%2Ftest",
+            "ce_source": b"/test",
             "ce_id": b"123",
             "ce_specversion": b"1.0",
         },

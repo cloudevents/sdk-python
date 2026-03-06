@@ -13,14 +13,16 @@
 #    under the License.
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Callable, Final
+
+from dateutil.parser import isoparse
 
 from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.bindings.common import (
     CONTENT_TYPE_HEADER,
     DATACONTENTTYPE_ATTR,
-    decode_header_value,
-    encode_header_value,
+    TIME_ATTR,
     get_event_factory_for_version,
 )
 from cloudevents.core.formats.base import Format
@@ -116,7 +118,13 @@ def to_binary(
             headers[CONTENT_TYPE_HEADER] = str(attr_value).encode("utf-8")
         else:
             header_name = f"{CE_PREFIX}{attr_name}"
-            headers[header_name] = encode_header_value(attr_value).encode("utf-8")
+            if isinstance(attr_value, datetime):
+                s = attr_value.isoformat()
+                if s.endswith("+00:00"):
+                    s = s[:-6] + "Z"
+                headers[header_name] = s.encode("utf-8")
+            else:
+                headers[header_name] = str(attr_value).encode("utf-8")
 
     data = event.get_data()
     datacontenttype = attributes.get(DATACONTENTTYPE_ATTR)
@@ -167,7 +175,10 @@ def from_binary(
 
         if normalized_name.startswith(CE_PREFIX):
             attr_name = normalized_name[len(CE_PREFIX) :]
-            attributes[attr_name] = decode_header_value(attr_name, header_value)
+            if attr_name == TIME_ATTR:
+                attributes[attr_name] = isoparse(header_value)
+            else:
+                attributes[attr_name] = header_value
         elif normalized_name == CONTENT_TYPE_HEADER:
             attributes[DATACONTENTTYPE_ATTR] = header_value
 
