@@ -110,10 +110,6 @@ def to_binary(
         if attr_value is None:
             continue
 
-        # Skip partitionkey - it goes in the message key, not headers
-        if attr_name == PARTITIONKEY_ATTR:
-            continue
-
         if attr_name == DATACONTENTTYPE_ATTR:
             headers[CONTENT_TYPE_HEADER] = str(attr_value).encode("utf-8")
         else:

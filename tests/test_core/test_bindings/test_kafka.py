@@ -191,12 +191,12 @@ def test_to_binary_datacontenttype_mapping() -> None:
 
 
 def test_to_binary_partitionkey_in_key() -> None:
-    """Test that partitionkey extension attribute becomes message key"""
+    """Test that partitionkey becomes message key and is still included in headers"""
     event = create_event({"partitionkey": "user-123"})
     message = to_binary(event, JSONFormat())
 
     assert message.key == "user-123"
-    assert "ce_partitionkey" not in message.headers
+    assert message.headers["ce_partitionkey"] == b"user-123"
 
 
 def test_to_binary_custom_key_mapper() -> None:
