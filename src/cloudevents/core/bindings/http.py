@@ -13,19 +13,63 @@
 #    under the License.
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Final
+from urllib.parse import quote, unquote
+
+from dateutil.parser import isoparse
 
 from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.bindings.common import (
     CONTENT_TYPE_HEADER,
     DATACONTENTTYPE_ATTR,
-    decode_header_value,
-    encode_header_value,
+    TIME_ATTR,
     get_event_factory_for_version,
 )
 from cloudevents.core.formats.base import Format
 from cloudevents.core.formats.json import JSONFormat
 from cloudevents.core.spec import SPECVERSION_V1_0
+
+# Per CloudEvents HTTP binding spec (section 3.1.3.2), all printable ASCII
+# characters (U+0021-U+007E) are safe EXCEPT space, double-quote, and percent.
+_CE_SAFE_CHARS: Final[str] = "".join(
+    c for c in map(chr, range(0x21, 0x7F)) if c not in (" ", '"', "%")
+)
+
+
+def _encode_header_value(value: Any) -> str:
+    """
+    Encode a CloudEvent attribute value for use in an HTTP header.
+
+    Handles datetime objects (ISO 8601 with 'Z' suffix for UTC) and applies
+    percent-encoding per the CloudEvents HTTP binding spec (section 3.1.3.2).
+
+    :param value: The attribute value to encode
+    :return: Percent-encoded string suitable for HTTP headers
+    """
+    if isinstance(value, datetime):
+        str_value = value.isoformat()
+        if str_value.endswith("+00:00"):
+            str_value = str_value[:-6] + "Z"
+        return quote(str_value, safe=_CE_SAFE_CHARS)
+    return quote(str(value), safe=_CE_SAFE_CHARS)
+
+
+def _decode_header_value(attr_name: str, value: str) -> Any:
+    """
+    Decode a CloudEvent attribute value from an HTTP header.
+
+    Applies percent-decoding and parses the 'time' attribute as datetime.
+
+    :param attr_name: The name of the CloudEvent attribute
+    :param value: The percent-encoded header value
+    :return: Decoded value (datetime for 'time' attribute, string otherwise)
+    """
+    decoded = unquote(value)
+    if attr_name == TIME_ATTR:
+        return isoparse(decoded)
+    return decoded
+
 
 CE_PREFIX: Final[str] = "ce-"
 
@@ -83,7 +127,7 @@ def to_binary(event: BaseCloudEvent, event_format: Format) -> HTTPMessage:
             headers[CONTENT_TYPE_HEADER] = str(attr_value)
         else:
             header_name = f"{CE_PREFIX}{attr_name}"
-            headers[header_name] = encode_header_value(attr_value)
+            headers[header_name] = _encode_header_value(attr_value)
 
     data = event.get_data()
     datacontenttype = attributes.get(DATACONTENTTYPE_ATTR)
@@ -130,7 +174,7 @@ def from_binary(
 
         if normalized_name.startswith(CE_PREFIX):
             attr_name = normalized_name[len(CE_PREFIX) :]
-            attributes[attr_name] = decode_header_value(attr_name, header_value)
+            attributes[attr_name] = _decode_header_value(attr_name, header_value)
         elif normalized_name == CONTENT_TYPE_HEADER:
             attributes[DATACONTENTTYPE_ATTR] = header_value
 

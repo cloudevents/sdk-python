@@ -118,7 +118,7 @@ def test_to_binary_required_attributes() -> None:
     assert "ce-type" in message.headers
     assert message.headers["ce-type"] == "com.example.test"
     assert "ce-source" in message.headers
-    assert message.headers["ce-source"] == "%2Ftest"  # Forward slash is percent-encoded
+    assert message.headers["ce-source"] == "/test"  # Printable ASCII is not encoded
     assert "ce-id" in message.headers
     assert message.headers["ce-id"] == "test-id-123"
     assert "ce-specversion" in message.headers
@@ -134,8 +134,8 @@ def test_to_binary_with_optional_attributes() -> None:
     message = to_binary(event, JSONFormat())
 
     assert message.headers["ce-subject"] == "test-subject"
-    # All special characters including : and / are percent-encoded
-    assert message.headers["ce-dataschema"] == "https%3A%2F%2Fexample.com%2Fschema"
+    # Printable ASCII (including : and /) is not encoded per CE spec 3.1.3.2
+    assert message.headers["ce-dataschema"] == "https://example.com/schema"
 
 
 def test_to_binary_with_extensions() -> None:
@@ -203,9 +203,9 @@ def test_to_binary_datetime_encoding() -> None:
     )
     message = to_binary(event, JSONFormat())
 
-    # Should encode with 'Z' suffix for UTC
+    # Should encode with 'Z' suffix for UTC, colons not encoded per CE spec
     assert "ce-time" in message.headers
-    assert "2023-01-15T10%3A30%3A45Z" in message.headers["ce-time"]
+    assert "2023-01-15T10:30:45Z" == message.headers["ce-time"]
 
 
 def test_to_binary_special_characters() -> None:
@@ -216,10 +216,9 @@ def test_to_binary_special_characters() -> None:
     )
     message = to_binary(event, JSONFormat())
 
-    # Should be percent-encoded
+    # Only space is encoded; ! is printable ASCII and left as-is per CE spec
     assert "ce-subject" in message.headers
-    # Space becomes %20, ! becomes %21
-    assert "Hello%20World%21" == message.headers["ce-subject"]
+    assert "Hello%20World!" == message.headers["ce-subject"]
 
 
 def test_to_binary_datacontenttype_mapping() -> None:
@@ -254,11 +253,11 @@ def test_to_binary_header_encoding() -> None:
     )
     message = to_binary(event, JSONFormat())
 
-    # Should be percent-encoded
+    # Per CE spec 3.1.3.2: only space, double-quote, percent, and non-printable ASCII encoded
     encoded_subject = message.headers["ce-subject"]
     assert " " not in encoded_subject  # Spaces should be encoded
     assert "%20" in encoded_subject  # Encoded space
-    assert "%3A" in encoded_subject  # Encoded colon
+    assert ":" in encoded_subject  # Colon is printable ASCII, not encoded
 
 
 def test_from_binary_accepts_http_message() -> None:
@@ -738,11 +737,28 @@ def test_percent_encoding_special_chars() -> None:
     )
     message = to_binary(event, JSONFormat())
 
-    # All special chars should be encoded
+    # Per CE spec: space and double-quote are encoded, but & is printable ASCII
     encoded = message.headers["ce-subject"]
     assert " " not in encoded
     assert '"' not in encoded
-    assert "&" not in encoded
+    assert "&" in encoded  # & is printable ASCII (U+0026), not encoded
+
+
+def test_percent_encoding_spec_example() -> None:
+    """Test the example from CE HTTP binding spec section 3.1.3.2:
+    'Euro € 😀' SHOULD be encoded as 'Euro%20%E2%82%AC%20%F0%9F%98%80'
+    """
+    event = create_event(
+        {"subject": "Euro € 😀"},
+        data=None,
+    )
+    message = to_binary(event, JSONFormat())
+
+    assert message.headers["ce-subject"] == "Euro%20%E2%82%AC%20%F0%9F%98%80"
+
+    # Round-trip: decode back to original
+    parsed = from_binary(message, JSONFormat(), CloudEvent)
+    assert parsed.get_subject() == "Euro € 😀"
 
 
 def test_percent_encoding_unicode() -> None:
