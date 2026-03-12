@@ -14,9 +14,10 @@
 
 import io
 
-from cloudevents_v1.http import from_http
 from flask import Flask, request
 from PIL import Image
+
+from cloudevents.core.bindings.http import HTTPMessage, from_http_event
 
 app = Flask(__name__)
 
@@ -25,17 +26,15 @@ app = Flask(__name__)
 def home():
     # Create a CloudEvent.
     # data_unmarshaller will cast event.data into an io.BytesIO object
-    event = from_http(
-        request.headers,
-        request.get_data(),
-        data_unmarshaller=lambda x: io.BytesIO(x),
+    event = from_http_event(
+        HTTPMessage(headers=dict(request.headers), body=request.get_data())
     )
 
     # Create image from cloudevent data
-    image = Image.open(event.data)
+    image = Image.open(io.BytesIO(event.get_data()))
 
     # Print
-    print(f"Found event {event['id']} with image of size {image.size}")
+    print(f"Found event {event.get_id()} with image of size {image.size}")
     return f"Found image of size {image.size}", 200
 
 
