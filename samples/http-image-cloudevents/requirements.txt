@@ -2,4 +2,4 @@ flask
 requests
 Pillow
 pytest
-cloudevents==2.0.0a1
+cloudevents==2.0.0a2
