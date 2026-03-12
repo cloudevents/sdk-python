@@ -6,11 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.1]
+
+### Changed
+
+- CloudEvents v1 moved to security fixes support stage.
+CloudEvents v2 is a rewrite with ongoing development ([])
+
 ## [1.12.0]
 
 ### Changed
 
-- Dropped Python3.8 support while it has reached EOL. ([])
+- Dropped Python3.8 support while it has reached EOL. ([#249])
 
 ## [1.11.1]
 
@@ -301,3 +308,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#236]: https://github.com/cloudevents/sdk-python/pull/236
 [#240]: https://github.com/cloudevents/sdk-python/pull/240
 [#248]: https://github.com/cloudevents/sdk-python/pull/248
+[#249]: https://github.com/cloudevents/sdk-python/pull/249
