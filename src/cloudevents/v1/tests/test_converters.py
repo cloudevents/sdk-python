@@ -20,7 +20,7 @@ from cloudevents_v1.sdk.converters import base, binary
 def test_binary_converter_raise_unsupported():
     with pytest.raises(exceptions.UnsupportedEvent):
         cnvtr = binary.BinaryHTTPCloudEventConverter()
-        cnvtr.read(None, {}, None, None)
+        cnvtr.read(None, {}, None, None)  # type: ignore[arg-type] # intentionally wrong type # noqa: E501
 
 
 def test_base_converters_raise_exceptions():
@@ -34,8 +34,8 @@ def test_base_converters_raise_exceptions():
 
     with pytest.raises(Exception):
         cnvtr = base.Converter()
-        cnvtr.write(None, None)
+        cnvtr.write(None, None)  # type: ignore[arg-type] # intentionally wrong type
 
     with pytest.raises(Exception):
         cnvtr = base.Converter()
-        cnvtr.read(None, None, None, None)
+        cnvtr.read(None, None, None, None)  # type: ignore[arg-type] # intentionally wrong type # noqa: E501
