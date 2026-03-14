@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from __future__ import annotations
 
 import bz2
 import io
@@ -240,11 +241,11 @@ def test_structured_to_request(specversion):
     assert headers["content-type"] == "application/cloudevents+json"
     for key in attributes:
         assert body[key] == attributes[key]
-    assert body["data"] == data, f"|{body_bytes}|| {body}"
+    assert body["data"] == data, f"|{body_bytes!r}|| {body}"
 
 
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
-def test_attributes_view_accessor(specversion: str):
+def test_attributes_view_accessor(specversion: str) -> None:
     attributes: dict[str, typing.Any] = {
         "specversion": specversion,
         "type": "word.found.name",
@@ -332,7 +333,7 @@ def test_valid_structured_events(specversion):
     events_queue = []
     num_cloudevents = 30
     for i in range(num_cloudevents):
-        event = {
+        raw_event = {
             "id": f"id{i}",
             "source": f"source{i}.com.test",
             "type": "cloudevent.test.type",
@@ -342,7 +343,7 @@ def test_valid_structured_events(specversion):
         events_queue.append(
             from_http(
                 {"content-type": "application/cloudevents+json"},
-                json.dumps(event),
+                json.dumps(raw_event),
             )
         )
 
@@ -453,7 +454,7 @@ def test_invalid_data_format_structured_from_http():
     headers = {"Content-Type": "application/cloudevents+json"}
     data = 20
     with pytest.raises(cloud_exceptions.InvalidStructuredJSON) as e:
-        from_http(headers, data)
+        from_http(headers, data)  # type: ignore[arg-type] # intentionally wrong type
     assert "Expected json of type (str, bytes, bytearray)" in str(e.value)
 
 
@@ -525,7 +526,7 @@ def test_generic_exception():
     e.errisinstance(cloud_exceptions.MissingRequiredFields)
 
     with pytest.raises(cloud_exceptions.GenericException) as e:
-        from_http({}, 123)
+        from_http({}, 123)  # type: ignore[arg-type] # intentionally wrong type
     e.errisinstance(cloud_exceptions.InvalidStructuredJSON)
 
     with pytest.raises(cloud_exceptions.GenericException) as e:
