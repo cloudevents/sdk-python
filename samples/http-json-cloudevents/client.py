@@ -15,47 +15,55 @@
 import sys
 
 import requests
-from cloudevents_v1.conversion import to_binary, to_structured
-from cloudevents_v1.http import CloudEvent
+
+from cloudevents.core.bindings.http import (
+    to_binary_event,
+    to_structured_event,
+)
+from cloudevents.core.v1.event import CloudEvent
 
 
 def send_binary_cloud_event(url):
     # This data defines a binary cloudevent
     attributes = {
+        "id": "123",
+        "specversion": "1.0",
         "type": "com.example.sampletype1",
         "source": "https://example.com/event-producer",
     }
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body = to_binary(event)
+    http_message = to_binary_event(event)
 
     # send and print event
-    requests.post(url, headers=headers, data=body)
-    print(f"Sent {event['id']} from {event['source']} with {event.data}")
+    requests.post(url, headers=http_message.headers, data=http_message.body)
+    print(f"Sent {event.get_id()} from {event.get_source()} with {event.get_data()}")
 
 
 def send_structured_cloud_event(url):
-    # This data defines a binary cloudevent
+    # This data defines a structured cloudevent
     attributes = {
+        "id": "123",
+        "specversion": "1.0",
         "type": "com.example.sampletype2",
         "source": "https://example.com/event-producer",
     }
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body = to_structured(event)
+    http_message = to_structured_event(event)
 
     # send and print event
-    requests.post(url, headers=headers, data=body)
-    print(f"Sent {event['id']} from {event['source']} with {event.data}")
+    requests.post(url, headers=http_message.headers, data=http_message.body)
+    print(f"Sent {event.get_id()} from {event.get_source()} with {event.get_data()}")
 
 
 if __name__ == "__main__":
     # expects a url from command line.
-    # e.g. python3 client.py http://localhost:3000/
+    # e.g. python client.py http://localhost:3000/
     if len(sys.argv) < 2:
-        sys.exit("Usage: python with_requests.py <CloudEvents controller URL>")
+        sys.exit("Usage: python client.py <CloudEvents controller URL>")
 
     url = sys.argv[1]
     send_binary_cloud_event(url)
