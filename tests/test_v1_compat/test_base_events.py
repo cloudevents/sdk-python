@@ -13,7 +13,6 @@
 #    under the License.
 
 import cloudevents.v1.exceptions as cloud_exceptions
-import pytest
 from cloudevents.v1.sdk.event import v03, v1
 
 

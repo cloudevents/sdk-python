@@ -15,13 +15,14 @@ import datetime
 from json import loads
 
 import pytest
+from pydantic import ValidationError as PydanticV2ValidationError
+from pydantic.v1 import ValidationError as PydanticV1ValidationError
+
 from cloudevents.v1.conversion import _json_or_string
 from cloudevents.v1.exceptions import IncompatibleArgumentsError
 from cloudevents.v1.pydantic.v1.event import CloudEvent as PydanticV1CloudEvent
 from cloudevents.v1.pydantic.v2.event import CloudEvent as PydanticV2CloudEvent
 from cloudevents.v1.sdk.event.attribute import SpecVersion
-from pydantic import ValidationError as PydanticV2ValidationError
-from pydantic.v1 import ValidationError as PydanticV1ValidationError
 
 _DUMMY_SOURCE = "dummy:source"
 _DUMMY_TYPE = "tests.cloudevents.override"

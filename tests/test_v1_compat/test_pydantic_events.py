@@ -17,8 +17,12 @@ import io
 import json
 import typing
 
-import cloudevents.v1.exceptions as cloud_exceptions
 import pytest
+from pydantic import ValidationError as PydanticV2ValidationError
+from pydantic.v1 import ValidationError as PydanticV1ValidationError
+from sanic import Sanic, response
+
+import cloudevents.v1.exceptions as cloud_exceptions
 from cloudevents.v1.conversion import to_binary, to_structured
 from cloudevents.v1.pydantic.v1.conversion import from_http as pydantic_v1_from_http
 from cloudevents.v1.pydantic.v1.event import CloudEvent as PydanticV1CloudEvent
@@ -27,9 +31,6 @@ from cloudevents.v1.pydantic.v2.event import CloudEvent as PydanticV2CloudEvent
 from cloudevents.v1.sdk import converters
 from cloudevents.v1.sdk.converters.binary import is_binary
 from cloudevents.v1.sdk.converters.structured import is_structured
-from pydantic import ValidationError as PydanticV2ValidationError
-from pydantic.v1 import ValidationError as PydanticV1ValidationError
-from sanic import Sanic, response
 
 invalid_test_headers = [
     {
