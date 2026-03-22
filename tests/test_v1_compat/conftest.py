@@ -12,26 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import pytest
-from cloudevents_v1.http import (
-    CloudEvent,
-    to_binary,
-    to_binary_http,
-    to_structured,
-    to_structured_http,
-)
+import sys
+
+_PYDANTIC_TEST_FILES = {
+    "test_pydantic_events.py",
+    "test_pydantic_cloudevent.py",
+    "test_pydantic_conversions.py",
+}
 
 
-@pytest.fixture
-def event():
-    return CloudEvent({"source": "s", "type": "t"}, None)
-
-
-def test_to_binary_http_deprecated(event):
-    with pytest.deprecated_call():
-        assert to_binary(event) == to_binary_http(event)
-
-
-def test_to_structured_http_deprecated(event):
-    with pytest.deprecated_call():
-        assert to_structured(event) == to_structured_http(event)
+def pytest_ignore_collect(collection_path, config):
+    if sys.version_info >= (3, 14) and collection_path.name in _PYDANTIC_TEST_FILES:
+        return True
+    return None

@@ -15,9 +15,9 @@
 import json
 import typing
 
-from cloudevents_v1.sdk import exceptions, types
-from cloudevents_v1.sdk.converters import base, binary, structured
-from cloudevents_v1.sdk.event import base as event_base
+from cloudevents.v1.sdk import exceptions, types
+from cloudevents.v1.sdk.converters import base, binary, structured
+from cloudevents.v1.sdk.event import base as event_base
 
 
 class HTTPMarshaller(object):

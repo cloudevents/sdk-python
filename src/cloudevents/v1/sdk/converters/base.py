@@ -14,7 +14,7 @@
 
 import typing
 
-from cloudevents_v1.sdk.event import base
+from cloudevents.v1.sdk.event import base
 
 
 class Converter(object):

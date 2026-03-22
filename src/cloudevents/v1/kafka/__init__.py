@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents_v1.kafka.conversion import (
+from cloudevents.v1.kafka.conversion import (
     KafkaMessage,
     KeyMapper,
     from_binary,

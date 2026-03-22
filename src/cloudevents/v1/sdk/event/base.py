@@ -17,8 +17,8 @@ import json
 import typing
 from typing import Set
 
-import cloudevents_v1.exceptions as cloud_exceptions
-from cloudevents_v1.sdk import types
+import cloudevents.v1.exceptions as cloud_exceptions
+from cloudevents.v1.sdk import types
 
 # TODO(slinkydeveloper) is this really needed?
 

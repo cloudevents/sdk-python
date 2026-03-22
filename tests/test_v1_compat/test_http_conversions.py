@@ -17,9 +17,10 @@ import datetime
 import json
 
 import pytest
-from cloudevents_v1.conversion import to_dict, to_json
-from cloudevents_v1.http import CloudEvent, from_dict, from_json
-from cloudevents_v1.sdk.event.attribute import SpecVersion
+
+from cloudevents.v1.conversion import to_dict, to_json
+from cloudevents.v1.http import CloudEvent, from_dict, from_json
+from cloudevents.v1.sdk.event.attribute import SpecVersion
 
 test_data = json.dumps({"data-key": "val"})
 test_attributes = {

@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import pytest
-from cloudevents_v1.conversion import _best_effort_serialize_to_json
-from cloudevents_v1.http import CloudEvent
+
+from cloudevents.v1.conversion import _best_effort_serialize_to_json
+from cloudevents.v1.http import CloudEvent
 
 
 @pytest.fixture()
@@ -22,10 +23,10 @@ def dummy_event():
 
 
 def test_json_methods(dummy_event):
-    from cloudevents_v1.conversion import to_json
-    from cloudevents_v1.http.conversion import from_json
-    from cloudevents_v1.http.json_methods import from_json as deprecated_from_json
-    from cloudevents_v1.http.json_methods import to_json as deprecated_to_json
+    from cloudevents.v1.conversion import to_json
+    from cloudevents.v1.http.conversion import from_json
+    from cloudevents.v1.http.json_methods import from_json as deprecated_from_json
+    from cloudevents.v1.http.json_methods import to_json as deprecated_to_json
 
     assert from_json(to_json(dummy_event)) == deprecated_from_json(
         deprecated_to_json(dummy_event)
@@ -33,10 +34,10 @@ def test_json_methods(dummy_event):
 
 
 def test_http_methods(dummy_event):
-    from cloudevents_v1.http import from_http, to_binary, to_structured
-    from cloudevents_v1.http.http_methods import from_http as deprecated_from_http
-    from cloudevents_v1.http.http_methods import to_binary as deprecated_to_binary
-    from cloudevents_v1.http.http_methods import (
+    from cloudevents.v1.http import from_http, to_binary, to_structured
+    from cloudevents.v1.http.http_methods import from_http as deprecated_from_http
+    from cloudevents.v1.http.http_methods import to_binary as deprecated_to_binary
+    from cloudevents.v1.http.http_methods import (
         to_structured as deprecated_to_structured,
     )
 
@@ -49,17 +50,17 @@ def test_http_methods(dummy_event):
 
 
 def test_util():
-    from cloudevents_v1.http.util import default_marshaller  # noqa
+    from cloudevents.v1.http.util import default_marshaller  # noqa
 
     assert _best_effort_serialize_to_json(None) == default_marshaller(None)
 
 
 def test_event_type():
-    from cloudevents_v1.http.event_type import is_binary, is_structured  # noqa
+    from cloudevents.v1.http.event_type import is_binary, is_structured  # noqa
 
 
 def test_http_module_imports():
-    from cloudevents_v1.http import (  # noqa
+    from cloudevents.v1.http import (  # noqa
         CloudEvent,
         from_dict,
         from_http,

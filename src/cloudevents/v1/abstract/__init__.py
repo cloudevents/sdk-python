@@ -12,6 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents_v1.abstract.event import AnyCloudEvent, CloudEvent
+from cloudevents.v1.abstract.event import AnyCloudEvent, CloudEvent
 
 __all__ = ["AnyCloudEvent", "CloudEvent"]

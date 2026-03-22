@@ -12,10 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import cloudevents_v1.exceptions as cloud_exceptions
 import pytest
-from cloudevents_v1.conversion import _json_or_string
-from cloudevents_v1.http import CloudEvent
+
+import cloudevents.v1.exceptions as cloud_exceptions
+from cloudevents.v1.conversion import _json_or_string
+from cloudevents.v1.http import CloudEvent
 
 
 @pytest.fixture(params=["0.3", "1.0"])

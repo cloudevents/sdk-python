@@ -12,7 +12,25 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents.v1.pydantic.v1.conversion import from_dict, from_http, from_json
-from cloudevents.v1.pydantic.v1.event import CloudEvent
+import pytest
 
-__all__ = ["CloudEvent", "from_json", "from_dict", "from_http"]
+from cloudevents.v1.sdk.event.opt import Option
+
+
+def test_set_raise_error():
+    with pytest.raises(ValueError):
+        o = Option("test", "value", True)
+        o.set(None)
+
+
+def test_options_eq_override():
+    o = Option("test", "value", True)
+    assert o.required()
+
+    o2 = Option("test", "value", True)
+    assert o2.required()
+
+    assert o == o2
+    o.set("setting to new value")
+
+    assert o != o2

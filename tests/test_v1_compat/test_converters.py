@@ -13,8 +13,9 @@
 #    under the License.
 
 import pytest
-from cloudevents_v1.sdk import exceptions
-from cloudevents_v1.sdk.converters import base, binary
+
+from cloudevents.v1.sdk import exceptions
+from cloudevents.v1.sdk.converters import base, binary
 
 
 def test_binary_converter_raise_unsupported():

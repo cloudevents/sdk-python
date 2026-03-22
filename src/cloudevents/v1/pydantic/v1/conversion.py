@@ -13,11 +13,11 @@
 #    under the License.
 import typing
 
-from cloudevents_v1.conversion import from_dict as _abstract_from_dict
-from cloudevents_v1.conversion import from_http as _abstract_from_http
-from cloudevents_v1.conversion import from_json as _abstract_from_json
-from cloudevents_v1.pydantic.v1.event import CloudEvent
-from cloudevents_v1.sdk import types
+from cloudevents.v1.conversion import from_dict as _abstract_from_dict
+from cloudevents.v1.conversion import from_http as _abstract_from_http
+from cloudevents.v1.conversion import from_json as _abstract_from_json
+from cloudevents.v1.pydantic.v1.event import CloudEvent
+from cloudevents.v1.sdk import types
 
 
 def from_http(

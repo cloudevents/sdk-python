@@ -13,7 +13,7 @@
 #    under the License.
 import typing
 
-from cloudevents_v1.sdk.event import base, opt
+from cloudevents.v1.sdk.event import base, opt
 
 
 class Event(base.BaseEvent):

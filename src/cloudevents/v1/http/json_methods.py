@@ -14,12 +14,13 @@
 
 import typing
 
-from cloudevents_v1.abstract import AnyCloudEvent
-from cloudevents_v1.conversion import to_json as _moved_to_json
-from cloudevents_v1.http import CloudEvent
-from cloudevents_v1.http.conversion import from_json as _moved_from_json
-from cloudevents_v1.sdk import types
 from deprecation import deprecated
+
+from cloudevents.v1.abstract import AnyCloudEvent
+from cloudevents.v1.conversion import to_json as _moved_to_json
+from cloudevents.v1.http import CloudEvent
+from cloudevents.v1.http.conversion import from_json as _moved_from_json
+from cloudevents.v1.sdk import types
 
 # THIS MODULE IS DEPRECATED, YOU SHOULD NOT ADD NEW FUNCTIONALLY HERE
 

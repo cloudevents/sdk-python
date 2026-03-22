@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents_v1.sdk.event import v03
+from cloudevents.v1.sdk.event import v1
 
 
-def test_v03_time_property():
-    event = v03.Event()
+def test_v1_time_property():
+    event = v1.Event()
 
     time1 = "1234"
     event.time = time1
@@ -27,8 +27,8 @@ def test_v03_time_property():
     assert event.time == time2
 
 
-def test_v03_subject_property():
-    event = v03.Event()
+def test_v1_subject_property():
+    event = v1.Event()
 
     subject1 = "<my-subject>"
     event.subject = subject1
@@ -39,25 +39,13 @@ def test_v03_subject_property():
     assert event.subject == subject2
 
 
-def test_v03_schema_url_property():
-    event = v03.Event()
+def test_v1_schema_property():
+    event = v1.Event()
 
-    schema_url1 = "<my-schema>"
-    event.schema_url = schema_url1
-    assert event.SchemaURL() == schema_url1
+    schema1 = "<my-schema>"
+    event.schema = schema1
+    assert event.Schema() == schema1
 
-    schema_url2 = "<my-schema2>"
-    event.SetSchemaURL(schema_url2)
-    assert event.schema_url == schema_url2
-
-
-def test_v03_datacontentencoding_property():
-    event = v03.Event()
-
-    datacontentencoding1 = "<my-datacontentencoding>"
-    event.datacontentencoding = datacontentencoding1
-    assert event.ContentEncoding() == datacontentencoding1
-
-    datacontentencoding2 = "<my-datacontentencoding2>"
-    event.SetContentEncoding(datacontentencoding2)
-    assert event.datacontentencoding == datacontentencoding2
+    schema2 = "<my-schema2>"
+    event.SetSchema(schema2)
+    assert event.schema == schema2
