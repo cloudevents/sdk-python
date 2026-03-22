@@ -1,36 +1,43 @@
 # Migrating from CloudEvents SDK v1 to v2
 
-This guide covers the breaking changes and new patterns introduced in v2 of the CloudEvents Python SDK.
+This guide covers the breaking changes and new patterns introduced in v2 of the
+CloudEvents Python SDK.
 
 ## Requirements
 
-| | v1 | v2 |
-|---|---|---|
-| Python | 3.7+ | **3.10+** |
+|              | v1                                 | v2                            |
+|--------------|------------------------------------|-------------------------------|
+| Python       | 3.7+                               | **3.10+**                     |
 | Dependencies | varies (optional `pydantic` extra) | `python-dateutil>=2.8.2` only |
 
 ## Intermediate Step: `cloudevents.v1` Compatibility Layer
 
-If you are not ready to migrate to the v2 core API, the `cloudevents.v1` package provides a drop-in compatibility layer that preserves the v1 API under a new namespace. This lets you unpin from the old top-level imports without rewriting your event-handling logic.
+If you are not ready to migrate to the v2 core API, the `cloudevents.v1` package
+provides a drop-in compatibility layer that preserves the v1 API under a new namespace.
+This lets you unpin from the old top-level imports without rewriting your event-handling
+logic.
 
 Swap the old top-level imports for their `cloudevents.v1.*` equivalents:
 
-| Old import | Compat layer import |
-|---|---|
-| `from cloudevents.http import CloudEvent` | `from cloudevents.v1.http import CloudEvent` |
-| `from cloudevents.http import from_http` | `from cloudevents.v1.http import from_http` |
-| `from cloudevents.http import from_json` | `from cloudevents.v1.http import from_json` |
-| `from cloudevents.http import from_dict` | `from cloudevents.v1.http import from_dict` |
-| `from cloudevents.conversion import to_binary` | `from cloudevents.v1.http import to_binary` |
-| `from cloudevents.conversion import to_structured` | `from cloudevents.v1.http import to_structured` |
-| `from cloudevents.conversion import to_json` | `from cloudevents.v1.http import to_json` |
-| `from cloudevents.conversion import to_dict` | `from cloudevents.v1.conversion import to_dict` |
-| `from cloudevents.kafka import KafkaMessage` | `from cloudevents.v1.kafka import KafkaMessage` |
-| `from cloudevents.kafka import to_binary` | `from cloudevents.v1.kafka import to_binary` |
-| `from cloudevents.kafka import from_binary` | `from cloudevents.v1.kafka import from_binary` |
-| `from cloudevents.pydantic import CloudEvent` | `from cloudevents.v1.pydantic import CloudEvent` |
+| Old import                                         | Compat layer import                              |
+|----------------------------------------------------|--------------------------------------------------|
+| `from cloudevents.http import CloudEvent`          | `from cloudevents.v1.http import CloudEvent`     |
+| `from cloudevents.http import from_http`           | `from cloudevents.v1.http import from_http`      |
+| `from cloudevents.http import from_json`           | `from cloudevents.v1.http import from_json`      |
+| `from cloudevents.http import from_dict`           | `from cloudevents.v1.http import from_dict`      |
+| `from cloudevents.conversion import to_binary`     | `from cloudevents.v1.http import to_binary`      |
+| `from cloudevents.conversion import to_structured` | `from cloudevents.v1.http import to_structured`  |
+| `from cloudevents.conversion import to_json`       | `from cloudevents.v1.http import to_json`        |
+| `from cloudevents.conversion import to_dict`       | `from cloudevents.v1.conversion import to_dict`  |
+| `from cloudevents.kafka import KafkaMessage`       | `from cloudevents.v1.kafka import KafkaMessage`  |
+| `from cloudevents.kafka import to_binary`          | `from cloudevents.v1.kafka import to_binary`     |
+| `from cloudevents.kafka import from_binary`        | `from cloudevents.v1.kafka import from_binary`   |
+| `from cloudevents.pydantic import CloudEvent`      | `from cloudevents.v1.pydantic import CloudEvent` |
 
-The compat layer behaviour is identical to the old v1 SDK: events are dict-like and mutable, marshallers/unmarshallers are accepted as callables, and `is_binary`/`is_structured` helpers are still available. The compat layer does **not** enforce strict mypy and is not under the v2 validation rules.
+The compat layer behaviour is identical to the old v1 SDK: events are dict-like and
+mutable, marshallers/unmarshallers are accepted as callables, and `is_binary`/
+`is_structured` helpers are still available. The compat layer does **not** enforce
+strict mypy and is not under the v2 validation rules.
 
 When you are ready to move fully to v2, follow the rest of this guide.
 
@@ -38,10 +45,17 @@ When you are ready to move fully to v2, follow the rest of this guide.
 
 v2 is a ground-up rewrite with four fundamental shifts:
 
-1. **Protocol-based design** -- `BaseCloudEvent` is a `Protocol`, not a base class. Events expose explicit getter methods instead of dict-like access.
-2. **Explicit serialization** -- Implicit JSON handling with marshaller callbacks is replaced by a `Format` protocol. `JSONFormat` is the built-in implementation; you can write your own.
-3. **Same auto-generated attributes** -- Like v1, v2 auto-generates `id` (UUID4), `time` (UTC now), and `specversion` (`"1.0"` or `"0.3"`) if omitted. Only `type` and `source` are strictly required.
-4. **Strict validation** -- Events are validated at construction time. Extension attribute names must be 1-20 lowercase alphanumeric characters. `time` must be a timezone-aware `datetime`.
+1. **Protocol-based design** -- `BaseCloudEvent` is a `Protocol`, not a base class.
+   Events expose explicit getter methods instead of dict-like access.
+2. **Explicit serialization** -- Implicit JSON handling with marshaller callbacks is
+   replaced by a `Format` protocol. `JSONFormat` is the built-in implementation; you can
+   write your own.
+3. **Same auto-generated attributes** -- Like v1, v2 auto-generates `id` (UUID4),
+   `time` (UTC now), and `specversion` (`"1.0"` or `"0.3"`) if omitted. Only `type` and
+   `source` are strictly required.
+4. **Strict validation** -- Events are validated at construction time. Extension
+   attribute names must be 1-20 lowercase alphanumeric characters. `time` must be a
+   timezone-aware `datetime`.
 
 ## Creating Events
 
@@ -71,7 +85,8 @@ event = CloudEvent(
 
 ## Accessing Event Attributes
 
-v1 events were dict-like. v2 events use explicit getter methods and are immutable after construction.
+v1 events were dict-like. v2 events use explicit getter methods and are immutable after
+construction.
 
 **v1:**
 
@@ -272,13 +287,14 @@ event = from_http(headers, body, data_unmarshaller=yaml.safe_load)
 from cloudevents.core.formats.base import Format
 from cloudevents.core.base import BaseCloudEvent, EventFactory
 
+
 class YAMLFormat:
     """Example custom format -- implement the Format protocol."""
 
     def read(
-        self,
-        event_factory: EventFactory | None,
-        data: str | bytes,
+            self,
+            event_factory: EventFactory | None,
+            data: str | bytes,
     ) -> BaseCloudEvent:
         ...  # Parse YAML into attributes dict, call event_factory(attributes, data)
 
@@ -286,16 +302,16 @@ class YAMLFormat:
         ...  # Serialize entire event to YAML bytes
 
     def write_data(
-        self,
-        data: dict | str | bytes | None,
-        datacontenttype: str | None,
+            self,
+            data: dict | str | bytes | None,
+            datacontenttype: str | None,
     ) -> bytes:
         ...  # Serialize just the data payload
 
     def read_data(
-        self,
-        body: bytes,
-        datacontenttype: str | None,
+            self,
+            body: bytes,
+            datacontenttype: str | None,
     ) -> dict | str | bytes | None:
         ...  # Deserialize just the data payload
 
@@ -331,12 +347,12 @@ from cloudevents.exceptions import (
 
 ```python
 from cloudevents.core.exceptions import (
-    BaseCloudEventException,          # Base for all CloudEvent errors
-    CloudEventValidationError,        # Aggregated validation errors (raised on construction)
-    MissingRequiredAttributeError,    # Missing required attribute (also a ValueError)
-    InvalidAttributeTypeError,        # Wrong attribute type (also a TypeError)
-    InvalidAttributeValueError,       # Invalid attribute value (also a ValueError)
-    CustomExtensionAttributeError,    # Invalid extension name (also a ValueError)
+    BaseCloudEventException,  # Base for all CloudEvent errors
+    CloudEventValidationError,  # Aggregated validation errors (raised on construction)
+    MissingRequiredAttributeError,  # Missing required attribute (also a ValueError)
+    InvalidAttributeTypeError,  # Wrong attribute type (also a TypeError)
+    InvalidAttributeValueError,  # Invalid attribute value (also a ValueError)
+    CustomExtensionAttributeError,  # Invalid extension name (also a ValueError)
 )
 ```
 
@@ -353,35 +369,35 @@ except CloudEventValidationError as e:
 
 ## Removed Features
 
-| Feature | v1 | v2 Alternative |
-|---|---|---|
-| Pydantic integration | `from cloudevents.pydantic import CloudEvent` | Removed -- use the core `CloudEvent` directly |
-| Dict-like event access | `event["source"]`, `event["x"] = y` | `event.get_source()`, `event.get_extension("x")` |
-| `from_dict()` | `from cloudevents.http import from_dict` | Construct `CloudEvent(attributes=d)` directly |
-| `to_dict()` | `from cloudevents.conversion import to_dict` | `event.get_attributes()` + `event.get_data()` |
-| `from_json()` | `from cloudevents.http import from_json` | `JSONFormat().read(None, json_bytes)` |
-| `to_json()` | `from cloudevents.conversion import to_json` | `JSONFormat().write(event)` |
-| Custom marshallers | `data_marshaller=fn` / `data_unmarshaller=fn` | Implement the `Format` protocol |
-| `is_binary()` / `is_structured()` | `from cloudevents.http import is_binary` | Mode is handled internally by `from_http_event()` |
-| Deprecated helpers | `to_binary_http()`, `to_structured_http()` | `to_binary_event()`, `to_structured_event()` |
+| Feature                           | v1                                            | v2 Alternative                                    |
+|-----------------------------------|-----------------------------------------------|---------------------------------------------------|
+| Pydantic integration              | `from cloudevents.pydantic import CloudEvent` | Removed -- use the core `CloudEvent` directly     |
+| Dict-like event access            | `event["source"]`, `event["x"] = y`           | `event.get_source()`, `event.get_extension("x")`  |
+| `from_dict()`                     | `from cloudevents.http import from_dict`      | Construct `CloudEvent(attributes=d)` directly     |
+| `to_dict()`                       | `from cloudevents.conversion import to_dict`  | `event.get_attributes()` + `event.get_data()`     |
+| `from_json()`                     | `from cloudevents.http import from_json`      | `JSONFormat().read(None, json_bytes)`             |
+| `to_json()`                       | `from cloudevents.conversion import to_json`  | `JSONFormat().write(event)`                       |
+| Custom marshallers                | `data_marshaller=fn` / `data_unmarshaller=fn` | Implement the `Format` protocol                   |
+| `is_binary()` / `is_structured()` | `from cloudevents.http import is_binary`      | Mode is handled internally by `from_http_event()` |
+| Deprecated helpers                | `to_binary_http()`, `to_structured_http()`    | `to_binary_event()`, `to_structured_event()`      |
 
 ## Quick Reference: Import Mapping
 
-| v1 Import | v2 Import |
-|---|---|
-| `cloudevents.http.CloudEvent` | `cloudevents.core.v1.event.CloudEvent` |
-| `cloudevents.http.from_http` | `cloudevents.core.bindings.http.from_http_event` |
-| `cloudevents.http.from_json` | `cloudevents.core.formats.json.JSONFormat().read` |
-| `cloudevents.http.from_dict` | `cloudevents.core.v1.event.CloudEvent(attributes=...)` |
-| `cloudevents.conversion.to_binary` | `cloudevents.core.bindings.http.to_binary_event` |
-| `cloudevents.conversion.to_structured` | `cloudevents.core.bindings.http.to_structured_event` |
-| `cloudevents.conversion.to_json` | `cloudevents.core.formats.json.JSONFormat().write` |
-| `cloudevents.conversion.to_dict` | `event.get_attributes()` |
-| `cloudevents.kafka.KafkaMessage` | `cloudevents.core.bindings.kafka.KafkaMessage` |
-| `cloudevents.kafka.to_binary` | `cloudevents.core.bindings.kafka.to_binary_event` |
-| `cloudevents.kafka.from_binary` | `cloudevents.core.bindings.kafka.from_binary_event` |
-| `cloudevents.pydantic.CloudEvent` | Removed |
-| `cloudevents.abstract.AnyCloudEvent` | `cloudevents.core.base.BaseCloudEvent` |
+| v1 Import                              | v2 Import                                              |
+|----------------------------------------|--------------------------------------------------------|
+| `cloudevents.http.CloudEvent`          | `cloudevents.core.v1.event.CloudEvent`                 |
+| `cloudevents.http.from_http`           | `cloudevents.core.bindings.http.from_http_event`       |
+| `cloudevents.http.from_json`           | `cloudevents.core.formats.json.JSONFormat().read`      |
+| `cloudevents.http.from_dict`           | `cloudevents.core.v1.event.CloudEvent(attributes=...)` |
+| `cloudevents.conversion.to_binary`     | `cloudevents.core.bindings.http.to_binary_event`       |
+| `cloudevents.conversion.to_structured` | `cloudevents.core.bindings.http.to_structured_event`   |
+| `cloudevents.conversion.to_json`       | `cloudevents.core.formats.json.JSONFormat().write`     |
+| `cloudevents.conversion.to_dict`       | `event.get_attributes()`                               |
+| `cloudevents.kafka.KafkaMessage`       | `cloudevents.core.bindings.kafka.KafkaMessage`         |
+| `cloudevents.kafka.to_binary`          | `cloudevents.core.bindings.kafka.to_binary_event`      |
+| `cloudevents.kafka.from_binary`        | `cloudevents.core.bindings.kafka.from_binary_event`    |
+| `cloudevents.pydantic.CloudEvent`      | Removed                                                |
+| `cloudevents.abstract.AnyCloudEvent`   | `cloudevents.core.base.BaseCloudEvent`                 |
 
 ## CloudEvents Spec v0.3
 
@@ -396,9 +412,11 @@ event = CloudEvent(
         "source": "/myapp",
         "id": "123",
         "specversion": "0.3",
-        "schemaurl": "https://example.com/schema",  # v0.3-specific (renamed to dataschema in v1.0)
+        "schemaurl": "https://example.com/schema",
+        # v0.3-specific (renamed to dataschema in v1.0)
     },
 )
 ```
 
-Binding functions auto-detect the spec version when deserializing, so no special handling is needed on the receiving side.
+Binding functions auto-detect the spec version when deserializing, so no special
+handling is needed on the receiving side.
