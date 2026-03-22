@@ -15,10 +15,10 @@
 import json
 
 import pytest
-from cloudevents_v1.sdk import converters, marshaller
-from cloudevents_v1.sdk.converters import structured
-from cloudevents_v1.sdk.event import v03, v1
-from cloudevents_v1.tests import data
+from cloudevents.v1.sdk import converters, marshaller
+from cloudevents.v1.sdk.converters import structured
+from cloudevents.v1.sdk.event import v03, v1
+from cloudevents.v1.tests import data
 
 
 @pytest.mark.parametrize("event_class", [v03.Event, v1.Event])

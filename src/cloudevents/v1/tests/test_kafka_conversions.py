@@ -17,17 +17,17 @@ import datetime
 import json
 
 import pytest
-from cloudevents_v1 import exceptions as cloud_exceptions
-from cloudevents_v1.http import CloudEvent
-from cloudevents_v1.kafka.conversion import (
+from cloudevents.v1 import exceptions as cloud_exceptions
+from cloudevents.v1.http import CloudEvent
+from cloudevents.v1.kafka.conversion import (
     KafkaMessage,
     from_binary,
     from_structured,
     to_binary,
     to_structured,
 )
-from cloudevents_v1.kafka.exceptions import KeyMapperError
-from cloudevents_v1.sdk import types
+from cloudevents.v1.kafka.exceptions import KeyMapperError
+from cloudevents.v1.sdk import types
 
 
 def simple_serialize(data: dict) -> bytes:

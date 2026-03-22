@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents_v1.pydantic.v2.conversion import from_dict, from_http, from_json
-from cloudevents_v1.pydantic.v2.event import CloudEvent
+from cloudevents.v1.pydantic.v2.conversion import from_dict, from_http, from_json
+from cloudevents.v1.pydantic.v2.event import CloudEvent
 
 __all__ = ["CloudEvent", "from_json", "from_dict", "from_http"]

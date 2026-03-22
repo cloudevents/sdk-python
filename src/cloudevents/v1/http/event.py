@@ -16,9 +16,9 @@ import datetime
 import typing
 import uuid
 
-import cloudevents_v1.exceptions as cloud_exceptions
-from cloudevents_v1 import abstract
-from cloudevents_v1.sdk.event import v03, v1
+import cloudevents.v1.exceptions as cloud_exceptions
+from cloudevents.v1 import abstract
+from cloudevents.v1.sdk.event import v03, v1
 
 _required_by_version = {
     "1.0": v1.Event._ce_required_fields,

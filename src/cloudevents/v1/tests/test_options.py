@@ -13,7 +13,7 @@
 #    under the License.
 
 import pytest
-from cloudevents_v1.sdk.event.opt import Option
+from cloudevents.v1.sdk.event.opt import Option
 
 
 def test_set_raise_error():

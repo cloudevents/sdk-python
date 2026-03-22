@@ -15,8 +15,8 @@ import datetime
 import json
 import typing
 
-from cloudevents_v1.exceptions import PydanticFeatureNotInstalled
-from cloudevents_v1.pydantic.fields_docs import FIELD_DESCRIPTIONS
+from cloudevents.v1.exceptions import PydanticFeatureNotInstalled
+from cloudevents.v1.pydantic.fields_docs import FIELD_DESCRIPTIONS
 
 try:
     from pydantic import VERSION as PYDANTIC_VERSION
@@ -32,9 +32,9 @@ except ImportError:  # pragma: no cover # hard to test
         "Install it using pip install cloudevents[pydantic]"
     )
 
-from cloudevents_v1 import abstract, conversion, http
-from cloudevents_v1.exceptions import IncompatibleArgumentsError
-from cloudevents_v1.sdk.event import attribute
+from cloudevents.v1 import abstract, conversion, http
+from cloudevents.v1.exceptions import IncompatibleArgumentsError
+from cloudevents.v1.sdk.event import attribute
 
 
 def _ce_json_dumps(  # type: ignore[no-untyped-def]

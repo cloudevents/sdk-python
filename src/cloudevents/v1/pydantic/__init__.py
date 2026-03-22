@@ -14,11 +14,11 @@
 
 from typing import TYPE_CHECKING
 
-from cloudevents_v1.exceptions import PydanticFeatureNotInstalled
+from cloudevents.v1.exceptions import PydanticFeatureNotInstalled
 
 try:
     if TYPE_CHECKING:
-        from cloudevents_v1.pydantic.v2 import (
+        from cloudevents.v1.pydantic.v2 import (
             CloudEvent,
             from_dict,
             from_http,
@@ -29,14 +29,14 @@ try:
 
         pydantic_major_version = PYDANTIC_VERSION.split(".")[0]
         if pydantic_major_version == "1":
-            from cloudevents_v1.pydantic.v1 import (
+            from cloudevents.v1.pydantic.v1 import (
                 CloudEvent,
                 from_dict,
                 from_http,
                 from_json,
             )
         else:
-            from cloudevents_v1.pydantic.v2 import (
+            from cloudevents.v1.pydantic.v2 import (
                 CloudEvent,
                 from_dict,
                 from_http,

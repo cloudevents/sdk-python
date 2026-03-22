@@ -13,7 +13,7 @@
 #    under the License.
 import typing
 
-from cloudevents_v1.conversion import (
+from cloudevents.v1.conversion import (
     _best_effort_serialize_to_json as _moved_default_marshaller,
 )
 from deprecation import deprecated

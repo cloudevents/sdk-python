@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cloudevents_v1.sdk.event import v03
+from cloudevents.v1.sdk.event import v03
 
 
 def test_v03_time_property():

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import typing
 
-from cloudevents_v1.sdk.event import base, opt
+from cloudevents.v1.sdk.event import base, opt
 
 if typing.TYPE_CHECKING:
     from typing_extensions import Self
