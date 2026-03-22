@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0.alpha5]
+
+### Changed
+
+- Improved spec compatibility of attributes processing. ([#275])
+
 ## [2.0.0.alpha4]
 
 ### Changed
@@ -317,3 +323,4 @@ CloudEvents v2 is a rewrite with ongoing development ([#271])
 [#249]: https://github.com/cloudevents/sdk-python/pull/249
 [#271]: https://github.com/cloudevents/sdk-python/pull/271
 [#273]: https://github.com/cloudevents/sdk-python/pull/273
+[#275]: https://github.com/cloudevents/sdk-python/pull/275
