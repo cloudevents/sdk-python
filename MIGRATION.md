@@ -9,6 +9,31 @@ This guide covers the breaking changes and new patterns introduced in v2 of the 
 | Python | 3.7+ | **3.10+** |
 | Dependencies | varies (optional `pydantic` extra) | `python-dateutil>=2.8.2` only |
 
+## Intermediate Step: `cloudevents.v1` Compatibility Layer
+
+If you are not ready to migrate to the v2 core API, the `cloudevents.v1` package provides a drop-in compatibility layer that preserves the v1 API under a new namespace. This lets you unpin from the old top-level imports without rewriting your event-handling logic.
+
+Swap the old top-level imports for their `cloudevents.v1.*` equivalents:
+
+| Old import | Compat layer import |
+|---|---|
+| `from cloudevents.http import CloudEvent` | `from cloudevents.v1.http import CloudEvent` |
+| `from cloudevents.http import from_http` | `from cloudevents.v1.http import from_http` |
+| `from cloudevents.http import from_json` | `from cloudevents.v1.http import from_json` |
+| `from cloudevents.http import from_dict` | `from cloudevents.v1.http import from_dict` |
+| `from cloudevents.conversion import to_binary` | `from cloudevents.v1.http import to_binary` |
+| `from cloudevents.conversion import to_structured` | `from cloudevents.v1.http import to_structured` |
+| `from cloudevents.conversion import to_json` | `from cloudevents.v1.http import to_json` |
+| `from cloudevents.conversion import to_dict` | `from cloudevents.v1.conversion import to_dict` |
+| `from cloudevents.kafka import KafkaMessage` | `from cloudevents.v1.kafka import KafkaMessage` |
+| `from cloudevents.kafka import to_binary` | `from cloudevents.v1.kafka import to_binary` |
+| `from cloudevents.kafka import from_binary` | `from cloudevents.v1.kafka import from_binary` |
+| `from cloudevents.pydantic import CloudEvent` | `from cloudevents.v1.pydantic import CloudEvent` |
+
+The compat layer behaviour is identical to the old v1 SDK: events are dict-like and mutable, marshallers/unmarshallers are accepted as callables, and `is_binary`/`is_structured` helpers are still available. The compat layer does **not** enforce strict mypy and is not under the v2 validation rules.
+
+When you are ready to move fully to v2, follow the rest of this guide.
+
 ## Architectural Changes
 
 v2 is a ground-up rewrite with four fundamental shifts:
