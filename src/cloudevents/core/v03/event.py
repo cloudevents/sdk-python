@@ -267,11 +267,11 @@ class CloudEvent(BaseCloudEvent):
                         msg="Extension attribute 'data' is reserved and must not be used",
                     )
                 )
-            if not (1 <= len(extension_attribute) <= 20):
+            if not (1 <= len(extension_attribute)):
                 errors[extension_attribute].append(
                     CustomExtensionAttributeError(
                         attribute_name=extension_attribute,
-                        msg=f"Extension attribute '{extension_attribute}' should be between 1 and 20 characters long",
+                        msg=f"Extension attribute name must be at least 1 character long but was '{extension_attribute}'",
                     )
                 )
             if not re.match(r"^[a-z0-9]+$", extension_attribute):

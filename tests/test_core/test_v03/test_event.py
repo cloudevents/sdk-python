@@ -410,7 +410,7 @@ def test_required_attributes_null_or_empty(
                     str(
                         CustomExtensionAttributeError(
                             "",
-                            "Extension attribute '' should be between 1 and 20 characters long",
+                            "Extension attribute name must be at least 1 character long but was ''",
                         )
                     ),
                     str(
@@ -419,19 +419,6 @@ def test_required_attributes_null_or_empty(
                             "Extension attribute '' should only contain lowercase letters and numbers",
                         )
                     ),
-                ]
-            },
-        ),
-        (
-            "thisisaverylongextension",
-            {
-                "thisisaverylongextension": [
-                    str(
-                        CustomExtensionAttributeError(
-                            "thisisaverylongextension",
-                            "Extension attribute 'thisisaverylongextension' should be between 1 and 20 characters long",
-                        )
-                    )
                 ]
             },
         ),
@@ -466,6 +453,21 @@ def test_custom_extension(extension_name: str, expected_error: dict) -> None:
         key: [str(e) for e in value] for key, value in e.value.errors.items()
     }
     assert actual_errors == expected_error
+
+
+def test_long_extension_attribute_name() -> None:
+    # Verify that extension attribute names longer than 20 characters are allowed
+    long_name = "a" * 21
+    event = CloudEvent(
+        {
+            "id": "1",
+            "source": "/",
+            "type": "test",
+            "specversion": "0.3",
+            long_name: "value",
+        }
+    )
+    assert event.get_extension(long_name) == "value"
 
 
 def test_default_specversion() -> None:
