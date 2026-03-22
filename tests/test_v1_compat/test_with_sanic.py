@@ -14,7 +14,7 @@
 
 from cloudevents.v1.sdk import converters, marshaller
 from cloudevents.v1.sdk.event import v1
-from cloudevents.v1.tests import data as test_data
+from tests.test_v1_compat import data as test_data
 from sanic import Sanic, response
 
 m = marshaller.NewDefaultHTTPMarshaller()
