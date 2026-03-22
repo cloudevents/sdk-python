@@ -34,10 +34,22 @@ def test_missing_required_attributes() -> None:
     expected_errors = {
         "source": [
             str(MissingRequiredAttributeError("source")),
+            str(
+                InvalidAttributeValueError(
+                    attribute_name="source",
+                    msg="Attribute 'source' must not be None or empty",
+                )
+            ),
             str(InvalidAttributeTypeError("source", str)),
         ],
         "type": [
             str(MissingRequiredAttributeError("type")),
+            str(
+                InvalidAttributeValueError(
+                    attribute_name="type",
+                    msg="Attribute 'type' must not be None or empty",
+                )
+            ),
             str(InvalidAttributeTypeError("type", str)),
         ],
     }
@@ -274,6 +286,118 @@ def test_schemaurl_validation(schemaurl: Any, expected_error: dict) -> None:
         key: [str(e) for e in value] for key, value in e.value.errors.items()
     }
     assert actual_errors == expected_error
+
+
+@pytest.mark.parametrize(
+    "attributes,expected_errors",
+    [
+        (
+            {"id": "", "source": "/", "type": "test"},
+            {
+                "id": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="id",
+                            msg="Attribute 'id' must not be None or empty",
+                        )
+                    )
+                ]
+            },
+        ),
+        (
+            {"id": None, "source": "/", "type": "test"},
+            {
+                "id": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="id",
+                            msg="Attribute 'id' must not be None or empty",
+                        )
+                    ),
+                    str(
+                        InvalidAttributeTypeError(
+                            attribute_name="id", expected_type=str
+                        )
+                    ),
+                ]
+            },
+        ),
+        (
+            {"id": "1", "source": "", "type": "test"},
+            {
+                "source": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="source",
+                            msg="Attribute 'source' must not be None or empty",
+                        )
+                    )
+                ]
+            },
+        ),
+        (
+            {"id": "1", "source": None, "type": "test"},
+            {
+                "source": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="source",
+                            msg="Attribute 'source' must not be None or empty",
+                        )
+                    ),
+                    str(
+                        InvalidAttributeTypeError(
+                            attribute_name="source", expected_type=str
+                        )
+                    ),
+                ]
+            },
+        ),
+        (
+            {"id": "1", "source": "/", "type": ""},
+            {
+                "type": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="type",
+                            msg="Attribute 'type' must not be None or empty",
+                        )
+                    )
+                ]
+            },
+        ),
+        (
+            {"id": "1", "source": "/", "type": None},
+            {
+                "type": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="type",
+                            msg="Attribute 'type' must not be None or empty",
+                        )
+                    ),
+                    str(
+                        InvalidAttributeTypeError(
+                            attribute_name="type", expected_type=str
+                        )
+                    ),
+                ]
+            },
+        ),
+    ],
+)
+def test_required_attributes_null_or_empty(
+    attributes: dict[str, Any], expected_errors: dict
+) -> None:
+    with pytest.raises(CloudEventValidationError) as e:
+        CloudEvent(attributes=attributes)
+
+    actual_errors = {
+        key: [str(e) for e in value] for key, value in e.value.errors.items()
+    }
+    for key, expected_msgs in expected_errors.items():
+        assert key in actual_errors
+        assert actual_errors[key] == expected_msgs
 
 
 @pytest.mark.parametrize(

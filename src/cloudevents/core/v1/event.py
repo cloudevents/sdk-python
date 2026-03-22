@@ -98,10 +98,10 @@ class CloudEvent(BaseCloudEvent):
 
         if "id" not in attributes:
             errors["id"].append(MissingRequiredAttributeError(attribute_name="id"))
-        if attributes.get("id") is None:
+        if not attributes.get("id"):
             errors["id"].append(
                 InvalidAttributeValueError(
-                    attribute_name="id", msg="Attribute 'id' must not be None"
+                    attribute_name="id", msg="Attribute 'id' must not be None or empty"
                 )
             )
         if not isinstance(attributes.get("id"), str):
@@ -113,6 +113,13 @@ class CloudEvent(BaseCloudEvent):
             errors["source"].append(
                 MissingRequiredAttributeError(attribute_name="source")
             )
+        if not attributes.get("source"):
+            errors["source"].append(
+                InvalidAttributeValueError(
+                    attribute_name="source",
+                    msg="Attribute 'source' must not be None or empty",
+                )
+            )
         if not isinstance(attributes.get("source"), str):
             errors["source"].append(
                 InvalidAttributeTypeError(attribute_name="source", expected_type=str)
@@ -120,6 +127,13 @@ class CloudEvent(BaseCloudEvent):
 
         if "type" not in attributes:
             errors["type"].append(MissingRequiredAttributeError(attribute_name="type"))
+        if not attributes.get("type"):
+            errors["type"].append(
+                InvalidAttributeValueError(
+                    attribute_name="type",
+                    msg="Attribute 'type' must not be None or empty",
+                )
+            )
         if not isinstance(attributes.get("type"), str):
             errors["type"].append(
                 InvalidAttributeTypeError(attribute_name="type", expected_type=str)
