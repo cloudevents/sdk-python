@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import pytest
+
 import cloudevents.v1.exceptions as cloud_exceptions
 from cloudevents.v1.sdk.event import v03, v1
 
