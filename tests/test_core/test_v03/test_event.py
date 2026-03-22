@@ -34,10 +34,22 @@ def test_missing_required_attributes() -> None:
     expected_errors = {
         "source": [
             str(MissingRequiredAttributeError("source")),
+            str(
+                InvalidAttributeValueError(
+                    attribute_name="source",
+                    msg="Attribute 'source' must not be None or empty",
+                )
+            ),
             str(InvalidAttributeTypeError("source", str)),
         ],
         "type": [
             str(MissingRequiredAttributeError("type")),
+            str(
+                InvalidAttributeValueError(
+                    attribute_name="type",
+                    msg="Attribute 'type' must not be None or empty",
+                )
+            ),
             str(InvalidAttributeTypeError("type", str)),
         ],
     }
@@ -277,6 +289,118 @@ def test_schemaurl_validation(schemaurl: Any, expected_error: dict) -> None:
 
 
 @pytest.mark.parametrize(
+    "attributes,expected_errors",
+    [
+        (
+            {"id": "", "source": "/", "type": "test"},
+            {
+                "id": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="id",
+                            msg="Attribute 'id' must not be None or empty",
+                        )
+                    )
+                ]
+            },
+        ),
+        (
+            {"id": None, "source": "/", "type": "test"},
+            {
+                "id": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="id",
+                            msg="Attribute 'id' must not be None or empty",
+                        )
+                    ),
+                    str(
+                        InvalidAttributeTypeError(
+                            attribute_name="id", expected_type=str
+                        )
+                    ),
+                ]
+            },
+        ),
+        (
+            {"id": "1", "source": "", "type": "test"},
+            {
+                "source": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="source",
+                            msg="Attribute 'source' must not be None or empty",
+                        )
+                    )
+                ]
+            },
+        ),
+        (
+            {"id": "1", "source": None, "type": "test"},
+            {
+                "source": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="source",
+                            msg="Attribute 'source' must not be None or empty",
+                        )
+                    ),
+                    str(
+                        InvalidAttributeTypeError(
+                            attribute_name="source", expected_type=str
+                        )
+                    ),
+                ]
+            },
+        ),
+        (
+            {"id": "1", "source": "/", "type": ""},
+            {
+                "type": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="type",
+                            msg="Attribute 'type' must not be None or empty",
+                        )
+                    )
+                ]
+            },
+        ),
+        (
+            {"id": "1", "source": "/", "type": None},
+            {
+                "type": [
+                    str(
+                        InvalidAttributeValueError(
+                            attribute_name="type",
+                            msg="Attribute 'type' must not be None or empty",
+                        )
+                    ),
+                    str(
+                        InvalidAttributeTypeError(
+                            attribute_name="type", expected_type=str
+                        )
+                    ),
+                ]
+            },
+        ),
+    ],
+)
+def test_required_attributes_null_or_empty(
+    attributes: dict[str, Any], expected_errors: dict
+) -> None:
+    with pytest.raises(CloudEventValidationError) as e:
+        CloudEvent(attributes=attributes)
+
+    actual_errors = {
+        key: [str(e) for e in value] for key, value in e.value.errors.items()
+    }
+    for key, expected_msgs in expected_errors.items():
+        assert key in actual_errors
+        assert actual_errors[key] == expected_msgs
+
+
+@pytest.mark.parametrize(
     "extension_name,expected_error",
     [
         (
@@ -286,7 +410,7 @@ def test_schemaurl_validation(schemaurl: Any, expected_error: dict) -> None:
                     str(
                         CustomExtensionAttributeError(
                             "",
-                            "Extension attribute '' should be between 1 and 20 characters long",
+                            "Extension attribute name must be at least 1 character long but was ''",
                         )
                     ),
                     str(
@@ -295,19 +419,6 @@ def test_schemaurl_validation(schemaurl: Any, expected_error: dict) -> None:
                             "Extension attribute '' should only contain lowercase letters and numbers",
                         )
                     ),
-                ]
-            },
-        ),
-        (
-            "thisisaverylongextension",
-            {
-                "thisisaverylongextension": [
-                    str(
-                        CustomExtensionAttributeError(
-                            "thisisaverylongextension",
-                            "Extension attribute 'thisisaverylongextension' should be between 1 and 20 characters long",
-                        )
-                    )
                 ]
             },
         ),
@@ -342,6 +453,21 @@ def test_custom_extension(extension_name: str, expected_error: dict) -> None:
         key: [str(e) for e in value] for key, value in e.value.errors.items()
     }
     assert actual_errors == expected_error
+
+
+def test_long_extension_attribute_name() -> None:
+    # Verify that extension attribute names longer than 20 characters are allowed
+    long_name = "a" * 21
+    event = CloudEvent(
+        {
+            "id": "1",
+            "source": "/",
+            "type": "test",
+            "specversion": "0.3",
+            long_name: "value",
+        }
+    )
+    assert event.get_extension(long_name) == "value"
 
 
 def test_default_specversion() -> None:
