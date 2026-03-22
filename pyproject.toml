@@ -76,6 +76,7 @@ allow-direct-references = true
 "CHANGELOG.md" = "CHANGELOG.md"
 "MAINTAINERS.md" = "MAINTAINERS.md"
 "README.md" = "README.md"
+"MIGRATION.md" = "MIGRATION.md"
 
 [tool.hatch.build.targets.sdist]
 packages = ["src/cloudevents"]
@@ -83,6 +84,7 @@ packages = ["src/cloudevents"]
 [tool.hatch.build.targets.sdist.force-include]
 "CHANGELOG.md" = "CHANGELOG.md"
 "MAINTAINERS.md" = "MAINTAINERS.md"
+"MIGRATION.md" = "MIGRATION.md"
 
 [tool.ruff]
 line-length = 88
