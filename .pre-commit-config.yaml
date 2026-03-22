@@ -17,7 +17,7 @@ repos:
     hooks:
       - id: mypy
         files: ^(src/cloudevents/|tests/)
-        exclude: ^(src/cloudevents/v1/)
+        exclude: ^(src/cloudevents/v1/|tests/test_v1_compat/)
         types: [python]
         args: ["--config-file=pyproject.toml"]
         additional_dependencies:
