@@ -6,6 +6,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0.alpha4]
+
+### Changed
+
+- CloudEvents v2 is ready to become the main version. ([#273])
+
+## [1.12.1]
+
+### Changed
+
+- CloudEvents v1 moved to security fixes support stage.
+CloudEvents v2 is a rewrite with ongoing development ([#271])
+
+## [1.12.0]
+
+### Changed
+
+- Dropped Python3.8 support while it has reached EOL. ([#249])
+
+## [1.11.1]
+
+### Fixed
+- Kafka `conversion` marshaller and unmarshaller typings ([#240])
+- Improved public API type annotations and fixed unit test type errors ([#248])
+
 ## [1.11.0]
 
 ### Fixed
@@ -287,3 +312,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#232]: https://github.com/cloudevents/sdk-python/pull/232
 [#235]: https://github.com/cloudevents/sdk-python/pull/235
 [#236]: https://github.com/cloudevents/sdk-python/pull/236
+[#240]: https://github.com/cloudevents/sdk-python/pull/240
+[#248]: https://github.com/cloudevents/sdk-python/pull/248
+[#249]: https://github.com/cloudevents/sdk-python/pull/249
+[#271]: https://github.com/cloudevents/sdk-python/pull/271
+[#273]: https://github.com/cloudevents/sdk-python/pull/273
