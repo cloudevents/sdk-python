@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0]
+
+### Changed
+
+- Released stable v2.0.0. See [migration](./MIGRATION.md) for details and migration
+  guidelines. ([#279])
+
 ## [2.0.0.alpha6]
 
 ### Changed
@@ -336,3 +343,4 @@ CloudEvents v2 is a rewrite with ongoing development ([#271])
 [#275]: https://github.com/cloudevents/sdk-python/pull/275
 [#276]: https://github.com/cloudevents/sdk-python/pull/276
 [#278]: https://github.com/cloudevents/sdk-python/pull/278
+[#279]: https://github.com/cloudevents/sdk-python/pull/279
