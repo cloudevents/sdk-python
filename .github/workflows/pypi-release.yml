@@ -10,41 +10,38 @@ on:
 jobs:
   build_dist:
     name: Build source distribution
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install the project
+        run: uv sync --all-extras --dev
 
       - name: Build SDist and wheel
-        run: pipx run build
+        run: uv build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: artifact
           path: dist/*
 
       - name: Check metadata
-        run: pipx run twine check dist/*
+        run: uvx twine check dist/*
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push'
     needs: [ build_dist ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/download-artifact@v7
         with:
-          python-version: "3.12"
-          cache: 'pip'
-      - name: Install build dependencies
-        run: pip install -U setuptools wheel build
-      - uses: actions/download-artifact@v4
-        with:
-          # unpacks default artifact into dist/
-          # if `name: artifact` is omitted, the action will create extra parent dir
           name: artifact
           path: dist
       - name: Publish
@@ -52,8 +49,19 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
-          attestations: false
-      - name: Install GitPython and cloudevents for pypi_packaging
-        run: pip install -U -r requirements/publish.txt
-      - name: Create Tag
-        run: python pypi_packaging.py
+  tag:
+    runs-on: ubuntu-24.04
+    needs: [ publish ]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Extract version
+        id: version
+        run: |
+          echo "version=$(grep -oP '__version__ = \"\K[^\"]+' src/cloudevents/__init__.py)" >> $GITHUB_OUTPUT
+      - name: Create and push tag
+        uses: pxpm/github-tag-action@1.0.1
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: ${{ steps.version.outputs.version }}

@@ -15,8 +15,11 @@
 import pytest
 from json_sample_server import app
 
-from cloudevents.conversion import to_binary, to_structured
-from cloudevents.http import CloudEvent
+from cloudevents.core.bindings.http import (
+    to_binary_event,
+    to_structured_event,
+)
+from cloudevents.core.v1.event import CloudEvent
 
 
 @pytest.fixture
@@ -28,28 +31,32 @@ def client():
 def test_binary_request(client):
     # This data defines a binary cloudevent
     attributes = {
+        "id": "123",
+        "specversion": "1.0",
         "type": "com.example.sampletype1",
         "source": "https://example.com/event-producer",
     }
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body = to_binary(event)
+    http_message = to_binary_event(event)
 
-    r = client.post("/", headers=headers, data=body)
+    r = client.post("/", headers=http_message.headers, data=http_message.body)
     assert r.status_code == 204
 
 
 def test_structured_request(client):
-    # This data defines a binary cloudevent
+    # This data defines a structured cloudevent
     attributes = {
+        "id": "123",
+        "specversion": "1.0",
         "type": "com.example.sampletype2",
         "source": "https://example.com/event-producer",
     }
     data = {"message": "Hello World!"}
 
     event = CloudEvent(attributes, data)
-    headers, body = to_structured(event)
+    http_message = to_structured_event(event)
 
-    r = client.post("/", headers=headers, data=body)
+    r = client.post("/", headers=http_message.headers, data=http_message.body)
     assert r.status_code == 204

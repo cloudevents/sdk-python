@@ -6,12 +6,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0]
+
+### Changed
+
+- Released stable v2.0.0. See [migration](./MIGRATION.md) for details and migration
+  guidelines. ([#279])
+
+## [2.0.0.alpha6]
+
+### Changed
+
+- Updated tooling and workflows. ([#278])
+
+### Fixed
+
+- Fixed the v1 compatibility layer. ([#276])
+
+## [2.0.0.alpha5]
+
+### Changed
+
+- Improved spec compatibility of attributes processing. ([#275])
+
+## [2.0.0.alpha4]
+
+### Changed
+
+- CloudEvents v2 is ready to become the main version. ([#273])
+
 ## [1.12.1]
 
 ### Changed
 
 - CloudEvents v1 moved to security fixes support stage.
-CloudEvents v2 is a rewrite with ongoing development ([])
+CloudEvents v2 is a rewrite with ongoing development ([#271])
 
 ## [1.12.0]
 
@@ -309,3 +338,9 @@ CloudEvents v2 is a rewrite with ongoing development ([])
 [#240]: https://github.com/cloudevents/sdk-python/pull/240
 [#248]: https://github.com/cloudevents/sdk-python/pull/248
 [#249]: https://github.com/cloudevents/sdk-python/pull/249
+[#271]: https://github.com/cloudevents/sdk-python/pull/271
+[#273]: https://github.com/cloudevents/sdk-python/pull/273
+[#275]: https://github.com/cloudevents/sdk-python/pull/275
+[#276]: https://github.com/cloudevents/sdk-python/pull/276
+[#278]: https://github.com/cloudevents/sdk-python/pull/278
+[#279]: https://github.com/cloudevents/sdk-python/pull/279

@@ -1,19 +1,155 @@
-[tool.black]
-line-length = 88
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+[project]
+name = "cloudevents"
+dynamic = ["version"]
+description = "CloudEvents Python SDK"
+authors = [
+    { name = "The Cloud Events Contributors", email = "cncfcloudevents@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">= 3.10"
+license = "Apache-2.0"
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+keywords = [
+    "CloudEvents",
+    "Eventing",
+    "Serverless",
+]
+dependencies = [
+    "deprecation>=2.0,<3.0",
+    "python-dateutil>=2.8.2",
+]
 
-[tool.isort]
-profile = "black"
+[project.urls]
+"Source code" = "https://github.com/cloudevents/sdk-python"
+"Documentation" = "https://cloudevents.io"
+"Home page" = "https://cloudevents.io"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.7",
+    "pytest>=9.0.2",
+    "mypy>=1.19.1",
+    "isort>=8.0.1",
+    "flake8>=7.3.0",
+    "pep8-naming>=0.15.1",
+    "flake8-print>=5.0.0",
+    "pre-commit>=4.5.1",
+    "pytest-cov>=7.1.0",
+    "types-python-dateutil>=2.9.0.20260305",
+    "sanic>=25.12.0",
+    "sanic-testing>=24.6.0",
+    "pydantic>=2.12.5",
+]
+
+[tool.uv.pip]
+universal = true
+generate-hashes = true
+
+[tool.hatch.version]
+path = "src/cloudevents/__init__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel.force-include]
+"CHANGELOG.md" = "CHANGELOG.md"
+"MAINTAINERS.md" = "MAINTAINERS.md"
+"README.md" = "README.md"
+"MIGRATION.md" = "MIGRATION.md"
+
+[tool.hatch.build.targets.sdist]
+packages = ["src/cloudevents"]
+
+[tool.hatch.build.targets.sdist.force-include]
+"CHANGELOG.md" = "CHANGELOG.md"
+"MAINTAINERS.md" = "MAINTAINERS.md"
+"MIGRATION.md" = "MIGRATION.md"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "site-packages",
+    "venv",
+]
+
+[tool.ruff.lint]
+ignore = ["E731"]
+extend-ignore = ["E203"]
+select = [
+    "I",    # isort - import sorting
+    "F401", # unused imports
+]
+
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[tool.mypy]
+python_version = "3.10"
+
+ignore_missing_imports = true
+namespace_packages = true
+explicit_package_bases = true
+scripts_are_modules = true
+pretty = true
+show_error_context = true
+follow_imports_for_stubs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+# subset of mypy --strict
+# https://mypy.readthedocs.io/en/stable/config_file.html
+check_untyped_defs = true
+disallow_incomplete_defs = true
+warn_return_any = true
+strict_equality = true
+disallow_untyped_defs = true
+exclude = [
+    "src/cloudevents/v1",
+]

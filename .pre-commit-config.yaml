@@ -1,27 +1,24 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-toml
-  - repo: https://github.com/pycqa/isort
-    rev: 6.0.1
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.7
     hooks:
-      - id: isort
-        args: [ "--profile", "black", "--filter-files" ]
-  - repo: https://github.com/psf/black
-    rev: 25.1.0
-    hooks:
-      - id: black
-        language_version: python3.11
+      # Run the linter.
+      - id: ruff
+      # Run the formatter.
+      - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.16.0
+    rev: v1.19.1
     hooks:
       - id: mypy
-        files: ^(cloudevents/)
-        exclude: ^(cloudevents/tests/)
-        types: [ python ]
-        args: [ ]
+        files: ^(src/cloudevents/|tests/)
+        exclude: ^(src/cloudevents/v1/|tests/test_v1_compat/)
+        types: [python]
+        args: ["--config-file=pyproject.toml"]
         additional_dependencies:
-          - "pydantic~=2.7"
+          - types-python-dateutil>=2.9.0.20260305
