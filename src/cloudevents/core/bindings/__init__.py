@@ -15,6 +15,6 @@
 """
 CloudEvents protocol bindings.
 
-This package provides protocol-specific bindings for CloudEvents, including HTTP and Kafka.
+This package provides protocol-specific bindings for CloudEvents, including HTTP, Kafka, AMQP, and RabbitMQ.
 Each binding module provides functions to convert CloudEvents to/from protocol-specific messages.
 """
