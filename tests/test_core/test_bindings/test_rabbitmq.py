@@ -56,7 +56,6 @@ def create_event(
     return CloudEvent(attributes=attrs, data=data)
 
 
-
 def test_rabbitmq_message_creation() -> None:
     """Test basic RabbitMQMessage creation"""
     message = RabbitMQMessage(
@@ -97,9 +96,7 @@ def test_rabbitmq_message_with_empty_headers() -> None:
 
 def test_rabbitmq_message_with_empty_body() -> None:
     """Test RabbitMQMessage with empty body"""
-    message = RabbitMQMessage(
-        headers={"test": "value"}, content_type=None, body=b""
-    )
+    message = RabbitMQMessage(headers={"test": "value"}, content_type=None, body=b"")
     assert message.headers == {"test": "value"}
     assert message.body == b""
 
@@ -108,7 +105,6 @@ def test_rabbitmq_message_with_none_content_type() -> None:
     """Test RabbitMQMessage with None content_type"""
     message = RabbitMQMessage(headers={}, content_type=None, body=b"test")
     assert message.content_type is None
-
 
 
 def test_to_binary_required_attributes() -> None:
@@ -260,7 +256,6 @@ def test_to_binary_no_content_type_when_no_datacontenttype() -> None:
     message = to_binary(event, JSONFormat())
 
     assert message.content_type is None
-
 
 
 def test_from_binary_required_attributes() -> None:
@@ -454,7 +449,6 @@ def test_from_binary_auto_detect_version() -> None:
     assert event.get_specversion() == "1.0"
 
 
-
 def test_binary_round_trip() -> None:
     """Test binary mode round-trip preserves event data"""
     original = create_event(
@@ -487,16 +481,13 @@ def test_binary_round_trip_with_datetime() -> None:
 
 def test_binary_round_trip_with_extensions() -> None:
     """Test binary mode round-trip preserves extensions as strings"""
-    original = create_event(
-        extra_attrs={"ext1": "value1", "ext2": "value2"}
-    )
+    original = create_event(extra_attrs={"ext1": "value1", "ext2": "value2"})
 
     message = to_binary(original, JSONFormat())
     recovered = from_binary(message, JSONFormat(), CloudEvent)
 
     assert recovered.get_extension("ext1") == "value1"
     assert recovered.get_extension("ext2") == "value2"
-
 
 
 def test_to_structured_basic_event() -> None:
@@ -575,7 +566,6 @@ def test_structured_round_trip() -> None:
     assert recovered.get_specversion() == original.get_specversion()
     assert recovered.get_subject() == original.get_subject()
     assert recovered.get_data() == original.get_data()
-
 
 
 def test_from_rabbitmq_detects_binary_mode() -> None:
@@ -657,7 +647,6 @@ def test_from_rabbitmq_non_cloudevents_content_type_is_binary() -> None:
     assert event.get_type() == "test"
 
 
-
 def test_unicode_in_attributes() -> None:
     """Test handling of unicode characters in attributes"""
     event = create_event(extra_attrs={"subject": "测试-subject-🌍"})
@@ -678,7 +667,6 @@ def test_unicode_in_data() -> None:
         assert data == {"message": "Hello 世界 🌍"}
     else:
         assert "Hello 世界 🌍" in str(data)
-
 
 
 def test_to_binary_event_defaults_json_format() -> None:
@@ -730,8 +718,7 @@ def test_from_structured_event_defaults_json_format() -> None:
     message = RabbitMQMessage(
         headers={},
         content_type="application/cloudevents+json",
-        body=b'{"type": "test", "source": "/test", "id": "123", '
-        b'"specversion": "1.0"}',
+        body=b'{"type": "test", "source": "/test", "id": "123", "specversion": "1.0"}',
     )
     event = from_structured_event(message)
 
@@ -757,7 +744,6 @@ def test_from_rabbitmq_event_defaults_json_format() -> None:
 
     assert isinstance(event, CloudEvent)
     assert event.get_type() == "test"
-
 
 
 def test_to_binary_with_multiple_extensions() -> None:
@@ -798,8 +784,7 @@ def test_empty_headers_structured_mode() -> None:
     message = RabbitMQMessage(
         headers={},
         content_type="application/cloudevents+json",
-        body=b'{"type": "test", "source": "/test", "id": "123", '
-        b'"specversion": "1.0"}',
+        body=b'{"type": "test", "source": "/test", "id": "123", "specversion": "1.0"}',
     )
     event = from_structured(message, JSONFormat(), CloudEvent)
 
