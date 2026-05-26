@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.0]
+
+### Fixed
+- Kafka `to_structured` converter dropping `datacontentype` attribute
+  when setting a header. ([#296])
+
 ## [1.12.1]
 
 ### Changed
@@ -310,3 +316,4 @@ CloudEvents v2 is a rewrite with ongoing development ([#271])
 [#248]: https://github.com/cloudevents/sdk-python/pull/248
 [#249]: https://github.com/cloudevents/sdk-python/pull/249
 [#271]: https://github.com/cloudevents/sdk-python/pull/271
+[#296]: https://github.com/cloudevents/sdk-python/pull/296
