@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated dev and build-time dependencies.
 
+### Fixed
+
+- Fixed an issue where setting a non-JSON datacontenttype (e.g., application/octet-stream) with dict data produced non-JSON-decodable output; now best-effort json-encoding is applied regardless of datacontenttype. ([#291])
+- Updated behavior when datacontenttype is unset: now treats events as application/json in line with spec recommendation. ([#291])
+
 ## [2.1.0]
 
 ### Added
