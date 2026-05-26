@@ -10,10 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated dev and build-time dependencies.
 
+## [2.1.0]
+
 ### Added
 
-- Added [RabbitMQ](https://github.com/knative-extensions/eventing-rabbitmq/blob/main/cloudevents-protocol-spec/spec.md)
-  protocol binding for CloudEvents.
+- Added [RabbitMQ][rabbit-mq-spec] protocol binding for CloudEvents. ([#284])
+
+[rabbit-mq-spec]: https://github.com/knative-extensions/eventing-rabbitmq/blob/main/cloudevents-protocol-spec/spec.md
 
 ## [2.0.0]
 
@@ -353,3 +356,4 @@ CloudEvents v2 is a rewrite with ongoing development ([#271])
 [#276]: https://github.com/cloudevents/sdk-python/pull/276
 [#278]: https://github.com/cloudevents/sdk-python/pull/278
 [#279]: https://github.com/cloudevents/sdk-python/pull/279
+[#284]: https://github.com/cloudevents/sdk-python/pull/284
