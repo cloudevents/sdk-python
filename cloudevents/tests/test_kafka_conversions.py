@@ -247,6 +247,7 @@ class TestToStructured(KafkaConversionTestBase):
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "datacontenttype": source_event["datacontenttype"],
                 "partitionkey": source_event["partitionkey"],
                 "data": self.expected_data,
             }
@@ -263,6 +264,7 @@ class TestToStructured(KafkaConversionTestBase):
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "datacontenttype": source_event["datacontenttype"],
                 "partitionkey": source_event["partitionkey"],
                 "data_base64": base64.b64encode(
                     custom_marshaller(self.expected_data)
@@ -281,6 +283,7 @@ class TestToStructured(KafkaConversionTestBase):
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "datacontenttype": source_event["datacontenttype"],
                 "partitionkey": source_event["partitionkey"],
                 "data": self.expected_data,
             }
@@ -299,6 +302,7 @@ class TestToStructured(KafkaConversionTestBase):
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "datacontenttype": source_event["datacontenttype"],
                 "partitionkey": source_event["partitionkey"],
                 "data_base64": base64.b64encode(
                     custom_marshaller(self.expected_data)
