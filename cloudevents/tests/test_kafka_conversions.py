@@ -17,8 +17,6 @@ import datetime
 import json
 
 import pytest
-
-from cloudevents import exceptions as cloud_exceptions
 from cloudevents.abstract.event import AnyCloudEvent
 from cloudevents.http import CloudEvent
 from cloudevents.kafka.conversion import (
@@ -30,6 +28,8 @@ from cloudevents.kafka.conversion import (
 )
 from cloudevents.kafka.exceptions import KeyMapperError
 from cloudevents.sdk import types
+
+from cloudevents import exceptions as cloud_exceptions
 
 
 def simple_serialize(data: dict) -> bytes:
@@ -334,6 +334,13 @@ class TestToStructured(KafkaConversionTestBase):
         assert result.headers["content-type"] == source_event["datacontenttype"].encode(
             "utf-8"
         )
+
+    def test_datacontenttype_attribute_present_after_setting_header(self, source_event):
+        result = to_structured(source_event)
+        datacontenttype = source_event.get("datacontenttype")
+        assert len(result.headers) == 1
+        assert result.headers["content-type"] == datacontenttype.encode("utf-8")
+        assert datacontenttype in result.value.decode("utf-8")
 
     def test_datamarshaller_exception(self, source_event):
         with pytest.raises(cloud_exceptions.DataMarshallerError):
