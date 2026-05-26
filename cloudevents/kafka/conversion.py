@@ -15,12 +15,11 @@ import base64
 import json
 import typing
 
+from cloudevents import exceptions as cloud_exceptions
+from cloudevents import http
 from cloudevents.abstract import AnyCloudEvent
 from cloudevents.kafka.exceptions import KeyMapperError
 from cloudevents.sdk import types
-
-from cloudevents import exceptions as cloud_exceptions
-from cloudevents import http
 
 JSON_MARSHALLER: types.MarshallerType = json.dumps
 JSON_UNMARSHALLER: types.UnmarshallerType = json.loads
