@@ -17,6 +17,7 @@ from json import loads
 
 import pytest
 
+from cloudevents.core.exceptions import BaseCloudEventException
 from cloudevents.core.formats.json import JSONFormat
 from cloudevents.core.v1.event import CloudEvent
 
@@ -346,3 +347,134 @@ def test_read_data_json_body(content_type: str) -> None:
     result = formatter.read_data(body, content_type)
 
     assert result == {"key": "value"}
+
+
+def test_write_batch_with_multiple_events() -> None:
+    formatter = JSONFormat()
+    event1 = CloudEvent(
+        attributes={
+            "id": "1",
+            "source": "source",
+            "type": "type",
+            "specversion": "1.0",
+        },
+        data={"key": "value1"},
+    )
+    event2 = CloudEvent(
+        attributes={
+            "id": "2",
+            "source": "source",
+            "type": "type",
+            "specversion": "1.0",
+        },
+        data={"key": "value2"},
+    )
+
+    result = formatter.write_batch([event1, event2])
+
+    parsed = loads(result.decode("utf-8"))
+    assert isinstance(parsed, list)
+    assert len(parsed) == 2
+    assert parsed[0]["id"] == "1"
+    assert parsed[0]["data"] == {"key": "value1"}
+    assert parsed[1]["id"] == "2"
+    assert parsed[1]["data"] == {"key": "value2"}
+
+
+def test_write_batch_empty_returns_empty_array() -> None:
+    formatter = JSONFormat()
+    assert formatter.write_batch([]) == b"[]"
+
+
+def test_read_batch_round_trip() -> None:
+    formatter = JSONFormat()
+    event1 = CloudEvent(
+        attributes={
+            "id": "1",
+            "source": "source",
+            "type": "type",
+            "specversion": "1.0",
+        },
+        data={"key": "value1"},
+    )
+    event2 = CloudEvent(
+        attributes={
+            "id": "2",
+            "source": "source",
+            "type": "type",
+            "specversion": "1.0",
+        },
+        data={"key": "value2"},
+    )
+
+    serialized = formatter.write_batch([event1, event2])
+    events = formatter.read_batch(CloudEvent, serialized)
+
+    assert len(events) == 2
+    assert events[0].get_id() == "1"
+    assert events[0].get_data() == {"key": "value1"}
+    assert events[1].get_id() == "2"
+    assert events[1].get_data() == {"key": "value2"}
+
+
+def test_read_batch_empty_array_returns_empty_list() -> None:
+    formatter = JSONFormat()
+    assert formatter.read_batch(CloudEvent, b"[]") == []
+
+
+def test_read_batch_auto_detects_mixed_versions() -> None:
+    from cloudevents.core.v03.event import CloudEvent as CloudEventV03
+
+    formatter = JSONFormat()
+    body = (
+        b'[{"id": "1", "source": "source", "type": "type", "specversion": "1.0"},'
+        b' {"id": "2", "source": "source", "type": "type", "specversion": "0.3"}]'
+    )
+
+    events = formatter.read_batch(None, body)
+
+    assert isinstance(events[0], CloudEvent)
+    assert isinstance(events[1], CloudEventV03)
+
+
+def test_read_batch_with_data_base64_element() -> None:
+    formatter = JSONFormat()
+    event = CloudEvent(
+        attributes={
+            "id": "1",
+            "source": "source",
+            "type": "type",
+            "specversion": "1.0",
+        },
+        data=b"binary-data",
+    )
+
+    serialized = formatter.write_batch([event])
+    events = formatter.read_batch(CloudEvent, serialized)
+
+    assert events[0].get_data() == b"binary-data"
+
+
+def test_read_batch_non_array_body_raises() -> None:
+    formatter = JSONFormat()
+    body = b'{"id": "1", "source": "source", "type": "type", "specversion": "1.0"}'
+
+    with pytest.raises(ValueError):
+        formatter.read_batch(CloudEvent, body)
+
+
+def test_read_batch_invalid_element_aborts() -> None:
+    formatter = JSONFormat()
+    # second element is missing the required 'type' attribute
+    body = (
+        b'[{"id": "1", "source": "source", "type": "type", "specversion": "1.0"},'
+        b' {"id": "2", "source": "source", "specversion": "1.0"}]'
+    )
+
+    with pytest.raises(BaseCloudEventException):
+        formatter.read_batch(CloudEvent, body)
+
+
+def test_get_batch_content_type() -> None:
+    formatter = JSONFormat()
+    assert formatter.get_batch_content_type() == "application/cloudevents-batch+json"

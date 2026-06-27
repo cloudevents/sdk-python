@@ -260,6 +260,42 @@ def from_structured(
     return event_format.read(event_factory, message.body)
 
 
+def to_batch(events: list[BaseCloudEvent], event_format: Format) -> HTTPMessage:
+    """
+    Convert a list of CloudEvents to an HTTP batched content mode message.
+
+    The entire batch is serialized into the HTTP body as a JSON array and the
+    Content-Type header is set to the format's batch media type.
+
+    :param events: The CloudEvents to convert
+    :param event_format: Format implementation for batch serialization
+    :return: HTTPMessage with the batch in the body
+    """
+    headers = {CONTENT_TYPE_HEADER: event_format.get_batch_content_type()}
+    body = event_format.write_batch(events)
+    return HTTPMessage(headers=headers, body=body)
+
+
+def from_batch(
+    message: HTTPMessage,
+    event_format: Format,
+    event_factory: EventFactory | None = None,
+) -> list[BaseCloudEvent]:
+    """
+    Parse an HTTP batched content mode message to a list of CloudEvents.
+
+    Deserializes the batch from the HTTP body using the specified format. When
+    ``event_factory`` is None, each event's version is auto-detected independently.
+
+    :param message: HTTPMessage to parse
+    :param event_format: Format implementation for batch deserialization
+    :param event_factory: Factory to create CloudEvent instances (auto-detected if None)
+    :return: List of CloudEvent instances
+    """
+    events: list[BaseCloudEvent] = event_format.read_batch(event_factory, message.body)
+    return events
+
+
 def from_http(
     message: HTTPMessage,
     event_format: Format,
@@ -300,6 +336,19 @@ def from_http(
     :param event_factory: Factory function to create CloudEvent instances (auto-detected if None)
     :return: CloudEvent instance
     """
+    content_type = ""
+    for key, value in message.headers.items():
+        if key.lower() == CONTENT_TYPE_HEADER:
+            content_type = value
+            break
+
+    batch_content_type = event_format.get_batch_content_type()
+    if content_type.split(";")[0].strip().lower() == batch_content_type:
+        raise ValueError(
+            f"Received a batch payload ('{batch_content_type}'); "
+            "use from_batch()/from_batch_event() to parse batched CloudEvents"
+        )
+
     if any(key.lower().startswith(CE_PREFIX) for key in message.headers.keys()):
         return from_binary(message, event_format, event_factory)
 
@@ -400,6 +449,38 @@ def from_structured_event(
     if event_format is None:
         event_format = JSONFormat()
     return from_structured(message, event_format, None)
+
+
+def to_batch_event(
+    events: list[BaseCloudEvent],
+    event_format: Format | None = None,
+) -> HTTPMessage:
+    """
+    Convenience wrapper for to_batch with JSON format as default.
+
+    :param events: The CloudEvents to convert
+    :param event_format: Format implementation (defaults to JSONFormat)
+    :return: HTTPMessage with the batch in the body
+    """
+    if event_format is None:
+        event_format = JSONFormat()
+    return to_batch(events, event_format)
+
+
+def from_batch_event(
+    message: HTTPMessage,
+    event_format: Format | None = None,
+) -> list[BaseCloudEvent]:
+    """
+    Convenience wrapper for from_batch with JSON format and auto-detection.
+
+    :param message: HTTPMessage to parse
+    :param event_format: Format implementation (defaults to JSONFormat)
+    :return: List of CloudEvent instances (version auto-detected per event)
+    """
+    if event_format is None:
+        event_format = JSONFormat()
+    return from_batch(message, event_format, None)
 
 
 def from_http_event(

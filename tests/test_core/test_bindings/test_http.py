@@ -19,12 +19,16 @@ import pytest
 
 from cloudevents.core.bindings.http import (
     HTTPMessage,
+    from_batch,
+    from_batch_event,
     from_binary,
     from_binary_event,
     from_http,
     from_http_event,
     from_structured,
     from_structured_event,
+    to_batch,
+    to_batch_event,
     to_binary,
     to_binary_event,
     to_structured,
@@ -1139,3 +1143,90 @@ def test_convenience_with_explicit_format_override() -> None:
 
     assert recovered.get_type() == event.get_type()
     assert recovered.get_data() == event.get_data()
+
+
+def test_to_batch_sets_batch_content_type() -> None:
+    events = [
+        create_event({"id": "1"}, {"key": "value1"}),
+        create_event({"id": "2"}, {"key": "value2"}),
+    ]
+
+    message = to_batch(events, JSONFormat())
+
+    assert message.headers["content-type"] == "application/cloudevents-batch+json"
+
+
+def test_to_batch_from_batch_round_trip() -> None:
+    events = [
+        create_event({"id": "1"}, {"key": "value1"}),
+        create_event({"id": "2"}, {"key": "value2"}),
+    ]
+
+    message = to_batch(events, JSONFormat())
+    parsed = from_batch(message, JSONFormat(), CloudEvent)
+
+    assert len(parsed) == 2
+    assert parsed[0].get_id() == "1"
+    assert parsed[0].get_data() == {"key": "value1"}
+    assert parsed[1].get_id() == "2"
+
+
+def test_from_batch_empty() -> None:
+    message = HTTPMessage(
+        headers={"content-type": "application/cloudevents-batch+json"},
+        body=b"[]",
+    )
+
+    assert from_batch(message, JSONFormat(), CloudEvent) == []
+
+
+def test_to_batch_event_defaults_to_json() -> None:
+    events = [create_event({"id": "1"}, {"key": "value1"})]
+
+    message = to_batch_event(events)
+
+    assert message.headers["content-type"] == "application/cloudevents-batch+json"
+
+
+def test_from_batch_event_round_trip_auto_detect() -> None:
+    events = [
+        create_event({"id": "1"}, {"key": "value1"}),
+        create_event({"id": "2"}, {"key": "value2"}),
+    ]
+
+    message = to_batch_event(events)
+    parsed = from_batch_event(message)
+
+    assert len(parsed) == 2
+    assert parsed[0].get_id() == "1"
+    assert parsed[1].get_id() == "2"
+
+
+def test_from_http_rejects_batch_payload() -> None:
+    message = HTTPMessage(
+        headers={"content-type": "application/cloudevents-batch+json"},
+        body=b"[]",
+    )
+
+    with pytest.raises(ValueError, match="from_batch"):
+        from_http(message, JSONFormat())
+
+
+def test_from_http_rejects_batch_payload_with_charset_param() -> None:
+    message = HTTPMessage(
+        headers={"content-type": "application/cloudevents-batch+json; charset=utf-8"},
+        body=b"[]",
+    )
+
+    with pytest.raises(ValueError, match="from_batch"):
+        from_http(message, JSONFormat())
+
+
+def test_from_http_rejects_batch_payload_mixed_case_content_type() -> None:
+    message = HTTPMessage(
+        headers={"content-type": "Application/CloudEvents-Batch+JSON"},
+        body=b"[]",
+    )
+
+    with pytest.raises(ValueError, match="from_batch"):
+        from_http(message, JSONFormat())
