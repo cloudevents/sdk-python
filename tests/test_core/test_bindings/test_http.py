@@ -20,17 +20,17 @@ import pytest
 from cloudevents.core.bindings.http import (
     HTTPMessage,
     from_batch,
-    from_batch_event,
     from_binary,
     from_binary_event,
+    from_events_batch,
     from_http,
     from_http_event,
     from_structured,
     from_structured_event,
     to_batch,
-    to_batch_event,
     to_binary,
     to_binary_event,
+    to_events_batch,
     to_structured,
     to_structured_event,
 )
@@ -1180,22 +1180,22 @@ def test_from_batch_empty() -> None:
     assert from_batch(message, JSONFormat(), CloudEvent) == []
 
 
-def test_to_batch_event_defaults_to_json() -> None:
+def test_to_events_batch_defaults_to_json() -> None:
     events = [create_event({"id": "1"}, {"key": "value1"})]
 
-    message = to_batch_event(events)
+    message = to_events_batch(events)
 
     assert message.headers["content-type"] == "application/cloudevents-batch+json"
 
 
-def test_from_batch_event_round_trip_auto_detect() -> None:
+def test_from_events_batch_round_trip_auto_detect() -> None:
     events = [
         create_event({"id": "1"}, {"key": "value1"}),
         create_event({"id": "2"}, {"key": "value2"}),
     ]
 
-    message = to_batch_event(events)
-    parsed = from_batch_event(message)
+    message = to_events_batch(events)
+    parsed = from_events_batch(message)
 
     assert len(parsed) == 2
     assert parsed[0].get_id() == "1"

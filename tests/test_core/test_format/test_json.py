@@ -17,7 +17,6 @@ from json import loads
 
 import pytest
 
-from cloudevents.core.exceptions import BaseCloudEventException
 from cloudevents.core.formats.json import JSONFormat
 from cloudevents.core.v1.event import CloudEvent
 
@@ -471,7 +470,15 @@ def test_read_batch_invalid_element_aborts() -> None:
         b' {"id": "2", "source": "source", "specversion": "1.0"}]'
     )
 
-    with pytest.raises(BaseCloudEventException):
+    with pytest.raises(ValueError, match="index 1"):
+        formatter.read_batch(CloudEvent, body)
+
+
+def test_read_batch_non_object_element_raises() -> None:
+    formatter = JSONFormat()
+    body = b"[1, 2, 3]"
+
+    with pytest.raises(ValueError, match="index 0.*must be a JSON object.*int"):
         formatter.read_batch(CloudEvent, body)
 
 

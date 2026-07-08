@@ -21,7 +21,7 @@ from typing import Any, Final, Pattern
 from dateutil.parser import isoparse
 
 from cloudevents.core.base import BaseCloudEvent, EventFactory
-from cloudevents.core.formats.base import Format
+from cloudevents.core.formats.base import BatchFormat
 from cloudevents.core.spec import SPECVERSION_V0_3, SPECVERSION_V1_0
 
 
@@ -42,7 +42,7 @@ class _JSONEncoderWithDatetime(JSONEncoder):
         return super().default(obj)
 
 
-class JSONFormat(Format):
+class JSONFormat(BatchFormat):
     CONTENT_TYPE: Final[str] = "application/cloudevents+json"
     DEFAULT_CONTENT_TYPE: Final[str] = "application/json"
     BATCH_CONTENT_TYPE: Final[str] = "application/cloudevents-batch+json"
@@ -203,9 +203,27 @@ class JSONFormat(Format):
 
         parsed = loads(decoded_data)
         if not isinstance(parsed, list):
-            raise ValueError("JSON batch payload must be a JSON array of CloudEvents")
+            raise ValueError(
+                "JSON batch payload must be a JSON array of CloudEvents, "
+                f"got {type(parsed).__name__}"
+            )
 
-        return [self._dict_to_event(event_factory, item) for item in parsed]
+        events: list[BaseCloudEvent] = []
+        for index, item in enumerate(parsed):
+            if not isinstance(item, dict):
+                raise ValueError(
+                    f"JSON batch element at index {index} must be a JSON object "
+                    f"representing a CloudEvent, got {type(item).__name__}"
+                )
+            try:
+                events.append(self._dict_to_event(event_factory, item))
+            except Exception as exc:
+                raise ValueError(
+                    f"Failed to parse CloudEvent at index {index} of the JSON "
+                    f"batch: {exc}"
+                ) from exc
+
+        return events
 
     def write_data(
         self,

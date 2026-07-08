@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from typing import Any, Protocol
+from typing import Any, Protocol, runtime_checkable
 
 from cloudevents.core.base import BaseCloudEvent, EventFactory
 
@@ -88,6 +88,21 @@ class Format(Protocol):
         :return: Content type string for CloudEvents structured content mode
         """
         ...
+
+
+@runtime_checkable
+class BatchFormat(Format, Protocol):
+    """
+    Protocol for formats that additionally support the CloudEvents Batch mode.
+
+    Batch support is kept separate from :class:`Format` so a format can implement
+    single-event (de)serialization without being forced to implement batching, and
+    so adding batch support to the SDK does not break existing ``Format``
+    implementations. A format that supports batches implements both protocols.
+
+    The protocol is ``runtime_checkable`` so callers that accept a plain ``Format``
+    (e.g. ``from_http``) can detect batch capability with ``isinstance``.
+    """
 
     def write_batch(self, events: list[BaseCloudEvent]) -> bytes:
         """

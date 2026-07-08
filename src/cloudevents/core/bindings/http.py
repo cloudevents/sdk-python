@@ -26,7 +26,7 @@ from cloudevents.core.bindings.common import (
     TIME_ATTR,
     get_event_factory_for_version,
 )
-from cloudevents.core.formats.base import Format
+from cloudevents.core.formats.base import BatchFormat, Format
 from cloudevents.core.formats.json import JSONFormat
 from cloudevents.core.spec import SPECVERSION_V1_0
 
@@ -260,7 +260,7 @@ def from_structured(
     return event_format.read(event_factory, message.body)
 
 
-def to_batch(events: list[BaseCloudEvent], event_format: Format) -> HTTPMessage:
+def to_batch(events: list[BaseCloudEvent], event_format: BatchFormat) -> HTTPMessage:
     """
     Convert a list of CloudEvents to an HTTP batched content mode message.
 
@@ -268,7 +268,7 @@ def to_batch(events: list[BaseCloudEvent], event_format: Format) -> HTTPMessage:
     Content-Type header is set to the format's batch media type.
 
     :param events: The CloudEvents to convert
-    :param event_format: Format implementation for batch serialization
+    :param event_format: Batch format implementation for batch serialization
     :return: HTTPMessage with the batch in the body
     """
     headers = {CONTENT_TYPE_HEADER: event_format.get_batch_content_type()}
@@ -278,7 +278,7 @@ def to_batch(events: list[BaseCloudEvent], event_format: Format) -> HTTPMessage:
 
 def from_batch(
     message: HTTPMessage,
-    event_format: Format,
+    event_format: BatchFormat,
     event_factory: EventFactory | None = None,
 ) -> list[BaseCloudEvent]:
     """
@@ -288,7 +288,7 @@ def from_batch(
     ``event_factory`` is None, each event's version is auto-detected independently.
 
     :param message: HTTPMessage to parse
-    :param event_format: Format implementation for batch deserialization
+    :param event_format: Batch format implementation for batch deserialization
     :param event_factory: Factory to create CloudEvent instances (auto-detected if None)
     :return: List of CloudEvent instances
     """
@@ -342,12 +342,15 @@ def from_http(
             content_type = value
             break
 
-    batch_content_type = event_format.get_batch_content_type()
-    if content_type.split(";")[0].strip().lower() == batch_content_type:
-        raise ValueError(
-            f"Received a batch payload ('{batch_content_type}'); "
-            "use from_batch()/from_batch_event() to parse batched CloudEvents"
-        )
+    received_content_type = content_type.split(";")[0].strip().lower()
+    if isinstance(event_format, BatchFormat):
+        batch_content_type = event_format.get_batch_content_type().strip().lower()
+        if received_content_type == batch_content_type:
+            raise ValueError(
+                f"Received a batch payload: content type '{received_content_type}' "
+                f"matches the batch content type '{batch_content_type}'. "
+                "Use from_batch()/from_events_batch() to parse batched CloudEvents."
+            )
 
     if any(key.lower().startswith(CE_PREFIX) for key in message.headers.keys()):
         return from_binary(message, event_format, event_factory)
@@ -451,15 +454,15 @@ def from_structured_event(
     return from_structured(message, event_format, None)
 
 
-def to_batch_event(
+def to_events_batch(
     events: list[BaseCloudEvent],
-    event_format: Format | None = None,
+    event_format: BatchFormat | None = None,
 ) -> HTTPMessage:
     """
     Convenience wrapper for to_batch with JSON format as default.
 
     :param events: The CloudEvents to convert
-    :param event_format: Format implementation (defaults to JSONFormat)
+    :param event_format: Batch format implementation (defaults to JSONFormat)
     :return: HTTPMessage with the batch in the body
     """
     if event_format is None:
@@ -467,15 +470,15 @@ def to_batch_event(
     return to_batch(events, event_format)
 
 
-def from_batch_event(
+def from_events_batch(
     message: HTTPMessage,
-    event_format: Format | None = None,
+    event_format: BatchFormat | None = None,
 ) -> list[BaseCloudEvent]:
     """
     Convenience wrapper for from_batch with JSON format and auto-detection.
 
     :param message: HTTPMessage to parse
-    :param event_format: Format implementation (defaults to JSONFormat)
+    :param event_format: Batch format implementation (defaults to JSONFormat)
     :return: List of CloudEvent instances (version auto-detected per event)
     """
     if event_format is None:
