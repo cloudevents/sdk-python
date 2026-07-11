@@ -44,6 +44,7 @@ class _JSONEncoderWithDatetime(JSONEncoder):
 
 class JSONFormat(Format):
     CONTENT_TYPE: Final[str] = "application/cloudevents+json"
+    DEFAULT_CONTENT_TYPE: Final[str] = "application/json"
     JSON_CONTENT_TYPE_PATTERN: Pattern[str] = re.compile(
         r"^(application|text)/([a-zA-Z0-9\-\.]+\+)?json(;.*)?$"
     )
@@ -135,7 +136,9 @@ class JSONFormat(Format):
                         "utf-8"
                     )
             else:
-                datacontenttype = event_dict.get("datacontenttype", "application/json")
+                datacontenttype = event_dict.get(
+                    "datacontenttype", self.DEFAULT_CONTENT_TYPE
+                )
                 if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype):
                     event_dict["data"] = event_data
                 else:
@@ -171,12 +174,19 @@ class JSONFormat(Format):
 
         # If data is a dict and content type is JSON, serialize as JSON
         if isinstance(data, dict):
-            if datacontenttype and re.match(
-                JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype
-            ):
+            content_type = datacontenttype or self.DEFAULT_CONTENT_TYPE
+            if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, content_type):
                 return dumps(data, cls=_JSONEncoderWithDatetime).encode("utf-8")
 
-        # Default: convert to string and encode
+            # for other contenttypes we still try to generate a json-decodable string
+            # if not possible, a string representing
+            try:
+                return dumps(data, cls=_JSONEncoderWithDatetime).encode("utf-8")
+            except TypeError:
+                pass
+
+        # according to the spec, we return an encoded string per default
+        # careful: the result is not json-decodable as the dict keys are single-quoted
         return str(data).encode("utf-8")
 
     def read_data(
@@ -196,9 +206,8 @@ class JSONFormat(Format):
             return None
 
         # If content type indicates JSON, try to parse as JSON
-        if datacontenttype and re.match(
-            JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype
-        ):
+        content_type = datacontenttype or self.DEFAULT_CONTENT_TYPE
+        if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, content_type):
             try:
                 decoded = body.decode("utf-8")
                 parsed: dict[str, Any] = loads(decoded)
