@@ -28,7 +28,6 @@ jobs:
         run: pipx run twine check dist/*
   publish:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     needs: [ build_dist ]
     steps:
       - uses: actions/checkout@v7.0.0
