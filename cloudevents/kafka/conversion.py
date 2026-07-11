@@ -213,8 +213,9 @@ def to_structured(
         attrs["data"] = data
 
     headers = {}
-    if "datacontenttype" in attrs:
-        headers["content-type"] = attrs.pop("datacontenttype").encode("utf-8")
+    datacontenttype = attrs.get("datacontenttype")
+    if datacontenttype is not None:
+        headers["content-type"] = datacontenttype.encode("utf-8")
 
     try:
         value = envelope_marshaller(attrs)

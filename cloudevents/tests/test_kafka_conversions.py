@@ -247,6 +247,7 @@ class TestToStructured(KafkaConversionTestBase):
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "datacontenttype": source_event["datacontenttype"],
                 "partitionkey": source_event["partitionkey"],
                 "data": self.expected_data,
             }
@@ -263,6 +264,7 @@ class TestToStructured(KafkaConversionTestBase):
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "datacontenttype": source_event["datacontenttype"],
                 "partitionkey": source_event["partitionkey"],
                 "data_base64": base64.b64encode(
                     custom_marshaller(self.expected_data)
@@ -281,6 +283,7 @@ class TestToStructured(KafkaConversionTestBase):
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "datacontenttype": source_event["datacontenttype"],
                 "partitionkey": source_event["partitionkey"],
                 "data": self.expected_data,
             }
@@ -299,6 +302,7 @@ class TestToStructured(KafkaConversionTestBase):
                 "source": source_event["source"],
                 "type": source_event["type"],
                 "time": source_event["time"],
+                "datacontenttype": source_event["datacontenttype"],
                 "partitionkey": source_event["partitionkey"],
                 "data_base64": base64.b64encode(
                     custom_marshaller(self.expected_data)
@@ -334,6 +338,13 @@ class TestToStructured(KafkaConversionTestBase):
         assert result.headers["content-type"] == source_event["datacontenttype"].encode(
             "utf-8"
         )
+
+    def test_datacontenttype_attribute_present_after_setting_header(self, source_event):
+        result = to_structured(source_event)
+        datacontenttype = source_event.get("datacontenttype")
+        assert len(result.headers) == 1
+        assert result.headers["content-type"] == datacontenttype.encode("utf-8")
+        assert datacontenttype in result.value.decode("utf-8")
 
     def test_datamarshaller_exception(self, source_event):
         with pytest.raises(cloud_exceptions.DataMarshallerError):
