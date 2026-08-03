@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `from_http` now names the required binary headers that are actually missing,
+  instead of always reporting a missing `specversion`. ([#139])
+
 ## [2.2.0]
 
 ### Changed
@@ -368,3 +373,4 @@ CloudEvents v2 is a rewrite with ongoing development ([#271])
 [#279]: https://github.com/cloudevents/sdk-python/pull/279
 [#284]: https://github.com/cloudevents/sdk-python/pull/284
 [#291]: https://github.com/cloudevents/sdk-python/pull/291
+[#139]: https://github.com/cloudevents/sdk-python/issues/139

@@ -22,6 +22,27 @@ from cloudevents.v1.sdk import converters, marshaller, types
 from cloudevents.v1.sdk.converters import is_binary
 from cloudevents.v1.sdk.event import v03, v1
 
+_REQUIRED_BINARY_HEADERS = ("ce-specversion", "ce-id", "ce-source", "ce-type")
+
+
+def _missing_binary_headers(
+    headers: typing.Mapping[str, str],
+) -> typing.List[str]:
+    """
+    Lists the required binary-mode headers missing from a partially populated
+    binary HTTP request.
+
+    Returns an empty list when no binary header is present at all, since such a
+    request is not an incomplete binary one.
+
+    :param headers: The lower-cased HTTP request headers.
+    :returns: The missing required binary headers.
+    """
+    missing = [header for header in _REQUIRED_BINARY_HEADERS if header not in headers]
+    if len(missing) == len(_REQUIRED_BINARY_HEADERS):
+        return []
+    return missing
+
 
 def _best_effort_serialize_to_json(  # type: ignore[no-untyped-def]
     value: typing.Any, *args, **kwargs
@@ -146,6 +167,12 @@ def from_http(
             )
 
     if specversion is None:
+        missing_binary_headers = _missing_binary_headers(headers)
+        if missing_binary_headers:
+            raise cloud_exceptions.MissingRequiredFields(
+                "Failed to find the following required headers in the binary "
+                "HTTP request: {}".format(", ".join(missing_binary_headers))
+            )
         raise cloud_exceptions.MissingRequiredFields(
             "Failed to find specversion in HTTP request"
         )
