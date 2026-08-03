@@ -103,6 +103,19 @@ def test_missing_required_fields_empty_data_binary(headers):
         _ = from_http(headers, None)
 
 
+@pytest.mark.parametrize(
+    "headers, missing_header",
+    list(
+        zip(invalid_test_headers, ["ce-id", "ce-source", "ce-type", "ce-specversion"])
+    ),
+)
+def test_missing_required_fields_binary_names_missing_header(headers, missing_header):
+    # Test for issue #139
+    with pytest.raises(cloud_exceptions.MissingRequiredFields) as e:
+        _ = from_http(headers, json.dumps(test_data))
+    assert missing_header in str(e.value)
+
+
 @pytest.mark.parametrize("specversion", ["1.0", "0.3"])
 def test_emit_binary_event(specversion):
     headers = {
