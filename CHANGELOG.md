@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `kafka.to_binary()` raising `KeyError` for events without a
+  `datacontenttype` and `AttributeError` for non-string attribute values; it now
+  omits the content-type header when `datacontenttype` is unset and stringifies
+  attribute values before encoding. ([#305])
+
 ## [2.2.0]
 
 ### Changed
@@ -368,3 +375,4 @@ CloudEvents v2 is a rewrite with ongoing development ([#271])
 [#279]: https://github.com/cloudevents/sdk-python/pull/279
 [#284]: https://github.com/cloudevents/sdk-python/pull/284
 [#291]: https://github.com/cloudevents/sdk-python/pull/291
+[#305]: https://github.com/cloudevents/sdk-python/pull/305
