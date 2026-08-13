@@ -92,12 +92,13 @@ def to_binary(
         )
 
     headers = {}
-    if event["datacontenttype"]:
-        headers["content-type"] = event["datacontenttype"].encode("utf-8")
+    datacontenttype = event.get("datacontenttype")
+    if datacontenttype:
+        headers["content-type"] = datacontenttype.encode("utf-8")
     for attr, value in event.get_attributes().items():
         if attr not in ["data", "partitionkey", "datacontenttype"]:
             if value is not None:
-                headers["ce_{0}".format(attr)] = value.encode("utf-8")
+                headers["ce_{0}".format(attr)] = str(value).encode("utf-8")
 
     try:
         data = data_marshaller(event.get_data())
