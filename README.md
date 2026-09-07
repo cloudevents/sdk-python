@@ -40,8 +40,8 @@ import requests
 # Create a CloudEvent
 # - The CloudEvent "id" is generated if omitted. "specversion" defaults to "1.0".
 attributes = {
-  "type": "com.example.sampletype1",
-  "source": "https://example.com/event-producer",
+    "type": "com.example.sampletype1",
+    "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
@@ -63,8 +63,8 @@ import requests
 # Create a CloudEvent
 # - The CloudEvent "id" is generated if omitted. "specversion" defaults to "1.0".
 attributes = {
-  "type": "com.example.sampletype2",
-  "source": "https://example.com/event-producer",
+    "type": "com.example.sampletype2",
+    "source": "https://example.com/event-producer",
 }
 data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
@@ -95,20 +95,20 @@ app = Flask(__name__)
 # create an endpoint at http://localhost:/3000/
 @app.route("/", methods=["POST"])
 def home():
-  # create a CloudEvent
-  event = from_http_event(HTTPMessage(dict(request.headers), request.get_data()))
+    # create a CloudEvent
+    event = from_http_event(HTTPMessage(dict(request.headers), request.get_data()))
 
-  # you can access cloudevent fields as seen below
-  print(
-    f"Found {event.get_id()} from {event.get_source()} with type "
-    f"{event.get_type()} and specversion {event.get_specversion()}"
-  )
+    # you can access cloudevent fields as seen below
+    print(
+        f"Found {event.get_id()} from {event.get_source()} with type "
+        f"{event.get_type()} and specversion {event.get_specversion()}"
+    )
 
-  return "", 204
+    return "", 204
 
 
 if __name__ == "__main__":
-  app.run(port=3000)
+    app.run(port=3000)
 ```
 
 You can find a complete example of turning a CloudEvent into a HTTP request
