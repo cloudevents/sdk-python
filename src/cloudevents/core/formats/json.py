@@ -72,7 +72,13 @@ class JSONFormat(Format):
         else:
             decoded_data = data
 
-        event_attributes = loads(decoded_data)
+        # JSON null attributes have the same meaning as omitted attributes.
+        # Only filter the envelope; null values inside data are payload content.
+        event_attributes = {
+            key: value
+            for key, value in loads(decoded_data).items()
+            if value is not None
+        }
 
         # Auto-detect version if factory not provided
         if event_factory is None:
