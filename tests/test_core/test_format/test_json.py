@@ -13,10 +13,12 @@
 #    under the License.
 
 from datetime import datetime, timezone
-from json import loads
+from json import dumps, loads
+from typing import Any
 
 import pytest
 
+from cloudevents.core.base import BaseCloudEvent, EventFactory
 from cloudevents.core.formats.json import JSONFormat
 from cloudevents.core.v1.event import CloudEvent
 
@@ -346,3 +348,44 @@ def test_read_data_json_body(content_type: str) -> None:
     result = formatter.read_data(body, content_type)
 
     assert result == {"key": "value"}
+
+
+@pytest.mark.parametrize("factory", [None, CloudEvent])
+@pytest.mark.parametrize(
+    "attribute", ["time", "subject", "dataschema", "datacontenttype", "extension"]
+)
+def test_read_null_attributes_as_absent(
+    factory: EventFactory | None, attribute: str
+) -> None:
+    attributes: dict[str, Any] = {
+        "id": "123",
+        "source": "/example",
+        "type": "example.created",
+        "specversion": "1.0",
+    }
+    attributes[attribute] = None
+    attributes["data"] = {"nested": None, "value": False, "count": 0}
+    event = JSONFormat().read(factory, dumps(attributes))
+    if attribute == "time":
+        # Missing time is defaulted by CloudEvent, just as with an omitted JSON member.
+        assert isinstance(event.get_attributes()["time"], datetime)
+    else:
+        assert attribute not in event.get_attributes()
+    assert event.get_data() == {"nested": None, "value": False, "count": 0}
+
+
+def test_read_null_attributes_are_not_passed_to_custom_factory() -> None:
+    received: dict[str, Any] = {}
+
+    def factory(attributes: dict[str, Any], data: Any) -> BaseCloudEvent:
+        received.update(attributes)
+        return CloudEvent(attributes, data)
+
+    event = JSONFormat().read(
+        factory,
+        '{"id":"123","source":"/example","type":"test","specversion":"1.0","time":null,"subject":null,"extension":null,"data":null}',
+    )
+    assert "time" not in received
+    assert "subject" not in received
+    assert "extension" not in received
+    assert event.get_data() is None
