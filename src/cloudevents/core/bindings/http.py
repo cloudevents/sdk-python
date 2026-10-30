@@ -65,7 +65,7 @@ def _decode_header_value(attr_name: str, value: str) -> Any:
     :param value: The percent-encoded header value
     :return: Decoded value (datetime for 'time' attribute, string otherwise)
     """
-    decoded = unquote(value)
+    decoded = unquote(value, encoding="utf-8", errors="strict")
     if attr_name == TIME_ATTR:
         return isoparse(decoded)
     return decoded
