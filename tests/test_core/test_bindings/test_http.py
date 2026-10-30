@@ -1139,3 +1139,38 @@ def test_convenience_with_explicit_format_override() -> None:
 
     assert recovered.get_type() == event.get_type()
     assert recovered.get_data() == event.get_data()
+
+
+@pytest.mark.parametrize("reader", [from_binary, from_http])
+@pytest.mark.parametrize("value", ["%FF", "%C3%28", "%ED%A0%80", "%F0%9F%98"])
+def test_binary_rejects_invalid_percent_encoded_utf8(reader: Any, value: str) -> None:
+    message = HTTPMessage(
+        headers={
+            "ce-specversion": "1.0",
+            "ce-id": "123",
+            "ce-type": "example.created",
+            "ce-source": "/example",
+            "ce-subject": value,
+        },
+        body=b"",
+    )
+    with pytest.raises(UnicodeDecodeError):
+        reader(message, JSONFormat())
+
+
+@pytest.mark.parametrize(
+    "encoded,decoded",
+    [("%E2%82%AC", "€"), ("%F0%9F%98%80", "😀"), ("%41", "A"), ("a+b", "a+b")],
+)
+def test_binary_accepts_valid_percent_encoded_utf8(encoded: str, decoded: str) -> None:
+    message = HTTPMessage(
+        headers={
+            "ce-specversion": "1.0",
+            "ce-id": "123",
+            "ce-type": "example.created",
+            "ce-source": "/example",
+            "ce-subject": encoded,
+        },
+        body=b"",
+    )
+    assert from_binary(message, JSONFormat()).get_attributes()["subject"] == decoded
