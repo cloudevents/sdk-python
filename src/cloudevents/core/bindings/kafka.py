@@ -165,18 +165,17 @@ def from_binary(
     attributes: dict[str, Any] = {}
 
     for header_name, header_value_bytes in message.headers.items():
-        header_value = header_value_bytes.decode("utf-8")
-
         normalized_name = header_name.lower()
 
         if normalized_name.startswith(CE_PREFIX):
+            header_value = header_value_bytes.decode("utf-8")
             attr_name = normalized_name[len(CE_PREFIX) :]
             if attr_name == TIME_ATTR:
                 attributes[attr_name] = isoparse(header_value)
             else:
                 attributes[attr_name] = header_value
         elif normalized_name == CONTENT_TYPE_HEADER:
-            attributes[DATACONTENTTYPE_ATTR] = header_value
+            attributes[DATACONTENTTYPE_ATTR] = header_value_bytes.decode("utf-8")
 
     # If message has a key, add it as partitionkey extension attribute
     if message.key is not None:
