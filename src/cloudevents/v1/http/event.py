@@ -17,6 +17,7 @@ import typing
 import uuid
 
 import cloudevents.v1.exceptions as cloud_exceptions
+from cloudevents.core.spec import is_valid_attribute_name
 from cloudevents.v1 import abstract
 from cloudevents.v1.sdk.event import v03, v1
 
@@ -24,6 +25,19 @@ _required_by_version = {
     "1.0": v1.Event._ce_required_fields,
     "0.3": v03.Event._ce_required_fields,
 }
+
+
+def _validate_attribute_name(name: str) -> None:
+    """
+    Validate names against the CloudEvents attribute naming convention.
+
+    See https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#attribute-naming-convention
+    """
+    if not is_valid_attribute_name(name):
+        raise cloud_exceptions.InvalidAttributeName(
+            f"Invalid CloudEvent attribute name '{name}': "
+            "attribute names must only contain lowercase ASCII letters and digits"
+        )
 
 
 class CloudEvent(abstract.CloudEvent):
@@ -59,6 +73,8 @@ class CloudEvent(abstract.CloudEvent):
         :type data: typing.Any
         """
         self._attributes = {k.lower(): v for k, v in attributes.items()}
+        for attribute_name in self._attributes:
+            _validate_attribute_name(attribute_name)
         self.data = data
         if "specversion" not in self._attributes:
             self._attributes["specversion"] = "1.0"
@@ -88,6 +104,7 @@ class CloudEvent(abstract.CloudEvent):
         return self.data
 
     def __setitem__(self, key: str, value: typing.Any) -> None:
+        _validate_attribute_name(key)
         self._attributes[key] = value
 
     def __delitem__(self, key: str) -> None:

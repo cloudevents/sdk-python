@@ -371,6 +371,19 @@ def test_required_attributes_null_or_empty(
                 ]
             },
         ),
+        (
+            "example-extension",
+            {
+                "example-extension": [
+                    str(
+                        CustomExtensionAttributeError(
+                            "example-extension",
+                            "Extension attribute 'example-extension' should only contain lowercase letters and numbers",
+                        )
+                    )
+                ]
+            },
+        ),
     ],
 )
 def test_custom_extension(extension_name: str, expected_error: dict) -> None:

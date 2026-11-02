@@ -11,8 +11,20 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from typing import Literal
+import re
+from typing import Final, Literal
 
 SpecVersion = Literal["1.0", "0.3"]
 SPECVERSION_V1_0 = "1.0"
 SPECVERSION_V0_3 = "0.3"
+
+_ATTRIBUTE_NAME_PATTERN: Final[re.Pattern[str]] = re.compile(r"^[a-z0-9]+$")
+
+
+def is_valid_attribute_name(name: str) -> bool:
+    """
+    Return whether a name follows the CloudEvents attribute naming convention.
+
+    See https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#attribute-naming-convention
+    """
+    return bool(_ATTRIBUTE_NAME_PATTERN.fullmatch(name))

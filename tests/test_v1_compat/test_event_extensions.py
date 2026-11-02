@@ -16,6 +16,7 @@ import json
 
 import pytest
 
+import cloudevents.v1.exceptions as cloud_exceptions
 from cloudevents.v1.http import CloudEvent, from_http, to_binary, to_structured
 
 test_data = json.dumps({"data-key": "val"})
@@ -30,6 +31,29 @@ test_attributes = {
 def test_cloudevent_access_extensions(specversion):
     event = CloudEvent(test_attributes, test_data)
     assert event["ext1"] == "testval"
+
+
+def test_cloudevent_rejects_invalid_extension_attribute_name():
+    with pytest.raises(cloud_exceptions.InvalidAttributeName) as exc:
+        CloudEvent(
+            {
+                "type": "com.example.string",
+                "source": "https://example.com/event-producer",
+                "example-extension": "testval",
+            },
+            test_data,
+        )
+
+    assert "example-extension" in str(exc.value)
+
+
+def test_cloudevent_rejects_invalid_extension_attribute_setitem():
+    event = CloudEvent(test_attributes, test_data)
+
+    with pytest.raises(cloud_exceptions.InvalidAttributeName) as exc:
+        event["example-extension"] = "testval"
+
+    assert "example-extension" in str(exc.value)
 
 
 @pytest.mark.parametrize("specversion", ["0.3", "1.0"])
