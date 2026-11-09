@@ -292,28 +292,28 @@ class YAMLFormat:
     """Example custom format -- implement the Format protocol."""
 
     def read(
-            self,
-            event_factory: EventFactory | None,
-            data: str | bytes,
-    ) -> BaseCloudEvent:
-        ...  # Parse YAML into attributes dict, call event_factory(attributes, data)
+        self,
+        event_factory: EventFactory | None,
+        data: str | bytes,
+    ) -> (
+        BaseCloudEvent
+    ): ...  # Parse YAML into attributes dict, call event_factory(attributes, data)
 
-    def write(self, event: BaseCloudEvent) -> bytes:
-        ...  # Serialize entire event to YAML bytes
+    def write(
+        self, event: BaseCloudEvent
+    ) -> bytes: ...  # Serialize entire event to YAML bytes
 
     def write_data(
-            self,
-            data: dict | str | bytes | None,
-            datacontenttype: str | None,
-    ) -> bytes:
-        ...  # Serialize just the data payload
+        self,
+        data: dict | str | bytes | None,
+        datacontenttype: str | None,
+    ) -> bytes: ...  # Serialize just the data payload
 
     def read_data(
-            self,
-            body: bytes,
-            datacontenttype: str | None,
-    ) -> dict | str | bytes | None:
-        ...  # Deserialize just the data payload
+        self,
+        body: bytes,
+        datacontenttype: str | None,
+    ) -> dict | str | bytes | None: ...  # Deserialize just the data payload
 
     def get_content_type(self) -> str:
         return "application/cloudevents+yaml"
