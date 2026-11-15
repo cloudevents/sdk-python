@@ -23,7 +23,14 @@ from cloudevents.v1.exceptions import PydanticFeatureNotInstalled
 from cloudevents.v1.pydantic.fields_docs import FIELD_DESCRIPTIONS
 
 try:
-    from pydantic import BaseModel, ConfigDict, Field, model_serializer
+    from pydantic import (
+        BaseModel,
+        ConfigDict,
+        Field,
+        SerializationInfo,
+        TypeAdapter,
+        model_serializer,
+    )
 except ImportError:  # pragma: no cover # hard to test
     raise PydanticFeatureNotInstalled(
         "CloudEvents pydantic feature is not installed. "
@@ -33,6 +40,39 @@ except ImportError:  # pragma: no cover # hard to test
 from cloudevents.v1 import abstract, conversion
 from cloudevents.v1.exceptions import IncompatibleArgumentsError
 from cloudevents.v1.sdk.event import attribute
+
+# JSON encoding for the ``data`` member. The CloudEvent envelope itself is still
+# produced by ``conversion.to_json`` so ``data_base64``, omitted null attributes,
+# and RFC3339 ``time`` stay on the structured-mode path.
+_JSON_DATA: TypeAdapter[Any] = TypeAdapter(Any)
+
+
+def _jsonable_data(value: Any, info: SerializationInfo) -> Any:
+    """Return a JSON-ready ``data`` value, leaving a binary payload untouched.
+
+    Structured mode emits top-level ``bytes`` as ``data_base64``. Every other
+    value is encoded the way ``BaseModel.model_dump_json`` encodes it, including
+    ``datetime``, ``date``, ``time``, ``UUID``, ``Decimal``, and nested models.
+
+    Serialization flags from ``model_dump_json`` / ``.json()`` apply to that
+    payload. ``include`` and ``exclude`` select CloudEvent fields, so they are
+    not applied inside ``data``.
+    """
+    if value is None or isinstance(value, (bytes, bytearray, memoryview)):
+        return value
+    return _JSON_DATA.dump_python(
+        value,
+        mode="json",
+        by_alias=info.by_alias,
+        exclude_unset=info.exclude_unset,
+        exclude_defaults=info.exclude_defaults,
+        exclude_none=info.exclude_none,
+        exclude_computed_fields=info.exclude_computed_fields,
+        round_trip=info.round_trip,
+        serialize_as_any=info.serialize_as_any,
+        polymorphic_serialization=info.polymorphic_serialization,
+        context=info.context,
+    )
 
 
 class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
@@ -193,22 +233,35 @@ class CloudEvent(abstract.CloudEvent, BaseModel):  # type: ignore
         return conversion.from_json(cls, b)
 
     @model_serializer(when_used="json")
-    def _ce_json_dumps(self) -> typing.Dict[str, typing.Any]:
+    def _ce_json_dumps(self, info: SerializationInfo) -> typing.Dict[str, typing.Any]:
         """Performs Pydantic-specific serialization of the event when
         serializing the model using `.model_dump_json()` method.
 
         Needed by the pydantic base-model to serialize the event correctly to json.
         Without this function the data will be incorrectly serialized.
 
+        ``data`` is encoded with Pydantic before the stdlib JSON step inside
+        ``conversion.to_json``, which otherwise rejects values such as
+        ``datetime``. ``info`` carries ``by_alias``, ``exclude_unset``, and the
+        other ``model_dump_json`` flags through to that payload. ``.json()``
+        delegates to ``model_dump_json``.
+
         :param self: CloudEvent.
+        :param info: Serialization options from ``model_dump_json``.
 
         :return: Event serialized as a standard CloudEvent dict with user specific
         parameters.
         """
+
+        def marshall(value: Any) -> Any:
+            return _jsonable_data(value, info)
+
         # Here mypy complains about json.loads returning Any
         # which is incompatible with this method return type
         # but we know it's always a dictionary in this case
-        return json.loads(conversion.to_json(self))  # type: ignore
+        return json.loads(  # type: ignore
+            conversion.to_json(self, data_marshaller=marshall)
+        )
 
     def _get_attributes(self) -> typing.Dict[str, typing.Any]:
         return {

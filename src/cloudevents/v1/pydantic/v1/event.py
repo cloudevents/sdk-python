@@ -37,6 +37,24 @@ from cloudevents.v1.exceptions import IncompatibleArgumentsError
 from cloudevents.v1.sdk.event import attribute
 
 
+def _jsonable_data(  # type: ignore[no-untyped-def]
+    value: typing.Any,
+    default: typing.Optional[typing.Callable[[typing.Any], typing.Any]],
+) -> typing.Any:
+    """Return a JSON-ready ``data`` value, leaving a binary payload untouched.
+
+    Structured mode emits top-level ``bytes`` as ``data_base64``. Every other
+    value is passed through the encoder Pydantic supplied to ``json()``
+    (``json_encoders`` and the ``encoder`` argument), which already accepts
+    ``datetime``, ``date``, ``time``, ``UUID``, ``Decimal``, and nested models.
+    """
+    if value is None or isinstance(value, (bytes, bytearray, memoryview)):
+        return value
+    if default is None:
+        return json.loads(json.dumps(value))
+    return json.loads(json.dumps(value, default=default))
+
+
 def _ce_json_dumps(  # type: ignore[no-untyped-def]
     obj: typing.Dict[str, typing.Any],
     *args,
@@ -47,6 +65,12 @@ def _ce_json_dumps(  # type: ignore[no-untyped-def]
     Needed by the pydantic base-model to serialize the event correctly to json.
     Without this function the data will be incorrectly serialized.
 
+    Pydantic applies ``by_alias``, ``exclude_unset``, ``exclude_none``, and
+    ``exclude_defaults`` while building ``obj``. ``args`` and ``kwargs``
+    (``indent``, ``ensure_ascii``, ``separators``, and the ``default`` encoder)
+    are forwarded to the final ``json.dumps``. ``data`` is encoded first so
+    values such as ``datetime`` survive ``conversion.to_json``.
+
     :param obj: CloudEvent represented as a dict.
     :param args: User arguments which will be passed to json.dumps function.
     :param kwargs: User arguments which will be passed to json.dumps function.
@@ -54,9 +78,14 @@ def _ce_json_dumps(  # type: ignore[no-untyped-def]
     :return: Event serialized as a standard JSON CloudEvent with user specific
     parameters.
     """
+    default = kwargs.get("default")
+
+    def marshall(data: typing.Any) -> typing.Any:
+        return _jsonable_data(data, default)
+
     # Using HTTP from dict due to performance issues.
     event = http.from_dict(obj)
-    event_json = conversion.to_json(event)
+    event_json = conversion.to_json(event, data_marshaller=marshall)
     # Pydantic is known for initialization time lagging.
     return json.dumps(
         # We SHOULD de-serialize the value, to serialize it back with

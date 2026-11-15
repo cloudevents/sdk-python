@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Pydantic `CloudEvent.json()` and `model_dump_json()` now encode `datetime`,
+  `date`, `time`, `UUID`, `Decimal`, and nested models inside `data`. Binary
+  payloads still use `data_base64`.
+
 ## [2.2.0]
 
 ### Changed
