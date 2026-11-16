@@ -710,23 +710,71 @@ def test_from_http_case_insensitive_detection() -> None:
     assert event.get_type() == "com.example.test"
 
 
-def test_from_http_mixed_headers() -> None:
-    """Test from_http when both ce- headers and structured content are present"""
+@pytest.mark.parametrize(
+    "content_type_header, content_type",
+    [
+        ("content-type", "application/cloudevents+json"),
+        ("Content-Type", "application/cloudevents+json; charset=UTF-8"),
+        ("CONTENT-TYPE", "Application/CloudEvents+JSON"),
+    ],
+)
+@pytest.mark.parametrize("explicit_factory", [False, True])
+def test_from_http_mixed_headers(
+    content_type_header: str, content_type: str, explicit_factory: bool
+) -> None:
+    """Structured Content-Type takes precedence over redundant metadata headers."""
     message = HTTPMessage(
         headers={
             "ce-type": "com.example.binary",
             "ce-source": "/binary",
             "ce-id": "123",
             "ce-specversion": "1.0",
-            "content-type": "application/cloudevents+json",
+            content_type_header: content_type,
         },
-        body=b'{"type": "com.example.structured", "source": "/structured", "id": "456", "specversion": "1.0"}',
+        body=b'{"type": "com.example.structured", "source": "/structured", "id": "456", "specversion": "1.0", "data": {"ok": true}}',
     )
-    event = from_http(message, JSONFormat(), CloudEvent)
+    event = from_http(message, JSONFormat(), CloudEvent if explicit_factory else None)
 
-    # Binary mode should take precedence (ce- headers present)
-    assert event.get_type() == "com.example.binary"
-    assert event.get_source() == "/binary"
+    assert event.get_type() == "com.example.structured"
+    assert event.get_source() == "/structured"
+    assert event.get_id() == "456"
+    assert event.get_data() == {"ok": True}
+
+
+def test_from_http_structured_with_partial_metadata_headers() -> None:
+    """Optional metadata headers need not contain a complete binary event."""
+    message = HTTPMessage(
+        headers={
+            "content-type": "application/cloudevents+json",
+            "ce-subject": "redundant-header",
+        },
+        body=b'{"type": "com.example.test", "source": "/test", "id": "123", "specversion": "1.0"}',
+    )
+
+    event = from_http_event(message)
+
+    assert event.get_id() == "123"
+    assert "subject" not in event.get_attributes()
+
+
+def test_from_http_structured_with_custom_format() -> None:
+    """Mode detection uses the supplied format's media type."""
+
+    class CustomJSONFormat(JSONFormat):
+        def get_content_type(self) -> str:
+            return "application/cloudevents+custom"
+
+    original = create_event(data={"ok": True})
+    structured = to_structured(original, CustomJSONFormat())
+    message = HTTPMessage(
+        headers={**structured.headers, "ce-subject": "redundant-header"},
+        body=structured.body,
+    )
+
+    event = from_http(message, CustomJSONFormat())
+
+    assert event.get_id() == original.get_id()
+    assert event.get_data() == {"ok": True}
 
 
 def test_percent_encoding_special_chars() -> None:
