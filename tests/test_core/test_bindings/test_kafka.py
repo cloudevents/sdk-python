@@ -811,3 +811,40 @@ def test_from_structured_with_key_auto_detect_v03() -> None:
     assert event.get_type() == "com.example.test"
     assert event.get_extension("partitionkey") == "partition-key-456"
     assert event.get_attributes()["specversion"] == "0.3"
+
+
+@pytest.mark.parametrize("reader", [from_binary, from_kafka])
+def test_binary_ignores_non_cloudevent_binary_headers(reader: Any) -> None:
+    message = KafkaMessage(
+        headers={
+            "ce_specversion": b"1.0",
+            "ce_id": b"123",
+            "ce_type": b"example.created",
+            "ce_source": b"/example",
+            "content-type": b"application/json",
+            "correlation-bin": b"\xff\x00\xfe",
+        },
+        key=None,
+        value=b'{"message":"hello"}',
+    )
+    event = reader(message, JSONFormat())
+    assert event.get_attributes()["id"] == "123"
+    assert event.get_data() == {"message": "hello"}
+    assert "correlation-bin" not in event.get_attributes()
+
+
+@pytest.mark.parametrize("header", ["ce_subject", "content-type"])
+def test_binary_rejects_invalid_utf8_in_cloudevent_headers(header: str) -> None:
+    message = KafkaMessage(
+        headers={
+            "ce_specversion": b"1.0",
+            "ce_id": b"123",
+            "ce_type": b"example.created",
+            "ce_source": b"/example",
+            header: b"\xff",
+        },
+        key=None,
+        value=b"",
+    )
+    with pytest.raises(UnicodeDecodeError):
+        from_binary(message, JSONFormat())

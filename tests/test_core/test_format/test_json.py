@@ -12,8 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 from datetime import datetime, timezone
+from json import loads
+
+import pytest
 
 from cloudevents.core.formats.json import JSONFormat
 from cloudevents.core.v1.event import CloudEvent
@@ -323,3 +325,24 @@ def test_read_cloud_event_from_string_input() -> None:
 
     assert result.get_id() == "123"
     assert result.get_source() == "source"
+
+
+@pytest.mark.parametrize(
+    "content_type", [None, "application/json", "application/octet-stream"]
+)
+def test_write_data_dict(content_type: str) -> None:
+    formatter = JSONFormat()
+    data = {"key": "value", "nested": {"a": 1}}
+    result = formatter.write_data(data, datacontenttype=content_type)
+
+    assert isinstance(result, bytes)
+    assert loads(result) == data
+
+
+@pytest.mark.parametrize("content_type", [None, "application/json"])
+def test_read_data_json_body(content_type: str) -> None:
+    formatter = JSONFormat()
+    body = b'{"key": "value"}'
+    result = formatter.read_data(body, content_type)
+
+    assert result == {"key": "value"}

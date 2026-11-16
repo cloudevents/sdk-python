@@ -33,8 +33,8 @@ Below we will provide samples on how to send cloudevents using the popular
 ### Binary HTTP CloudEvent
 
 ```python
-from cloudevents_v1.http import CloudEvent
-from cloudevents_v1.conversion import to_binary
+from cloudevents.core.v1.event import CloudEvent
+from cloudevents.core.bindings.http import to_binary_event
 import requests
 
 # Create a CloudEvent
@@ -47,17 +47,17 @@ data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
 
 # Creates the HTTP request representation of the CloudEvent in binary content mode
-headers, body = to_binary(event)
+message = to_binary_event(event)
 
 # POST
-requests.post("<some-url>", data=body, headers=headers)
+requests.post("<some-url>", data=message.body, headers=message.headers)
 ```
 
 ### Structured HTTP CloudEvent
 
 ```python
-from cloudevents_v1.conversion import to_structured
-from cloudevents_v1.http import CloudEvent
+from cloudevents.core.v1.event import CloudEvent
+from cloudevents.core.bindings.http import to_structured_event
 import requests
 
 # Create a CloudEvent
@@ -70,10 +70,10 @@ data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
 
 # Creates the HTTP request representation of the CloudEvent in structured content mode
-headers, body = to_structured(event)
+message = to_structured_event(event)
 
 # POST
-requests.post("<some-url>", data=body, headers=headers)
+requests.post("<some-url>", data=message.body, headers=message.headers)
 ```
 
 You can find a complete example of turning a CloudEvent into a HTTP request
@@ -87,7 +87,7 @@ The code below shows how to consume a cloudevent using the popular python web fr
 ```python
 from flask import Flask, request
 
-from cloudevents_v1.http import from_http
+from cloudevents.core.bindings.http import from_http_event, HTTPMessage
 
 app = Flask(__name__)
 
@@ -96,12 +96,12 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def home():
   # create a CloudEvent
-  event = from_http(request.headers, request.get_data())
+  event = from_http_event(HTTPMessage(dict(request.headers), request.get_data()))
 
   # you can access cloudevent fields as seen below
   print(
-    f"Found {event['id']} from {event['source']} with type "
-    f"{event['type']} and specversion {event['specversion']}"
+    f"Found {event.get_id()} from {event.get_source()} with type "
+    f"{event.get_type()} and specversion {event.get_specversion()}"
   )
 
   return "", 204
