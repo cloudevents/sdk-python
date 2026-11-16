@@ -271,7 +271,8 @@ def from_http(
     Auto-detects CloudEvents version and uses appropriate event factory if not provided.
 
     Automatically detects whether the message uses binary or structured content mode:
-    - If any ce- prefixed headers are present → binary mode
+    - If Content-Type matches the supplied event format → structured mode
+    - Otherwise, if any ce- prefixed headers are present → binary mode
     - Otherwise → structured mode
 
     This function provides a convenient way to handle both content modes without
@@ -300,6 +301,22 @@ def from_http(
     :param event_factory: Factory function to create CloudEvent instances (auto-detected if None)
     :return: CloudEvent instance
     """
+    # Structured messages may also carry ce- metadata headers (HTTP binding 3.2.3).
+    # Their Content-Type determines the mode; the body remains authoritative.
+    content_type = next(
+        (
+            value
+            for key, value in message.headers.items()
+            if key.lower() == CONTENT_TYPE_HEADER
+        ),
+        "",
+    )
+    if (
+        content_type.partition(";")[0].strip().lower()
+        == event_format.get_content_type().partition(";")[0].strip().lower()
+    ):
+        return from_structured(message, event_format, event_factory)
+
     if any(key.lower().startswith(CE_PREFIX) for key in message.headers.keys()):
         return from_binary(message, event_format, event_factory)
 
