@@ -36,15 +36,28 @@ jobs:
     runs-on: ubuntu-24.04
     if: github.event_name == 'push'
     needs: [ build_dist ]
+    outputs:
+      release_needed: ${{ steps.release_check.outputs.release_needed }}
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Check release tag
+        id: release_check
+        run: |
+          version=$(grep -oP '__version__ = "\K[^"]+' src/cloudevents/__init__.py)
+          if git show-ref --verify --quiet "refs/tags/$version"; then
+            echo "release_needed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_needed=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/download-artifact@v8.0.1
+        if: steps.release_check.outputs.release_needed == 'true'
         with:
           name: artifact
           path: dist
       - name: Publish
+        if: steps.release_check.outputs.release_needed == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
@@ -52,6 +65,7 @@ jobs:
   tag:
     runs-on: ubuntu-24.04
     needs: [ publish ]
+    if: needs.publish.outputs.release_needed == 'true'
     steps:
       - uses: actions/checkout@v6
         with:
