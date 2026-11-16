@@ -172,18 +172,17 @@ class JSONFormat(Format):
         if isinstance(data, str):
             return data.encode("utf-8")
 
-        # If data is a dict and content type is JSON, serialize as JSON
-        if isinstance(data, dict):
-            content_type = datacontenttype or self.DEFAULT_CONTENT_TYPE
-            if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, content_type):
-                return dumps(data, cls=_JSONEncoderWithDatetime).encode("utf-8")
+        # Any other value (dict, list, number, bool) is serialized as JSON
+        content_type = datacontenttype or self.DEFAULT_CONTENT_TYPE
+        if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, content_type):
+            return dumps(data, cls=_JSONEncoderWithDatetime).encode("utf-8")
 
-            # for other contenttypes we still try to generate a json-decodable string
-            # if not possible, a string representing
-            try:
-                return dumps(data, cls=_JSONEncoderWithDatetime).encode("utf-8")
-            except TypeError:
-                pass
+        # for other contenttypes we still try to generate a json-decodable string
+        # if not possible, a string representing
+        try:
+            return dumps(data, cls=_JSONEncoderWithDatetime).encode("utf-8")
+        except TypeError:
+            pass
 
         # according to the spec, we return an encoded string per default
         # careful: the result is not json-decodable as the dict keys are single-quoted

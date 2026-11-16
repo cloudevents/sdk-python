@@ -14,6 +14,7 @@
 
 from datetime import datetime, timezone
 from json import loads
+from typing import Any
 
 import pytest
 
@@ -333,6 +334,18 @@ def test_read_cloud_event_from_string_input() -> None:
 def test_write_data_dict(content_type: str) -> None:
     formatter = JSONFormat()
     data = {"key": "value", "nested": {"a": 1}}
+    result = formatter.write_data(data, datacontenttype=content_type)
+
+    assert isinstance(result, bytes)
+    assert loads(result) == data
+
+
+@pytest.mark.parametrize(
+    "content_type", [None, "application/json", "application/octet-stream"]
+)
+@pytest.mark.parametrize("data", [["a", {"b": None}], True, 1.5])
+def test_write_data_non_dict_json_value(content_type: str, data: Any) -> None:
+    formatter = JSONFormat()
     result = formatter.write_data(data, datacontenttype=content_type)
 
     assert isinstance(result, bytes)

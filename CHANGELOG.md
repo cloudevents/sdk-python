@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed binary content mode producing invalid JSON for list, boolean and other
+  non-dict JSON data (e.g. `['a']` instead of `["a"]`).
+
 ## [2.2.0]
 
 ### Changed
