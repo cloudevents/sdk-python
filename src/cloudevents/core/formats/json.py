@@ -21,7 +21,7 @@ from typing import Any, Final, Pattern
 from dateutil.parser import isoparse
 
 from cloudevents.core.base import BaseCloudEvent, EventFactory
-from cloudevents.core.formats.base import Format
+from cloudevents.core.formats.base import BatchFormat
 from cloudevents.core.spec import SPECVERSION_V0_3, SPECVERSION_V1_0
 
 
@@ -42,12 +42,114 @@ class _JSONEncoderWithDatetime(JSONEncoder):
         return super().default(obj)
 
 
-class JSONFormat(Format):
+class JSONFormat(BatchFormat):
     CONTENT_TYPE: Final[str] = "application/cloudevents+json"
     DEFAULT_CONTENT_TYPE: Final[str] = "application/json"
+    BATCH_CONTENT_TYPE: Final[str] = "application/cloudevents-batch+json"
     JSON_CONTENT_TYPE_PATTERN: Pattern[str] = re.compile(
         r"^(application|text)/([a-zA-Z0-9\-\.]+\+)?json(;.*)?$"
     )
+
+    def _event_to_dict(self, event: BaseCloudEvent) -> dict[str, Any]:
+        """
+        Build the JSON-serializable dict for a single CloudEvent.
+
+        Shared by single-event ``write`` and batch ``write_batch`` so the two
+        paths cannot drift.
+        """
+        event_data = event.get_data()
+        event_dict: dict[str, Any] = dict(event.get_attributes())
+        specversion = event_dict.get("specversion", SPECVERSION_V1_0)
+
+        if event_data is not None:
+            if isinstance(event_data, (bytes, bytearray)):
+                if specversion == SPECVERSION_V0_3:
+                    event_dict["datacontentencoding"] = "base64"
+                    event_dict["data"] = base64.b64encode(event_data).decode("utf-8")
+                else:
+                    event_dict["data_base64"] = base64.b64encode(event_data).decode(
+                        "utf-8"
+                    )
+            else:
+                datacontenttype = event_dict.get(
+                    "datacontenttype", self.DEFAULT_CONTENT_TYPE
+                )
+                if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype):
+                    event_dict["data"] = event_data
+                else:
+                    event_dict["data"] = str(event_data)
+        return event_dict
+
+    def write(self, event: BaseCloudEvent) -> bytes:
+        """
+        Write a CloudEvent to a JSON formatted byte string.
+
+        Supports both v0.3 and v1.0 CloudEvents:
+        - v0.3: Uses 'datacontentencoding: base64' with base64-encoded 'data' field
+        - v1.0: Uses 'data_base64' field (no datacontentencoding)
+
+        :param event: The CloudEvent to write.
+        :return: The CloudEvent as a JSON formatted byte array.
+        """
+        return dumps(self._event_to_dict(event), cls=_JSONEncoderWithDatetime).encode(
+            "utf-8"
+        )
+
+    def write_batch(self, events: list[BaseCloudEvent]) -> bytes:
+        """
+        Write a list of CloudEvents to a JSON Batch formatted byte string.
+
+        The output is a JSON array whose elements are CloudEvents rendered per the
+        JSON event format. An empty list serializes to ``b"[]"``.
+
+        :param events: The CloudEvents to write.
+        :return: The batch as a JSON formatted byte array.
+        """
+        return dumps(
+            [self._event_to_dict(event) for event in events],
+            cls=_JSONEncoderWithDatetime,
+        ).encode("utf-8")
+
+    def _dict_to_event(
+        self,
+        event_factory: EventFactory | None,
+        event_attributes: dict[str, Any],
+    ) -> BaseCloudEvent:
+        """
+        Build a CloudEvent from an already-parsed attributes dict.
+
+        Shared by single-event ``read`` and batch ``read_batch``. Handles version
+        auto-detection, 'time' parsing, v0.3 'datacontentencoding', and v1.0
+        'data_base64'.
+        """
+        if event_factory is None:
+            from cloudevents.core.bindings.common import get_event_factory_for_version
+
+            specversion = event_attributes.get("specversion", SPECVERSION_V1_0)
+            event_factory = get_event_factory_for_version(specversion)
+
+        if "time" in event_attributes:
+            event_attributes["time"] = isoparse(event_attributes["time"])
+
+        specversion = event_attributes.get("specversion", SPECVERSION_V1_0)
+        event_data: dict[str, Any] | str | bytes | None = event_attributes.pop(
+            "data", None
+        )
+
+        if (
+            specversion == SPECVERSION_V0_3
+            and "datacontentencoding" in event_attributes
+        ):
+            encoding = event_attributes.get("datacontentencoding", "").lower()
+            if encoding == "base64" and isinstance(event_data, str):
+                event_data = base64.b64decode(event_data)
+
+        if event_data is None:
+            event_data_base64 = event_attributes.pop("data_base64", None)
+            if event_data_base64 is not None:
+                event_data = base64.b64decode(event_data_base64)
+
+        return event_factory(event_attributes, event_data)
 
     def read(
         self,
@@ -72,79 +174,56 @@ class JSONFormat(Format):
         else:
             decoded_data = data
 
-        event_attributes = loads(decoded_data)
+        return self._dict_to_event(event_factory, loads(decoded_data))
 
-        # Auto-detect version if factory not provided
-        if event_factory is None:
-            from cloudevents.core.bindings.common import get_event_factory_for_version
-
-            specversion = event_attributes.get("specversion", SPECVERSION_V1_0)
-            event_factory = get_event_factory_for_version(specversion)
-
-        if "time" in event_attributes:
-            event_attributes["time"] = isoparse(event_attributes["time"])
-
-        # Handle data field based on version
-        specversion = event_attributes.get("specversion", SPECVERSION_V1_0)
-        event_data: dict[str, Any] | str | bytes | None = event_attributes.pop(
-            "data", None
-        )
-
-        # v0.3: Check for datacontentencoding attribute
-        if (
-            specversion == SPECVERSION_V0_3
-            and "datacontentencoding" in event_attributes
-        ):
-            encoding = event_attributes.get("datacontentencoding", "").lower()
-            if encoding == "base64" and isinstance(event_data, str):
-                # Decode base64 encoded data in v0.3
-                event_data = base64.b64decode(event_data)
-
-        # v1.0: Check for data_base64 field (when data is None)
-        if event_data is None:
-            event_data_base64 = event_attributes.pop("data_base64", None)
-            if event_data_base64 is not None:
-                event_data = base64.b64decode(event_data_base64)
-
-        return event_factory(event_attributes, event_data)
-
-    def write(self, event: BaseCloudEvent) -> bytes:
+    def read_batch(
+        self,
+        event_factory: EventFactory | None,
+        data: str | bytes,
+    ) -> list[BaseCloudEvent]:
         """
-        Write a CloudEvent to a JSON formatted byte string.
+        Read a list of CloudEvents from a JSON Batch formatted byte string.
 
-        Supports both v0.3 and v1.0 CloudEvents:
-        - v0.3: Uses 'datacontentencoding: base64' with base64-encoded 'data' field
-        - v1.0: Uses 'data_base64' field (no datacontentencoding)
+        The input MUST be a JSON array; each element is parsed per the JSON event
+        format. When ``event_factory`` is None the version is auto-detected per
+        element, so a batch may mix v0.3 and v1.0 events. An empty array returns an
+        empty list. An invalid element propagates its exception and aborts the call.
 
-        :param event: The CloudEvent to write.
-        :return: The CloudEvent as a JSON formatted byte array.
+        :param event_factory: Factory to create CloudEvent instances, or None to
+                              auto-detect each element's version.
+        :param data: The JSON Batch formatted byte array.
+        :return: The list of CloudEvent instances.
+        :raises ValueError: If the body is not a JSON array.
         """
-        event_data = event.get_data()
-        event_dict: dict[str, Any] = dict(event.get_attributes())
-        specversion = event_dict.get("specversion", SPECVERSION_V1_0)
+        decoded_data: str
+        if isinstance(data, bytes):
+            decoded_data = data.decode("utf-8")
+        else:
+            decoded_data = data
 
-        if event_data is not None:
-            if isinstance(event_data, (bytes, bytearray)):
-                # Handle binary data based on version
-                if specversion == SPECVERSION_V0_3:
-                    # v0.3: Use datacontentencoding with base64-encoded data field
-                    event_dict["datacontentencoding"] = "base64"
-                    event_dict["data"] = base64.b64encode(event_data).decode("utf-8")
-                else:
-                    # v1.0: Use data_base64 field
-                    event_dict["data_base64"] = base64.b64encode(event_data).decode(
-                        "utf-8"
-                    )
-            else:
-                datacontenttype = event_dict.get(
-                    "datacontenttype", self.DEFAULT_CONTENT_TYPE
+        parsed = loads(decoded_data)
+        if not isinstance(parsed, list):
+            raise ValueError(
+                "JSON batch payload must be a JSON array of CloudEvents, "
+                f"got {type(parsed).__name__}"
+            )
+
+        events: list[BaseCloudEvent] = []
+        for index, item in enumerate(parsed):
+            if not isinstance(item, dict):
+                raise ValueError(
+                    f"JSON batch element at index {index} must be a JSON object "
+                    f"representing a CloudEvent, got {type(item).__name__}"
                 )
-                if re.match(JSONFormat.JSON_CONTENT_TYPE_PATTERN, datacontenttype):
-                    event_dict["data"] = event_data
-                else:
-                    event_dict["data"] = str(event_data)
+            try:
+                events.append(self._dict_to_event(event_factory, item))
+            except Exception as exc:
+                raise ValueError(
+                    f"Failed to parse CloudEvent at index {index} of the JSON "
+                    f"batch: {exc}"
+                ) from exc
 
-        return dumps(event_dict, cls=_JSONEncoderWithDatetime).encode("utf-8")
+        return events
 
     def write_data(
         self,
@@ -230,3 +309,11 @@ class JSONFormat(Format):
         :return: Content type string for CloudEvents structured content mode
         """
         return self.CONTENT_TYPE
+
+    def get_batch_content_type(self) -> str:
+        """
+        Get the Content-Type header value for JSON batch mode.
+
+        :return: ``application/cloudevents-batch+json``
+        """
+        return self.BATCH_CONTENT_TYPE
