@@ -14,21 +14,21 @@
 
 from flask import Flask, request
 
-from cloudevents.http import from_http
+from cloudevents.core.bindings.http import HTTPMessage, from_http_event
 
 app = Flask(__name__)
 
 
-# create an endpoint at http://localhost:/3000/
+# create an endpoint at http://localhost:3000/
 @app.route("/", methods=["POST"])
 def home():
     # create a CloudEvent
-    event = from_http(request.headers, request.get_data())
+    event = from_http_event(HTTPMessage(dict(request.headers), request.get_data()))
 
     # you can access cloudevent fields as seen below
     print(
-        f"Found {event['id']} from {event['source']} with type "
-        f"{event['type']} and specversion {event['specversion']}"
+        f"Found {event.get_id()} from {event.get_source()} with type "
+        f"{event.get_type()} and specversion {event.get_specversion()}"
     )
 
     return "", 204

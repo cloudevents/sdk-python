@@ -1,4 +1,4 @@
-# Python SDK for [CloudEvents](https://github.com/cloudevents/spec)
+# Python SDK v2 for [CloudEvents](https://github.com/cloudevents/spec)
 
 [![PyPI version](https://badge.fury.io/py/cloudevents.svg)](https://badge.fury.io/py/cloudevents)
 
@@ -14,8 +14,8 @@ This SDK current supports the following versions of CloudEvents:
 
 ## Python SDK
 
-Package **cloudevents** provides primitives to work with CloudEvents specification:
-https://github.com/cloudevents/spec.
+Package [**cloudevents**](src/cloudevents) provides primitives to work with
+[CloudEvents specification](https://github.com/cloudevents/spec).
 
 ### Installing
 
@@ -39,8 +39,8 @@ Below we will provide samples on how to send cloudevents using the popular
 ### Binary HTTP CloudEvent
 
 ```python
-from cloudevents.http import CloudEvent
-from cloudevents.conversion import to_binary
+from cloudevents.core.v1.event import CloudEvent
+from cloudevents.core.bindings.http import to_binary_event
 import requests
 
 # Create a CloudEvent
@@ -53,17 +53,17 @@ data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
 
 # Creates the HTTP request representation of the CloudEvent in binary content mode
-headers, body = to_binary(event)
+message = to_binary_event(event)
 
 # POST
-requests.post("<some-url>", data=body, headers=headers)
+requests.post("<some-url>", data=message.body, headers=message.headers)
 ```
 
 ### Structured HTTP CloudEvent
 
 ```python
-from cloudevents.conversion import to_structured
-from cloudevents.http import CloudEvent
+from cloudevents.core.v1.event import CloudEvent
+from cloudevents.core.bindings.http import to_structured_event
 import requests
 
 # Create a CloudEvent
@@ -76,10 +76,10 @@ data = {"message": "Hello World!"}
 event = CloudEvent(attributes, data)
 
 # Creates the HTTP request representation of the CloudEvent in structured content mode
-headers, body = to_structured(event)
+message = to_structured_event(event)
 
 # POST
-requests.post("<some-url>", data=body, headers=headers)
+requests.post("<some-url>", data=message.body, headers=message.headers)
 ```
 
 You can find a complete example of turning a CloudEvent into a HTTP request
@@ -93,7 +93,7 @@ The code below shows how to consume a cloudevent using the popular python web fr
 ```python
 from flask import Flask, request
 
-from cloudevents.http import from_http
+from cloudevents.core.bindings.http import from_http_event, HTTPMessage
 
 app = Flask(__name__)
 
@@ -102,12 +102,12 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def home():
     # create a CloudEvent
-    event = from_http(request.headers, request.get_data())
+    event = from_http_event(HTTPMessage(dict(request.headers), request.get_data()))
 
     # you can access cloudevent fields as seen below
     print(
-        f"Found {event['id']} from {event['source']} with type "
-        f"{event['type']} and specversion {event['specversion']}"
+        f"Found {event.get_id()} from {event.get_source()} with type "
+        f"{event.get_type()} and specversion {event.get_specversion()}"
     )
 
     return "", 204
@@ -168,18 +168,13 @@ with one of the project's SDKs, please send an email to
 
 ## Maintenance
 
-We use [black][black] and [isort][isort] for autoformatting. We set up a [tox][tox]
-environment to reformat the codebase.
-
-e.g.
-
-```bash
-pip install tox
-tox -e reformat
-```
+We use [uv][uv] for dependency and package management, [ruff][ruff] and [isort][isort]
+for autoformatting and [pre-commit][pre-commit] to automate those with commit
+hooks.
 
 For information on releasing version bumps see [RELEASING.md](RELEASING.md)
 
-[black]: https://black.readthedocs.io/
+[uv]: https://docs.astral.sh/uv/
+[ruff]: https://docs.astral.sh/ruff
 [isort]: https://pycqa.github.io/isort/
-[tox]: https://tox.wiki/
+[pre-commit]: https://pre-commit.com

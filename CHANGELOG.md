@@ -6,11 +6,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0]
+
+### Changed
+
+- Updated dev and build-time dependencies.
+
+### Fixed
+
+- Fixed an issue where setting a non-JSON datacontenttype (e.g.,
+  application/octet-stream) with dict data produced non-JSON-decodable output; now
+  best-effort json-encoding is applied regardless of datacontenttype. ([#291])
+- Updated behavior when datacontenttype is unset: now treats events as application/json
+  in line with spec recommendation. ([#291])
+
+## [2.1.0]
+
+### Added
+
+- Added [RabbitMQ][rabbit-mq-spec] protocol binding for CloudEvents. ([#284])
+
+[rabbit-mq-spec]: https://github.com/knative-extensions/eventing-rabbitmq/blob/main/cloudevents-protocol-spec/spec.md
+
+## [2.0.0]
+
+### Changed
+
+- Released stable v2.0.0. See [migration](./MIGRATION.md) for details and migration
+  guidelines. ([#279])
+
+## [2.0.0.alpha6]
+
+### Changed
+
+- Updated tooling and workflows. ([#278])
+
+### Fixed
+
+- Fixed the v1 compatibility layer. ([#276])
+
+## [2.0.0.alpha5]
+
+### Changed
+
+- Improved spec compatibility of attributes processing. ([#275])
+
+## [2.0.0.alpha4]
+
+### Changed
+
+- CloudEvents v2 is ready to become the main version. ([#273])
+
+## [1.12.1]
+
+### Changed
+
+- CloudEvents v1 moved to security fixes support stage.
+CloudEvents v2 is a rewrite with ongoing development ([#271])
+
 ## [1.12.0]
 
 ### Changed
 
-- Dropped Python3.8 support while it has reached EOL. ([])
+- Dropped Python3.8 support while it has reached EOL. ([#249])
 
 ## [1.11.1]
 
@@ -301,3 +359,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#236]: https://github.com/cloudevents/sdk-python/pull/236
 [#240]: https://github.com/cloudevents/sdk-python/pull/240
 [#248]: https://github.com/cloudevents/sdk-python/pull/248
+[#249]: https://github.com/cloudevents/sdk-python/pull/249
+[#271]: https://github.com/cloudevents/sdk-python/pull/271
+[#273]: https://github.com/cloudevents/sdk-python/pull/273
+[#275]: https://github.com/cloudevents/sdk-python/pull/275
+[#276]: https://github.com/cloudevents/sdk-python/pull/276
+[#278]: https://github.com/cloudevents/sdk-python/pull/278
+[#279]: https://github.com/cloudevents/sdk-python/pull/279
+[#284]: https://github.com/cloudevents/sdk-python/pull/284
+[#291]: https://github.com/cloudevents/sdk-python/pull/291

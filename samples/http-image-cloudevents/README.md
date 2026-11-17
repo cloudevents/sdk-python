@@ -3,20 +3,20 @@
 Install dependencies:
 
 ```sh
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 Start server:
 
 ```sh
-python3 image_sample_server.py
+python image_sample_server.py
 ```
 
 In a new shell, run the client code which sends a structured and binary
 cloudevent to your local server:
 
 ```sh
-python3 client.py http://localhost:3000/
+python client.py http://localhost:3000/
 ```
 
 ## Test
