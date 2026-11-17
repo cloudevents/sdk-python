@@ -29,7 +29,7 @@ Or alternatively via conda:
 
 ```
 conda install conda-forge::cloudevents
-``
+```
 
 ## Sending CloudEvents
 
