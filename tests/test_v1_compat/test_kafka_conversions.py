@@ -129,6 +129,20 @@ class TestToBinary(KafkaConversionTestBase):
         assert "data" not in result.headers
         assert "partitionkey" not in result.headers
 
+    def test_no_datacontenttype(self, source_event):
+        # datacontenttype is optional; to_binary must not raise KeyError when it
+        # is absent, and should simply omit the content-type header.
+        del source_event["datacontenttype"]
+        result = to_binary(source_event)
+        assert "content-type" not in result.headers
+
+    def test_non_string_extension_attribute(self, source_event):
+        # Extension attributes may be non-string (e.g. int) per the CloudEvents
+        # spec; to_binary must stringify them rather than raising AttributeError.
+        source_event["extension1"] = 5
+        result = to_binary(source_event)
+        assert result.headers["ce_extension1"] == b"5"
+
     def test_raise_marshaller_exception(self, source_event):
         with pytest.raises(cloud_exceptions.DataMarshallerError):
             to_binary(source_event, data_marshaller=failing_func)
