@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import re
 import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -27,7 +26,7 @@ from cloudevents.core.exceptions import (
     InvalidAttributeValueError,
     MissingRequiredAttributeError,
 )
-from cloudevents.core.spec import SPECVERSION_V0_3
+from cloudevents.core.spec import SPECVERSION_V0_3, is_valid_attribute_name
 
 REQUIRED_ATTRIBUTES: Final[list[str]] = ["id", "source", "type", "specversion"]
 OPTIONAL_ATTRIBUTES: Final[list[str]] = [
@@ -274,7 +273,7 @@ class CloudEvent(BaseCloudEvent):
                         msg=f"Extension attribute name must be at least 1 character long but was '{extension_attribute}'",
                     )
                 )
-            if not re.match(r"^[a-z0-9]+$", extension_attribute):
+            if not is_valid_attribute_name(extension_attribute):
                 errors[extension_attribute].append(
                     CustomExtensionAttributeError(
                         attribute_name=extension_attribute,

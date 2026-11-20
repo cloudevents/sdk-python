@@ -25,6 +25,10 @@ class InvalidRequiredFields(GenericException):
     pass
 
 
+class InvalidAttributeName(GenericException):
+    pass
+
+
 class InvalidStructuredJSON(GenericException):
     pass
 
