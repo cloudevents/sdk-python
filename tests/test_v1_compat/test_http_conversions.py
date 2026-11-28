@@ -132,6 +132,30 @@ def test_json_can_talk_to_itself_base64(specversion):
     assert event.data == data
 
 
+@pytest.mark.parametrize("specversion", ["0.3", "1.0"])
+def test_json_null_attribute_equivalent_to_omitted(specversion):
+    base_attrs = {
+        "specversion": specversion,
+        "id": "1234",
+        "source": "https://example.com/event-producer",
+        "type": "com.example.string",
+        "time": "2023-01-01T00:00:00Z",
+    }
+    event_with_none = CloudEvent({**base_attrs, "extnone": None, "subject": None})
+    event_without = CloudEvent(base_attrs)
+
+    assert json.loads(to_json(event_with_none)) == json.loads(to_json(event_without))
+    assert from_json(to_json(event_with_none)) == from_json(to_json(event_without))
+
+    raw_with_null = json.dumps({**base_attrs, "extnone": None, "subject": None})
+    assert from_json(raw_with_null) == from_json(to_json(event_without))
+
+    raw_with_null_data = json.dumps({**base_attrs, "extnone": None, "data": None})
+    parsed_null_data = from_json(raw_with_null_data)
+    assert parsed_null_data.data is None
+    assert "extnone" not in parsed_null_data
+
+
 def test_from_dict():
     given = {
         "data": b"\x00\x00\x11Hello World",
