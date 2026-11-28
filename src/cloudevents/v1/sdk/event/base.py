@@ -218,7 +218,7 @@ class BaseEvent(EventGetterSetter):
                 props["data"] = data
         if "extensions" in props:
             extensions = props.pop("extensions")
-            props.update(extensions)
+            props.update({k: v for k, v in extensions.items() if v is not None})
         return json.dumps(props)
 
     def UnmarshalJSON(
@@ -235,6 +235,8 @@ class BaseEvent(EventGetterSetter):
             )
 
         for name, value in raw_ce.items():
+            if value is None and name not in ("data", "data_base64"):
+                continue
             try:
                 if name == "data":
                     decoded_value = data_unmarshaller(json.dumps(value))
